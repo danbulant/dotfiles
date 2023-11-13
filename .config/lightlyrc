@@ -1,0 +1,8 @@
+[Common]
+CornerRadius=7
+
+[Style]
+DolphinSidebarOpacity=23
+MenuOpacity=30
+TabDrawHighlight=true
+UnifiedTabBarKonsole=true
