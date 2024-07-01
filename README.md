@@ -26,7 +26,7 @@ I'm using Arch linux.
 - rofi - application launcher, general "chooser" (used for power menu, notification actions, etc)
 - waybar - the top status bar
 - lightly (AUR) - QT theme, set it via `qt5ct`. Adds blur to *most* QT apps, but mainly also improves the general look and feal of QT apps. Some blur is broken on wayland.
-- swaylock-effects-git - lockscreen, adds blur and animations to the lockscreen. If it's broken for you, use normal `swaylock` instead (less styling)
+- hyprlock - Fancy lock screen
 - spicetify - custom spotify theme
 - VSCode - code editor. Current theme/config is not in dotfiles here, but the theme used is Atom One Dark, and the font is Fira Code.
 - dolphin - file browser
