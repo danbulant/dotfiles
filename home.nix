@@ -39,10 +39,24 @@
             grim
             slurp
             wl-clipboard
+            nextcloud-client
+            python3
 
             strace
             ghidra
-            python3
+            ffuf
+            sqlmap
+            nmap
+            rustscan
+            thc-hydra
+            file
+            binwalk
+            p7zip
+            foremost
+            gdb
+            feroxbuster
+            python312Packages.pypykatz
+            screen
         ];
     };
     programs = {
