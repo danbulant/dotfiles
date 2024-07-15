@@ -1,6 +1,6 @@
 # Dotfiles
 
-My dotfiles. Moved from KDE plasma config to hyprland.
+My dotfiles and nix setup incl. scripts for hyprland and some other goodies.
 
 super key = windows key
 
@@ -14,7 +14,7 @@ Please do edit configuration of at least hyprland - default configuration is ver
 
 ## Used software
 
-I'm using Arch linux.
+I'm using NixOS.
 
 - hyprland - wayland compositor and window manager (also adds blur and rounded corners). Really barebones, see below for shortcuts (read the config file for up to date shortcuts)
 - fish - shell (friendly, interactive, doesn't implement POSIX, I recommend reading it's docs first)
@@ -25,13 +25,12 @@ I'm using Arch linux.
 - nushell - for scripting and data management - I don't use it and it's not required for the current setup, but I'm planning to use it in the future.
 - rofi - application launcher, general "chooser" (used for power menu, notification actions, etc)
 - waybar - the top status bar
-- lightly (AUR) - QT theme, set it via `qt5ct`. Adds blur to *most* QT apps, but mainly also improves the general look and feal of QT apps. Some blur is broken on wayland.
 - hyprlock - Fancy lock screen
 - spicetify - custom spotify theme
 - VSCode - code editor. Current theme/config is not in dotfiles here, but the theme used is Atom One Dark, and the font is Fira Code.
 - dolphin - file browser
 - polkit-kde-authentication-agent-1 - required for sudo gui prompts (like when you open dolphin as root)
-- blueman-applet - bluetooth app indicator
+- blueman - bluetooth app indicator
 - swaybg - for showing wallpaper
 - activity-watch and awatcher - for program usage statistics
 - nm-applet - network manager app indicator

@@ -6,11 +6,10 @@ if status is-interactive
             echo
             onefetch
         end
-        test -f .nvmrc && nvm use > /dev/null
+        # test -f .nvmrc && nvm use > /dev/null
     end
-    #fastfetch -l arch
     echo -e "\n"
-    fastfetch -l arch --color-keys (set_color "09BC8A" | string sub -s 3 -e -1) --color-title (set_color "75DDDD" | string sub -s 3 -e -1)
+    fastfetch --color-keys (set_color "09BC8A" | string sub -s 3 -e -1) --color-title (set_color "75DDDD" | string sub -s 3 -e -1)
     test -f .nvmrc && nvm use > /dev/null
 end
 set PATH $PATH $HOME/.cargo/bin $HOME/.local/share/pnpm $HOME/.local/bin $HOME/.spicetify $HOME/.bun/bin
@@ -38,7 +37,7 @@ fish_ssh_agent
 #end
 # <<< conda initialize <<<
 
-eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+# eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 set -x PERL5LIB "/home/dan/perl5/lib/perl5:$PERL5LIB";
 set -x PERL_LOCAL_LIB_ROOT "/home/dan/perl5:$PERL_LOCAL_LIB_ROOT";
 set -x PERL_MB_OPT "--install_base \"/home/dan/perl5\"";
