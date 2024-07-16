@@ -1,5 +1,5 @@
 echo "Copying configurations"
 cp .config/* ~/.config/ -r
-sudo cp configuration.nix /etc/nixos/configuration.nix
-sudo cp home.nix /etc/nixos/home.nix
+cp .default-python-packages ~
+sudo cp *.nix /etc/nixos/
 sudo nixos-rebuild switch

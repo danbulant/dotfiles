@@ -1,4 +1,8 @@
-{ pkgs, ...}: {
+{ pkgs, ...}: 
+let
+  unstable-pkgs = import <nixos-unstable> {};
+in
+{
     home = {
         stateVersion = "24.05";
 
@@ -40,7 +44,19 @@
             slurp
             wl-clipboard
             nextcloud-client
-            python3
+            kdePackages.partitionmanager
+            kdePackages.filelight
+            kdePackages.kate
+            xorg.xbacklight
+            cachix
+            playerctl
+            libcanberra-gtk3 # sound events
+            qt6ct
+            nil # nix language server
+
+            jq
+            htmlq
+            fzf
 
             strace
             ghidra
@@ -57,6 +73,23 @@
             feroxbuster
             python312Packages.pypykatz
             screen
+
+            (python312.withPackages (ps: with ps; [ 
+                pyquery
+                pygobject3
+            ]))
+            pipx
+            gobject-introspection
+
+            unstable-pkgs.prisma-engines
+            openssl
+            gcc
+            # required by mise plugins
+            automake
+            autoconf
+            ncurses
+            pkg-config
+            gnumake
         ];
     };
     programs = {
@@ -65,8 +98,13 @@
             interactiveShellInit = ''
                 set fish_greeting # Disable greeting
             '';
-            shellInit = ''
+            shellInit = with unstable-pkgs; ''
                 source ~/.config/fish/config-old.fish
+
+                set -x PRISMA_SCHEMA_ENGINE_BINARY "${prisma-engines}/bin/schema-engine"
+                set -x PRISMA_QUERY_ENGINE_BINARY "${prisma-engines}/bin/query-engine"
+                set -x PRISMA_QUERY_ENGINE_LIBRARY "${prisma-engines}/lib/libquery_engine.node"
+                set -x PRISMA_FMT_BINARY "${prisma-engines}/bin/prisma-fmt"
             '';
             plugins = with pkgs.fishPlugins; [
                 { name = "grc"; src = grc.src; }
@@ -88,8 +126,37 @@
         bat.enable = true;
         lsd.enable = true;
         fastfetch.enable = true;
-        mise.enable = true;
+        mise = {
+            enable = true;
+            globalConfig = {
+                tools = {
+                    usage = "latest";
+                    node = "latest";
+                    python = "3";
+                    terraform = "latest";
+                    erlang = "latest";
+                    gleam = "latest";
+                    "pipx:pypykats" = "latest";
+                    "pipx:pyquery" = "latest";
+                    "pipx:pygobject" = "latest";
+                    "npm:pnpm" = "latest";
+                };
+                plugins = {
+                    gleam = "https://github.com/asdf-community/asdf-gleam.git";
+                };
+                env = {
+                    MISE_NODE_COMPILE = "false";
+                    MISE_PYTHON_COMPILE = "false";
+                    MISE_NODE_COREPACK = "true";
+                };
+            };
+            settings = {
+                python_compile = false;
+                python_precompiled_os = "unknown-linux-musl";
+            };
+        };
         direnv.enable = true;
+        direnv.nix-direnv.enable = true;
         # firefox.enable = true;
     };
     services.kdeconnect.enable = true;

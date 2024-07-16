@@ -2,18 +2,32 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+let
+  unstable-pkgs = import <nixos-unstable> {};
+in
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
+      <nixos-hardware/lenovo/legion/16ach6h/hybrid>
       ./hardware-configuration.nix
       <home-manager/nixos>
+      ./cachix.nix
     ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.supportedFilesystems = [ "ntfs" ];
+
+  fileSystems."/media/New BTRFS" = {
+    device = "/dev/disk/by-uuid/26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
+    fsType = "btrfs";
+  };
+  fileSystems."/media/secondary" = {
+    device = "/dev/disk/by-uuid/050574C34881C3B9";
+    fsType = "ntfs";
+  };
 
   networking.hostName = "lenovo-nix";
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -57,11 +71,15 @@
     pulse.enable = true;
     #jack.enable = true;
   };
+  services.geoclue2.enable = true;
+  services.localtimed.enable = true;
+  time.hardwareClockInLocalTime = true;
 
   users.users.dan = {
     isNormalUser = true;
     description = "John";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" ];
+    shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
@@ -75,9 +93,11 @@
 
   programs.firefox.enable = true;
   programs.hyprland.enable = true;
+  programs.hyprland.package = unstable-pkgs.hyprland;
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
   programs.fish.enable = true;
+  programs.nix-ld.enable = true; # Fix dynamic binaries from outside of nix
   services.openssh.enable = true;
   services.tailscale = {
     enable = true;
@@ -86,6 +106,7 @@
     extraUpFlags = [ "--advertise-exit-node" ];
   };
   hardware.opentabletdriver.enable = true;
+  virtualisation.docker.enable = true;
   
 
   environment.systemPackages = with pkgs; [
@@ -96,50 +117,17 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.cudaSupport = true;
 
   # The nvidia fun part
   hardware.opengl.enable = true;
-  services.xserver.videoDrivers = ["nvidia"];
 
   hardware.nvidia = {
     prime = {
       # hardware specific, beware!
-      amdgpuBusId = "PCI:01:00:0";
-      nvidiaBusId = "PCI:06:00:0";
-
-      offload = {
-        enable = true;
-        enableOffloadCmd = true;
-      };
+      amdgpuBusId = lib.mkForce "PCI:01:00:0";
+      nvidiaBusId = lib.mkForce "PCI:06:00:0";
     };
-    # Modesetting is required.
-    modesetting.enable = true;
-
-    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-    # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
-    # of just the bare essentials.
-    powerManagement.enable = false;
-
-    # Fine-grained power management. Turns off GPU when not in use.
-    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    powerManagement.finegrained = false;
-
-    # Use the NVidia open source kernel module (not to be confused with the
-    # independent third-party "nouveau" open source driver).
-    # Support is limited to the Turing and later architectures. Full list of 
-    # supported GPUs is at: 
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
-    # Only available from driver 515.43.04+
-    # Currently alpha-quality/buggy, so false is currently the recommended setting.
-    open = false;
-
-    # Enable the Nvidia settings menu,
-	  # accessible via `nvidia-settings`.
-    nvidiaSettings = true;
-
-    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
   security.polkit.enable = true;
@@ -161,4 +149,6 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.05"; # Did you read the comment?
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 }
