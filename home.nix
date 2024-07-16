@@ -52,9 +52,16 @@ in
             qt6ct
             nil # nix language server
 
+            caddy
             jq
             htmlq
             fzf
+            gleam
+            erlang
+            terraform
+            nodejs
+            # nodePackages.pnpm
+            corepack
 
             strace
             ghidra
@@ -93,9 +100,6 @@ in
     programs = {
         fish = {
             enable = true;
-            # interactiveShellInit = ''
-            #     set fish_greeting # Disable greeting
-            # '';
             shellInit = with unstable-pkgs; ''
                 source ~/.config/fish/config-old.fish
 
@@ -119,43 +123,24 @@ in
             enable = true;
             userName  = "Daniel Bulant";
             userEmail = "danbulant@gmail.com";
+            difftastic.enable = true;
+            signing = {
+                signByDefault = true;
+                key = "/home/dan/.ssh/id_ed25519";
+            };
+            extraConfig = {
+                pull.rebase = false;
+                gpg.format = "ssh";
+            };
         };
+        gitui.enable = true;
         btop.enable = true;
         bat.enable = true;
         lsd.enable = true;
         fastfetch.enable = true;
-        mise = {
-            enable = true;
-            globalConfig = {
-                tools = {
-                    usage = "latest";
-                    node = "latest";
-                    python = "3";
-                    terraform = "latest";
-                    erlang = "latest";
-                    gleam = "latest";
-                    "pipx:pypykats" = "latest";
-                    "pipx:pyquery" = "latest";
-                    "pipx:pygobject" = "latest";
-                    "npm:pnpm" = "latest";
-                };
-                plugins = {
-                    gleam = "https://github.com/asdf-community/asdf-gleam.git";
-                };
-                env = {
-                    MISE_NODE_COMPILE = "false";
-                    MISE_PYTHON_COMPILE = "false";
-                    MISE_NODE_COREPACK = "true";
-                };
-            };
-            settings = {
-                python_compile = false;
-                python_precompiled_os = "unknown-linux-musl";
-            };
-        };
         direnv.enable = true;
         direnv.nix-direnv.enable = true;
-        # firefox.enable = true;
+        firefox.enable = true;
     };
     services.kdeconnect.enable = true;
     services.kdeconnect.indicator = true;
