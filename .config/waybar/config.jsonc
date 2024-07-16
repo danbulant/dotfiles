@@ -83,7 +83,7 @@
     },
 
      "hyprland/window": {
-        "format": "   {}",
+        "format": "   {}",
         "separate-outputs": true,
         "rewrite": {
             // "~(.*)": "$1 ",
@@ -92,6 +92,7 @@
             "(.*) - Visual Studio Code": "$1 󰨞",
             "(.*)Visual Studio Code": "Code 󰨞",
             "(.*) — Dolphin": "$1 󰉋",
+            "(.*)Spotify Premium": "Spotify 󰓇",
             "(.*)Spotify": "Spotify 󰓇",
             "(.*)Steam": "Steam 󰓓",
             "(.*) - Vivaldi": "$1 ",

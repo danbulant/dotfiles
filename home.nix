@@ -9,7 +9,9 @@ in
         packages = with pkgs; [
             grc
             onefetch
+            fira
             fira-code
+            fira-code-nerdfont
             kitty
             nushell
             rofi-wayland
@@ -23,10 +25,6 @@ in
             firefox
             dunst
             sccache
-            discord
-            spotify
-            spicetify-cli
-            meslo-lgs-nf
             blueman
             swaybg
             activitywatch
@@ -95,9 +93,9 @@ in
     programs = {
         fish = {
             enable = true;
-            interactiveShellInit = ''
-                set fish_greeting # Disable greeting
-            '';
+            # interactiveShellInit = ''
+            #     set fish_greeting # Disable greeting
+            # '';
             shellInit = with unstable-pkgs; ''
                 source ~/.config/fish/config-old.fish
 
