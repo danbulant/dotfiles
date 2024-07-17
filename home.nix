@@ -62,7 +62,33 @@ in
             nodejs
             # nodePackages.pnpm
             corepack
+            ansible
+            aria2
+            qbittorrent
+            audacity
+            bettercap
+            bitwarden
+            duperemove
+            ffmpeg
+            flameshot
+            ripgrep
+            iotop
+            nethogs
+            john
+            iperf
+            mold
+            nheko
+            quickemu
+            qemu
+            # uwufetch
+            vagrant
+            socat
+            websocat
+            whois
+            wifite2
 
+            android-tools
+            aircrack-ng
             strace
             ghidra
             ffuf

@@ -107,6 +107,7 @@ in
   };
   hardware.opentabletdriver.enable = true;
   virtualisation.docker.enable = true;
+  services.avahi.enable = true;
   
 
   environment.systemPackages = with pkgs; [
