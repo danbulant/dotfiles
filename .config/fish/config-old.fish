@@ -6,11 +6,9 @@ if status is-interactive
             echo
             onefetch
         end
-        # test -f .nvmrc && nvm use > /dev/null
     end
     echo -e "\n"
     fastfetch
-    test -f .nvmrc && nvm use > /dev/null
 end
 set PATH $PATH $HOME/.cargo/bin $HOME/.local/share/pnpm $HOME/.local/bin $HOME/.spicetify $HOME/.bun/bin
 set fish_greeting
@@ -39,3 +37,6 @@ fish_ssh_agent
 # set -x PERL_MM_OPT "INSTALL_BASE=/home/dan/perl5";
 set -x SCCACHE_DIR "/media/New BTRFS/.sccache"
 set -x RUSTC_WRAPPER (which sccache)
+
+abbr -a nsp "nix-shell --run fish -p" 
+abbr -a ns "nix-shell --run fish"

@@ -7,6 +7,7 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            # acpilight
             grc
             onefetch
             fira
@@ -25,7 +26,6 @@ in
             firefox
             dunst
             sccache
-            blueman
             swaybg
             activitywatch
             networkmanagerapplet
@@ -34,6 +34,11 @@ in
             dust
             jetbrains.rust-rover
             jetbrains.webstorm
+            jetbrains.phpstorm
+            jetbrains.pycharm-community-bin
+            jetbrains.clion
+            nwg-displays
+            wireguard-tools
             mongodb-compass
             hashcat
             tldr
@@ -45,7 +50,10 @@ in
             kdePackages.partitionmanager
             kdePackages.filelight
             kdePackages.kate
-            xorg.xbacklight
+            kdePackages.ksystemstats
+            kdePackages.kinfocenter
+            kdePackages.kirigami-addons
+            #xorg.xbacklight
             cachix
             playerctl
             libcanberra-gtk3 # sound events
@@ -86,6 +94,13 @@ in
             websocat
             whois
             wifite2
+            dig
+            httpie
+            inxi
+            numbat
+            wireshark
+            nixfmt-rfc-style
+            qpwgraph
 
             android-tools
             aircrack-ng
@@ -104,6 +119,7 @@ in
             feroxbuster
             python312Packages.pypykatz
             screen
+            openvpn
 
             (python312.withPackages (ps: with ps; [ 
                 pyquery
@@ -123,6 +139,7 @@ in
             gnumake
         ];
     };
+    services.lorri.enable = true;
     programs = {
         fish = {
             enable = true;
@@ -157,6 +174,8 @@ in
             extraConfig = {
                 pull.rebase = false;
                 gpg.format = "ssh";
+                commit.gpgsign = true;
+                gpg.ssh.allowedSignersFile = "/home/dan/allowed_signers";
             };
         };
         gitui.enable = true;
@@ -170,6 +189,8 @@ in
     };
     services.kdeconnect.enable = true;
     services.kdeconnect.indicator = true;
+    services.blueman-applet.enable = true;
+    services.mpris-proxy.enable = true;
     xdg.mimeApps = {
         enable = true;
 

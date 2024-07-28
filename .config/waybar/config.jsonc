@@ -53,8 +53,8 @@
     },
 
     "clock": {
-        "format": "{:  %H:%M %p 󰃭  %a %d}",
-        "format-alt": "{:󰥔 %H:%M  %b %Y}",
+        "format": "  {:%H:%M %p 󰃭  %a %d}",
+        "format-alt": "󰥔 {:%H:%M  %b %Y}",
         "tooltip-format": "<tt><big>{calendar}</big></tt>"
     },
 
@@ -66,10 +66,11 @@
         // "format-alt": "{alt}",
     },
     "custom/spotify": {
-      "exec": "python ~/.config/waybar/player.py",
+      "exec": "bash ~/.config/waybar/album_art.sh",
       "format": "{}",
       "return-type": "json",
-      "on-click": "playerctl play-pause"
+      "on-click": "playerctl play-pause",
+      "interval": 10
     },
     "custom/spotify-start": {
       "exec": "echo ",

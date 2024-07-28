@@ -61,7 +61,7 @@ in
   };
 
   services.printing.enable = true;
-
+  hardware.acpilight.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -71,14 +71,25 @@ in
     pulse.enable = true;
     #jack.enable = true;
   };
+  security.pam.loginLimits = [{
+    domain = "*";
+    type = "soft";
+    item = "nofile";
+    value = "64000";
+  }];
   services.geoclue2.enable = true;
   services.localtimed.enable = true;
+  services.lorri.enable = true;
+  services.blueman.enable = true;
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+  programs.wireshark.enable = true;
   time.hardwareClockInLocalTime = true;
 
   users.users.dan = {
     isNormalUser = true;
     description = "John";
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" ];
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
