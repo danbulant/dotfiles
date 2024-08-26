@@ -66,9 +66,9 @@
         // "format-alt": "{alt}",
     },
     "custom/spotify": {
-      "exec": "bash ~/.config/waybar/album_art.sh",
+      "exec": "bash ~/.config/waybar/spotify-meta.sh",
       "format": "{}",
-      "return-type": "json",
+      //"return-type": "json",
       "on-click": "playerctl play-pause",
       "interval": 10
     },
