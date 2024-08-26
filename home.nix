@@ -37,6 +37,9 @@ in
             jetbrains.phpstorm
             jetbrains.pycharm-community-bin
             jetbrains.clion
+            jetbrains.goland
+            jetbrains.datagrip
+            datovka
             nwg-displays
             wireguard-tools
             mongodb-compass
@@ -53,6 +56,7 @@ in
             kdePackages.ksystemstats
             kdePackages.kinfocenter
             kdePackages.kirigami-addons
+            kdePackages.ark
             #xorg.xbacklight
             cachix
             playerctl
@@ -60,6 +64,7 @@ in
             qt6ct
             nil # nix language server
 
+            gping
             caddy
             jq
             htmlq
@@ -128,7 +133,7 @@ in
             pipx
             gobject-introspection
 
-            unstable-pkgs.prisma-engines
+            # unstable-pkgs.prisma-engines
             openssl
             gcc
             # required by mise plugins
@@ -146,11 +151,11 @@ in
             shellInit = with unstable-pkgs; ''
                 source ~/.config/fish/config-old.fish
 
-                set -x PRISMA_SCHEMA_ENGINE_BINARY "${prisma-engines}/bin/schema-engine"
-                set -x PRISMA_QUERY_ENGINE_BINARY "${prisma-engines}/bin/query-engine"
-                set -x PRISMA_QUERY_ENGINE_LIBRARY "${prisma-engines}/lib/libquery_engine.node"
-                set -x PRISMA_FMT_BINARY "${prisma-engines}/bin/prisma-fmt"
             '';
+            # set -x PRISMA_SCHEMA_ENGINE_BINARY "${prisma-engines}/bin/schema-engine"
+            # set -x PRISMA_QUERY_ENGINE_BINARY "${prisma-engines}/bin/query-engine"
+            # set -x PRISMA_QUERY_ENGINE_LIBRARY "${prisma-engines}/lib/libquery_engine.node"
+            # set -x PRISMA_FMT_BINARY "${prisma-engines}/bin/prisma-fmt"
             plugins = with pkgs.fishPlugins; [
                 { name = "grc"; src = grc.src; }
                 { name = "tide"; src = tide.src; }

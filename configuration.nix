@@ -9,7 +9,14 @@ in
 {
   imports =
     [
-      <nixos-hardware/lenovo/legion/16ach6h/hybrid>
+    #  <nixos-hardware/lenovo/legion/16ach6h/hybrid> # this is borked in latest update for some reason, edid doesn't build
+      <nixos-hardware/common/cpu/amd>
+      <nixos-hardware/common/cpu/amd/pstate.nix>
+      <nixos-hardware/common/cpu/amd/zenpower.nix>
+      <nixos-hardware/common/gpu/amd>
+      <nixos-hardware/common/gpu/nvidia/prime.nix>
+      <nixos-hardware/common/pc/laptop>
+      <nixos-hardware/common/pc/laptop/ssd>
       ./hardware-configuration.nix
       <home-manager/nixos>
       ./cachix.nix
@@ -134,15 +141,25 @@ in
   # The nvidia fun part
   hardware.opengl.enable = true;
 
+  boot.kernelModules = ["amdgpu"];
   hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement.enable = true;
     prime = {
       # hardware specific, beware!
-      amdgpuBusId = lib.mkForce "PCI:01:00:0";
-      nvidiaBusId = lib.mkForce "PCI:06:00:0";
+      amdgpuBusId = lib.mkForce "PCI:06:00:0";
+      nvidiaBusId = lib.mkForce "PCI:01:00:0";
     };
   };
 
   security.polkit.enable = true;
+  # OBS Studio virtual camera
+  boot.extraModulePackages = with config.boot.kernelPackages; [
+    v4l2loopback
+  ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+  '';
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [
