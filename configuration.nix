@@ -2,27 +2,31 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
-let
-  unstable-pkgs = import <nixos-unstable> {};
-in
+{ config, pkgs, hyprland, nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+# let
+  # unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
+  # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+# in
 {
   imports =
     [
-    #  <nixos-hardware/lenovo/legion/16ach6h/hybrid> # this is borked in latest update for some reason, edid doesn't build
-      <nixos-hardware/common/cpu/amd>
-      <nixos-hardware/common/cpu/amd/pstate.nix>
-      <nixos-hardware/common/cpu/amd/zenpower.nix>
-      <nixos-hardware/common/gpu/amd>
-      <nixos-hardware/common/gpu/nvidia/prime.nix>
-      <nixos-hardware/common/pc/laptop>
-      <nixos-hardware/common/pc/laptop/ssd>
+      # nixos-hardware.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
+      nixos-hardware.nixosModules.common-cpu-amd
+      nixos-hardware.nixosModules.common-cpu-amd-pstate
+      nixos-hardware.nixosModules.common-cpu-amd-zenpower
+      nixos-hardware.nixosModules.common-gpu-amd
+      nixos-hardware.nixosModules.common-gpu-nvidia
+      nixos-hardware.nixosModules.common-pc-laptop
+      nixos-hardware.nixosModules.common-pc-laptop-ssd
       ./hardware-configuration.nix
-      <home-manager/nixos>
       ./cachix.nix
     ];
 
-  # Bootloader.
+  nixpkgs.config.permittedInsecurePackages = [
+    "olm-3.2.16"
+  ];
+
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.supportedFilesystems = [ "ntfs" ];
@@ -64,7 +68,6 @@ in
       layout = "us";
       variant = "";
     };
-    #libinput.enable = true;
   };
 
   services.printing.enable = true;
@@ -76,7 +79,6 @@ in
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    #jack.enable = true;
   };
   security.pam.loginLimits = [{
     domain = "*";
@@ -100,7 +102,7 @@ in
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
-    #  thunderbird
+      zen-browser.packages."${system}".specific
     ];
   };
   home-manager.useGlobalPkgs = true;
@@ -110,8 +112,20 @@ in
   environment.sessionVariables.DEFAULT_BROWSER = "firefox";
 
   programs.firefox.enable = true;
-  programs.hyprland.enable = true;
-  programs.hyprland.package = unstable-pkgs.hyprland;
+  nix.settings = {
+    substituters = ["https://hyprland.cachix.org"];
+    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+  };
+  
+  # Comment out below for the first time to avoid cache miss, if using flake
+  programs.hyprland = {
+    enable = true;
+    package = hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    # package = unstable-pkgs.hyprland;
+  };
+  # End comment out
+
+  # programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
   programs.fish.enable = true;
@@ -139,10 +153,17 @@ in
   nixpkgs.config.cudaSupport = true;
 
   # The nvidia fun part
-  hardware.opengl.enable = true;
+  hardware.opengl = {
+    enable = true;
+    # package = unstable-pkgs.mesa.drivers;
+    # Steam support
+    driSupport32Bit = true;
+    # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
+  };
 
   boot.kernelModules = ["amdgpu"];
   hardware.nvidia = {
+    open = false;
     modesetting.enable = true;
     powerManagement.enable = true;
     prime = {

@@ -41,6 +41,11 @@ For base setup, only `hyprland`, `rofi`, `waybar` and `swaylock`/`swaylock-effec
 
 ## General notes
 
+## Setting up
+
+Run `sync-nix.sh`, it will copy configurations and run nixos-rebuild.
+If you don't want to build hyprland yourself and instead use cache, comment out programs.hyprland in configuration first, sync, then un-comment it and sync again.
+
 ### Lock screen
 
 Lock screen doesn't show what you type, it just changes it's circle for each character. If you delete all the input, it will show "cleared".  

@@ -8,6 +8,7 @@ in
 
         packages = with pkgs; [
             # acpilight
+            nix-top
             grc
             onefetch
             fira
