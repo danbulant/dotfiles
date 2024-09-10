@@ -1,3 +1,4 @@
+{ nix-gaming, ... }:
 { pkgs, hyprland-plugins, ...}: 
 let
   unstable-pkgs = import <nixos-unstable> {};
@@ -8,6 +9,8 @@ in
 
         packages = with pkgs; [
             # acpilight
+            nix-gaming.packages.${pkgs.system}.osu-lazer-bin
+            obsidian
             betaflight-configurator
             glxinfo
             pciutils

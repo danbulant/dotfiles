@@ -39,6 +39,10 @@
     device = "/dev/disk/by-uuid/050574C34881C3B9";
     fsType = "ntfs";
   };
+  fileSystems."/media/windows" = {
+    device = "/dev/disk/by-uuid/846A9EF06A9EDE6C";
+    fsType = "ntfs";
+  };
 
   networking.hostName = "lenovo-nix";
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -98,24 +102,28 @@
   users.users.dan = {
     isNormalUser = true;
     description = "John";
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode"];
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
       zen-browser.packages."${system}".specific
     ];
   };
-  home-manager.useGlobalPkgs = true;
-  home-manager.users.dan = import ./home.nix;
-  home-manager.backupFileExtension = "backup";
 
   # Other defaults are set in home.nix
   environment.sessionVariables.DEFAULT_BROWSER = "firefox";
 
   programs.firefox.enable = true;
   nix.settings = {
-    substituters = ["https://hyprland.cachix.org" "https://cache.nixos.org"];
-    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+    substituters = [
+      "https://hyprland.cachix.org"
+      "https://cache.nixos.org"
+      "https://nix-gaming.cachix.org"
+    ];
+    trusted-public-keys = [
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+    ];
   };
   
   # Comment out below for the first time to avoid cache miss, if using flake
@@ -134,6 +142,7 @@
   # programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
+  programs.gamemode.enable = true;
   programs.fish.enable = true;
   programs.nix-ld.enable = true; # Fix dynamic binaries from outside of nix
   services.openssh.enable = true;

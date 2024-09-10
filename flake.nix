@@ -11,17 +11,36 @@
     };
     home-manager.url = "github:nix-community/home-manager"; # /release-24.11
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-gaming.url = "github:fufexan/nix-gaming";
     # kwin-effects-forceblur.url = "https://gist.githubusercontent.com/taj-ny/c1abdde710f33e34dc39dc53a5dc2c09/raw/7078265012c37b6f6bc397e9a7893bc6004e7b6c/kwin-effects-forceblur.nix";
   };
 
-  outputs = { nixpkgs, ... }@attrs: {
+  outputs = { nixpkgs, home-manager, ... }@attrs: {
     nixosConfigurations.lenovo-nix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
-      modules = with attrs; [
-        home-manager.nixosModules.default
+      modules = [
+        home-manager.nixosModules.home-manager {
+          home-manager.useGlobalPkgs = true;
+          home-manager.users.dan = (import ./home.nix) { nix-gaming = attrs.nix-gaming; };
+          home-manager.backupFileExtension = "backup";
+        }
         ./configuration.nix
       ];
     };
+
+    # homeConfigurations.lenovo-nix = home-manager.lib.homeManagerConfiguration {
+    #   pkgs = import nixpkgs {
+    #     system = "x86_64-linux";
+    #     config.allowUnfree = true;
+    #   };
+
+    #   extraSpecialArgs = {inherit attrs;};
+
+    #   modules = [
+    #     ./home.nix
+    #   ];
+    # };
   };
 }
