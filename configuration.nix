@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, hyprland, nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+{ config, pkgs, hyprland, hyprland-plugins, nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
 # let
   # unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
@@ -107,20 +107,26 @@
   };
   home-manager.useGlobalPkgs = true;
   home-manager.users.dan = import ./home.nix;
+  home-manager.backupFileExtension = "backup";
 
   # Other defaults are set in home.nix
   environment.sessionVariables.DEFAULT_BROWSER = "firefox";
 
   programs.firefox.enable = true;
   nix.settings = {
-    substituters = ["https://hyprland.cachix.org"];
+    substituters = ["https://hyprland.cachix.org" "https://cache.nixos.org"];
     trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
   };
   
   # Comment out below for the first time to avoid cache miss, if using flake
   programs.hyprland = {
     enable = true;
-    package = hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    package = hyprland.packages.${pkgs.system}.hyprland;
+    portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
+      {
+        inherit (pkgs) mesa;
+      };
+
     # package = unstable-pkgs.hyprland;
   };
   # End comment out
@@ -153,11 +159,11 @@
   nixpkgs.config.cudaSupport = true;
 
   # The nvidia fun part
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
     # package = unstable-pkgs.mesa.drivers;
     # Steam support
-    driSupport32Bit = true;
+    enable32Bit = true;
     # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
   };
 

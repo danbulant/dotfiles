@@ -1,4 +1,4 @@
-{ pkgs, ...}: 
+{ pkgs, hyprland-plugins, ...}: 
 let
   unstable-pkgs = import <nixos-unstable> {};
 in
@@ -8,6 +8,9 @@ in
 
         packages = with pkgs; [
             # acpilight
+            betaflight-configurator
+            glxinfo
+            pciutils
             nix-top
             grc
             onefetch
@@ -19,6 +22,7 @@ in
             rofi-wayland
             rustup 
             discord
+            vesktop
             spotify
             spicetify-cli
             meslo-lgs-nf
@@ -146,6 +150,10 @@ in
         ];
     };
     services.lorri.enable = true;
+    wayland.windowManager.hyprland.plugins = [
+        hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
+        hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
+    ];
     programs = {
         fish = {
             enable = true;
