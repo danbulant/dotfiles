@@ -9,6 +9,7 @@ in
 
         packages = with pkgs; [
             # acpilight
+            wpsoffice
             nix-gaming.packages.${pkgs.system}.osu-lazer-bin
             obsidian
             betaflight-configurator
