@@ -63,11 +63,11 @@
     LC_TIME = "cs_CZ.UTF-8";
   };
 
-  services.xserver.enable = false;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
   services.desktopManager.plasma6.enable = true;
   services.xserver = {
+    enable = false;
     xkb = {
       layout = "us";
       variant = "";
@@ -154,14 +154,55 @@
   };
   hardware.opentabletdriver.enable = true;
   virtualisation.docker.enable = true;
+  virtualisation.docker.enableOnBoot = false;
   services.avahi.enable = true;
-  
+
+  boot = {
+    # Shortcuts for fixing things
+    # alt+sysrq (prtsc) + key
+    # h: Print help to the system log.
+    # f: Trigger the kernel oom killer.
+    # s: Sync data to disk before triggering the reset options below.
+    # e: SIGTERM all processes except PID 0.
+    # i: SIGKILL all processes except PID 0.
+    # b: Reboot the system.
+    kernel.sysctl."kernel.sysrq" = 1;
+
+    # Visuals
+    plymouth = {
+        enable = true;
+        theme = "deus_ex"; # motion is also cool
+        themePackages = with pkgs; [
+          (adi1090x-plymouth-themes.override {
+            selected_themes = [ "deus_ex" ];
+          })
+        ];
+    };
+    kernelParams = [
+        "quiet"
+        "splash"
+        "boot.shell_on_fail"
+        "loglevel=3"
+        "rd.systemd.show_status=false"
+        "rd.udev.log_level=3"
+        "udev.log_priority=3"
+    ];
+
+    # Removing support for unneeded stuff
+    # zfs.enabled = false;
+    swraid.enable = false;
+
+    initrd.systemd.enable = true;
+  };
+  boot.loader.timeout = 0;
+
 
   environment.systemPackages = with pkgs; [
     git
     nvtopPackages.full
     btop
     lshw
+    nvidia-docker
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -176,7 +217,7 @@
     # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
   };
 
-  boot.kernelModules = ["amdgpu"];
+  boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
   hardware.nvidia = {
     open = false;
     modesetting.enable = true;
@@ -195,6 +236,7 @@
   ];
   boot.extraModprobeConfig = ''
     options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+    options nvidia_drm modeset=1 fbdev=1
   '';
 
   # Open ports in the firewall.
@@ -216,4 +258,8 @@
   system.stateVersion = "24.05"; # Did you read the comment?
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  networking.extraHosts = ''
+    10.99.24.21 supersecureservice.cypherfix.tcc
+  '';
 }

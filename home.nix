@@ -32,7 +32,7 @@ in
             meslo-lgs-nf
             waybar
             chromium
-            firefox
+            # firefox
             dunst
             sccache
             swaybg
@@ -74,6 +74,7 @@ in
             nil # nix language server
 
             gping
+            redisinsight
             caddy
             jq
             htmlq
@@ -161,7 +162,7 @@ in
     programs = {
         fish = {
             enable = true;
-            shellInit = with unstable-pkgs; ''
+            shellInit = ''
                 source ~/.config/fish/config-old.fish
 
             '';
@@ -180,6 +181,25 @@ in
 
             ];
         };
+        # nixvim = {
+        #     enable = true;
+        #     # colorscheme = "hanekawa_tsubasa";w
+        #     colorschemes.onedark.enable = true;
+        #     plugins = {
+        #         wakatime.enable = true;
+        #         cmp = {
+        #             autoEnableSources = true;
+        #             enable = true;
+        #             settings.sources = [
+        #                 { name = "fish"; }
+        #                 { name = "nvim_lsp"; }
+        #                 { name = "path"; }
+        #                 { name = "buffer"; }
+        #                 # { name = "treesitter"; }
+        #             ];
+        #         };
+        #     };
+        # };
         git = {
             enable = true;
             userName  = "Daniel Bulant";
@@ -203,7 +223,7 @@ in
         fastfetch.enable = true;
         direnv.enable = true;
         direnv.nix-direnv.enable = true;
-        firefox.enable = true;
+        # firefox.enable = true;
     };
     services.kdeconnect.enable = true;
     services.kdeconnect.indicator = true;
