@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     zen-browser.url = "github:MarceColl/zen-browser-flake";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
@@ -9,7 +9,7 @@
       url = "github:hyprwm/hyprland-plugins";
       inputs.hyprland.follows = "hyprland";
     };
-    home-manager.url = "github:nix-community/home-manager"; # /release-24.11
+    home-manager.url = "github:nix-community/home-manager/release-24.05"; # /release-24.11
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-gaming.url = "github:fufexan/nix-gaming";
@@ -26,12 +26,13 @@
       system = "x86_64-linux";
       specialArgs = attrs;
       modules = [
+        # ./obs.nix # doesn't work. Use nix-shell -p obs-studio instead
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
           home-manager.users.dan = (import ./home.nix) { nix-gaming = attrs.nix-gaming; };
           home-manager.backupFileExtension = "backup";
         }
-        nixvim.nixosModules.nixvim
+        # nixvim.nixosModules.nixvim
         ./configuration.nix
       ];
     };

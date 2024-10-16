@@ -44,6 +44,17 @@
     fsType = "ntfs";
   };
 
+  services.beesd.filesystems = {
+    root = {
+      spec = "UUID=26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
+      hashTableSizeMB = 1024;
+      extraOptions = [
+        "-c" "4"
+        "-g" "10"
+      ];
+    };
+  };
+
   networking.hostName = "lenovo-nix";
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
@@ -65,7 +76,9 @@
 
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # services.desktopManager.plasma6 = {
+  #   enable = true;
+  # };
   services.xserver = {
     enable = false;
     xkb = {
@@ -109,6 +122,7 @@
       zen-browser.packages."${system}".specific
     ];
   };
+  nix.settings.trusted-users = [ "root" "@wheel" "dan" ];
 
   # Other defaults are set in home.nix
   environment.sessionVariables.DEFAULT_BROWSER = "firefox";

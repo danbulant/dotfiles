@@ -24,7 +24,6 @@ in
             kitty
             nushell
             rofi-wayland
-            rustup 
             discord
             vesktop
             spotify
@@ -90,7 +89,7 @@ in
             qbittorrent
             audacity
             bettercap
-            bitwarden
+            # bitwarden
             duperemove
             ffmpeg
             flameshot
@@ -104,7 +103,7 @@ in
             quickemu
             qemu
             # uwufetch
-            vagrant
+            # vagrant
             socat
             websocat
             whois
@@ -136,22 +135,19 @@ in
             screen
             openvpn
 
-            (python312.withPackages (ps: with ps; [ 
-                pyquery
-                pygobject3
-            ]))
-            pipx
-            gobject-introspection
+            mdbook
+            nix-tree
+            nix-du
+            graphviz
 
-            # unstable-pkgs.prisma-engines
-            openssl
-            gcc
-            # required by mise plugins
-            automake
-            autoconf
-            ncurses
-            pkg-config
-            gnumake
+            # (python312.withPackages (ps: with ps; [ 
+            #     pyquery
+            #     pygobject3
+            # ]))
+            # pipx
+            # gobject-introspection
+
+            crate2nix
         ];
     };
     services.lorri.enable = true;
