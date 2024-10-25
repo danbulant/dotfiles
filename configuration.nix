@@ -60,7 +60,7 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   networking.networkmanager.enable = true;
-  time.timeZone = "Europe/Prague";
+ time.timeZone = "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "cs_CZ.UTF-8";
@@ -76,9 +76,10 @@
 
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
-  # services.desktopManager.plasma6 = {
-  #   enable = true;
-  # };
+   services.desktopManager.plasma6 = {
+     enable = true;
+   };
+  #services.desktopManager.gnome.enable = true;
   services.xserver = {
     enable = false;
     xkb = {
@@ -146,7 +147,7 @@
     package = hyprland.packages.${pkgs.system}.hyprland;
     portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
       {
-        inherit (pkgs) mesa;
+        #inherit (pkgs) mesa;
       };
 
     # package = unstable-pkgs.hyprland;

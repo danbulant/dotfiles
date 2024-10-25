@@ -10,9 +10,10 @@ in
         packages = with pkgs; [
             # acpilight
             wpsoffice
-            nix-gaming.packages.${pkgs.system}.osu-lazer-bin
+            # nix-gaming.packages.${pkgs.system}.osu-lazer-bin
             obsidian
             betaflight-configurator
+            home-manager
             glxinfo
             pciutils
             nix-top
@@ -117,6 +118,8 @@ in
             qpwgraph
 
             android-tools
+            hyperfine
+            scc
             aircrack-ng
             strace
             ghidra
