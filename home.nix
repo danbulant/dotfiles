@@ -163,6 +163,8 @@ in
             nix-du
             graphviz
 
+            awatcher
+
             # (python312.withPackages (ps: with ps; [ 
             #     pyquery
             #     pygobject3
