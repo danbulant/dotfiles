@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, hyprland, hyprland-plugins, nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+{ config, pkgs, hyprland, options, hyprland-plugins, nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
 # let
   # unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
@@ -19,11 +19,18 @@
       nixos-hardware.nixosModules.common-pc-laptop
       nixos-hardware.nixosModules.common-pc-laptop-ssd
       ./hardware-configuration.nix
-      ./cachix.nix
+      # /etc/nixos/cachix.nix
     ];
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
+    # "qbittorrent-4.6.4"
+    # "cinny-3.2.0"
+    "dotnet-sdk-wrapped-7.0.410"
+    "dotnet-sdk-7.0.410"
+    "dotnet-runtime-6.0.36"
+    "dotnet-sdk-wrapped-6.0.428"
+    "dotnet-sdk-6.0.428"
   ];
 
 
@@ -60,7 +67,7 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   networking.networkmanager.enable = true;
- time.timeZone = "Europe/Prague";
+  time.timeZone = lib.mkForce "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "cs_CZ.UTF-8";
@@ -144,11 +151,11 @@
   # Comment out below for the first time to avoid cache miss, if using flake
   programs.hyprland = {
     enable = true;
-    package = hyprland.packages.${pkgs.system}.hyprland;
-    portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
-      {
+    #package = hyprland.packages.${pkgs.system}.hyprland;
+    #portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
+     # {
         #inherit (pkgs) mesa;
-      };
+      #};
 
     # package = unstable-pkgs.hyprland;
   };
@@ -159,7 +166,18 @@
   services.hypridle.enable = true;
   programs.gamemode.enable = true;
   programs.fish.enable = true;
-  programs.nix-ld.enable = true; # Fix dynamic binaries from outside of nix
+  # Fix dynamic binaries from outside of nix
+  programs.nix-ld = {
+    enable = true;
+    libraries = options.programs.nix-ld.libraries.default ++ (with pkgs; [
+      libdrm
+      mesa
+      libxkbcommon
+      openssl
+      libGL libva
+      libelf
+    ]);
+  };
   services.openssh.enable = true;
   services.tailscale = {
     enable = true;

@@ -1,7 +1,11 @@
-{ nix-gaming, ... }:
-{ pkgs, hyprland-plugins, ...}: 
+{ nix-gaming, nixpkgs-unstable,... }:
+{ pkgs, hyprland-plugins, inputs, ...}:
 let
-  unstable-pkgs = import <nixos-unstable> {};
+
+  unstable = import inputs.nixpkgs-unstable {
+    system = pkgs.system;
+  };
+
 in
 {
     home = {
@@ -10,6 +14,8 @@ in
         packages = with pkgs; [
             # acpilight
             wpsoffice
+            pico-sdk
+            elf2uf2-rs
             # nix-gaming.packages.${pkgs.system}.osu-lazer-bin
             obsidian
             betaflight-configurator
@@ -48,6 +54,7 @@ in
             jetbrains.clion
             jetbrains.goland
             jetbrains.datagrip
+            jetbrains.rider
             datovka
             nwg-displays
             wireguard-tools
@@ -72,9 +79,20 @@ in
             libcanberra-gtk3 # sound events
             qt6ct
             nil # nix language server
+            nix-output-monitor
+            expect
+            nh
+            
+            udev-block-notify
 
+            appimage-run
+
+            heroic
+            heaptrack
+            # cinny
             gping
-            redisinsight
+            # redisinsight
+            valgrind
             caddy
             jq
             htmlq
@@ -116,6 +134,8 @@ in
             wireshark
             nixfmt-rfc-style
             qpwgraph
+
+            nixpkgs-unstable.legacyPackages.${system}.zed-editor
 
             android-tools
             hyperfine
@@ -176,6 +196,8 @@ in
         };
         vscode = {
             enable = true;
+            # package = nixpkgs-unstable.packages.${pkgs.system}.vscode;
+            # package = unstable.pkgs.vscode;
             extensions = with pkgs.vscode-extensions; [
 
             ];
