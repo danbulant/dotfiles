@@ -10,20 +10,21 @@
 {
   imports =
     [
-      # nixos-hardware.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
-      nixos-hardware.nixosModules.common-cpu-amd
-      nixos-hardware.nixosModules.common-cpu-amd-pstate
-      nixos-hardware.nixosModules.common-cpu-amd-zenpower
-      nixos-hardware.nixosModules.common-gpu-amd
-      nixos-hardware.nixosModules.common-gpu-nvidia
-      nixos-hardware.nixosModules.common-pc-laptop
-      nixos-hardware.nixosModules.common-pc-laptop-ssd
+      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
+      # nixos-hardware.nixosModules.common-cpu-amd
+      # nixos-hardware.nixosModules.common-cpu-amd-pstate
+      # nixos-hardware.nixosModules.common-cpu-amd-zenpower
+      # nixos-hardware.nixosModules.common-gpu-amd
+      # nixos-hardware.nixosModules.common-gpu-nvidia
+      # nixos-hardware.nixosModules.common-pc-laptop
+      # nixos-hardware.nixosModules.common-pc-laptop-ssd
       ./hardware-configuration.nix
       # /etc/nixos/cachix.nix
     ];
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
+    "cinny-unwrapped-4.2.3"
     # "qbittorrent-4.6.4"
     # "cinny-3.2.0"
     "dotnet-sdk-wrapped-7.0.410"
@@ -248,6 +249,10 @@
     # Steam support
     enable32Bit = true;
     # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
+    extraPackages = with pkgs; [
+      libvdpau-va-gl
+      nvidia-vaapi-driver
+    ];
   };
 
   boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
@@ -292,7 +297,7 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # /etc/hosts :)
   networking.extraHosts = ''
-    10.99.24.21 supersecureservice.cypherfix.tcc
   '';
 }

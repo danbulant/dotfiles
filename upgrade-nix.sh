@@ -6,5 +6,5 @@ if [ -z "$(which nh)" ]; then
 else
     sudo nix-channel --update
     sudo nix flake update
-    sudo nh os switch .
+    nh os switch .
 fi

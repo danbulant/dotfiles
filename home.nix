@@ -89,7 +89,7 @@ in
 
             heroic
             heaptrack
-            # cinny
+            cinny
             gping
             # redisinsight
             valgrind
@@ -164,6 +164,9 @@ in
             graphviz
 
             awatcher
+            tigervnc
+
+            libva-utils
 
             # (python312.withPackages (ps: with ps; [ 
             #     pyquery
