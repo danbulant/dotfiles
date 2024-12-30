@@ -9,6 +9,10 @@
       url = "github:hyprwm/hyprland-plugins";
       inputs.hyprland.follows = "hyprland";
     };
+    suyu = {
+      url = "git+https://git.suyu.dev/suyu/nix-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,7 +24,7 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
+  outputs = { nixpkgs, home-manager, nixpkgs-unstable, nix-gaming, suyu, nix-index-database, ... }@attrs: {
     nixosConfigurations.lenovo-nix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
@@ -28,7 +32,7 @@
         # ./obs.nix # doesn't work. Use nix-shell -p obs-studio instead
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
-          home-manager.users.dan = (import ./home.nix) { inherit nixpkgs-unstable nix-gaming; };
+          home-manager.users.dan = (import ./home.nix) { inherit nixpkgs-unstable nix-gaming suyu; };
           home-manager.backupFileExtension = "backup";
         }
         ./configuration.nix

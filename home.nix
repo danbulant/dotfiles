@@ -1,4 +1,4 @@
-{ nix-gaming, nixpkgs-unstable,... }:
+{ nix-gaming, nixpkgs-unstable, suyu, ... }:
 { pkgs, hyprland-plugins, inputs, ...}:
 let
 
@@ -13,6 +13,9 @@ in
 
         packages = with pkgs; [
             # acpilight
+            wootility
+            surrealdb
+            surrealist
             wpsoffice
             pico-sdk
             elf2uf2-rs
@@ -89,7 +92,7 @@ in
 
             heroic
             heaptrack
-            cinny
+            cinny-desktop
             gping
             # redisinsight
             valgrind
@@ -136,6 +139,7 @@ in
             qpwgraph
 
             nixpkgs-unstable.legacyPackages.${system}.zed-editor
+            # suyu.packages.${pkgs.stdenv.hostPlatform.system}.suyu
 
             android-tools
             hyperfine
@@ -162,6 +166,9 @@ in
             nix-tree
             nix-du
             graphviz
+
+            blender
+            warpinator
 
             awatcher
             tigervnc

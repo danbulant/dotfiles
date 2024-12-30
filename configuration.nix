@@ -25,6 +25,7 @@
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
     "cinny-unwrapped-4.2.3"
+    "cinny-4.2.3"
     # "qbittorrent-4.6.4"
     # "cinny-3.2.0"
     "dotnet-sdk-wrapped-7.0.410"
@@ -283,9 +284,39 @@
   ];
   networking.firewall.allowedUDPPorts = [
     5353 # Google cast discovery
+    42000 # warpinator
+    42001 # warpinator 
   ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  services.udev.extraRules = ''
+  # Wooting One Legacy
+
+  SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="ff01", TAG+="uaccess"
+
+  SUBSYSTEM=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="ff01", TAG+="uaccess"
+
+  # Wooting One update mode
+
+  SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2402", TAG+="uaccess"
+
+  # Wooting Two Legacy
+
+  SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="ff02", TAG+="uaccess"
+
+  SUBSYSTEM=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="ff02", TAG+="uaccess"
+
+  # Wooting Two update mode
+
+  SUBSYSTEM=="hidraw", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2403", TAG+="uaccess"
+
+  # Generic Wootings
+
+  SUBSYSTEM=="hidraw", ATTRS{idVendor}=="31e3", TAG+="uaccess"
+
+  SUBSYSTEM=="usb", ATTRS{idVendor}=="31e3", TAG+="uaccess"
+  '';
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
