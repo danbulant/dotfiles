@@ -214,6 +214,8 @@
         ];
     };
     kernelParams = [
+        # attempt to fix nvidia perf
+        "nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
         "quiet"
         "splash"
         "boot.shell_on_fail"
@@ -228,6 +230,15 @@
     swraid.enable = false;
 
     initrd.systemd.enable = true;
+
+    # OBS Studio virtual camera
+    extraModulePackages = with config.boot.kernelPackages; [
+      v4l2loopback
+    ];
+    extraModprobeConfig = ''
+      options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+      options nvidia_drm modeset=1 fbdev=1
+    '';
   };
   boot.loader.timeout = 0;
 
@@ -261,6 +272,7 @@
     open = false;
     modesetting.enable = true;
     powerManagement.enable = true;
+    nvidiaSettings = true;
     prime = {
       # hardware specific, beware!
       amdgpuBusId = lib.mkForce "PCI:06:00:0";
@@ -269,14 +281,6 @@
   };
 
   security.polkit.enable = true;
-  # OBS Studio virtual camera
-  boot.extraModulePackages = with config.boot.kernelPackages; [
-    v4l2loopback
-  ];
-  boot.extraModprobeConfig = ''
-    options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
-    options nvidia_drm modeset=1 fbdev=1
-  '';
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [
