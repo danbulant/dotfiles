@@ -13,6 +13,8 @@ in
 
         packages = with pkgs; [
             # acpilight
+            #kdePackages.plasma-workspace
+            rar
             wootility
             surrealdb
             surrealist
@@ -28,9 +30,11 @@ in
             nix-top
             grc
             onefetch
+            inter
             fira
             fira-code
             fira-code-nerdfont
+            iosevka
             kitty
             nushell
             rofi-wayland
@@ -69,6 +73,7 @@ in
             slurp
             wl-clipboard
             nextcloud-client
+            kdePackages.plasma-workspace
             kdePackages.partitionmanager
             kdePackages.filelight
             kdePackages.kate
@@ -190,6 +195,15 @@ in
         hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
         hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
     ];
+    fonts.fontconfig = {
+        enable = true;
+        defaultFonts = {
+            emoji = ["Noto Color Emoji"];
+            monospace = ["Iosevka" "Iosevka NF" "FiraCode Nerd Font Mono"];
+            sansSerif = ["Inter"];
+            serif = ["Noto Serif"];
+        };
+    };
     programs = {
         fish = {
             enable = true;

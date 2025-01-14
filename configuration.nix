@@ -162,6 +162,9 @@
     # package = unstable-pkgs.hyprland;
   };
   # End comment out
+  
+  #xdg.configFile."menus/applications.menu".text = builtins.readFile ./applications.menu;
+  environment.etc."/xdg/menus/plasma-applications.menu".text = builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
 
   # programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
@@ -216,6 +219,7 @@
     kernelParams = [
         # attempt to fix nvidia perf
         "nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
+        "initcall_blacklist=sysfb_init"
         "quiet"
         "splash"
         "boot.shell_on_fail"
@@ -242,6 +246,15 @@
   };
   boot.loader.timeout = 0;
 
+  # App image support
+  boot.binfmt.registrations.appimage = {
+    wrapInterpreterInShell = false;
+    interpreter = "${pkgs.appimage-run}/bin/appimage-run";
+    recognitionType = "magic";
+    offset = 0;
+    mask = ''\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff'';
+    magicOrExtension = ''\x7fELF....AI\x02'';
+  };
 
   environment.systemPackages = with pkgs; [
     git
@@ -285,6 +298,8 @@
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [
     57621 # Spotify app discovery
+    42000
+    42001
   ];
   networking.firewall.allowedUDPPorts = [
     5353 # Google cast discovery
@@ -321,6 +336,13 @@
 
   SUBSYSTEM=="usb", ATTRS{idVendor}=="31e3", TAG+="uaccess"
   '';
+
+  services.syncthing = {
+    enable = true;
+    openDefaultPorts = true;
+  };
+  systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
+
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
