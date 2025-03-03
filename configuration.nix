@@ -82,7 +82,7 @@
     LC_TELEPHONE = "cs_CZ.UTF-8";
     LC_TIME = "cs_CZ.UTF-8";
   };
-
+  services.dnsmasq.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
    services.desktopManager.plasma6 = {
@@ -98,6 +98,7 @@
   };
 
   services.printing.enable = true;
+  hardware.sane.enable = true;
   hardware.acpilight.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -125,7 +126,7 @@
   users.users.dan = {
     isNormalUser = true;
     description = "John";
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode"];
+    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp"];
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
@@ -191,8 +192,11 @@
     extraUpFlags = [ "--advertise-exit-node" ];
   };
   hardware.opentabletdriver.enable = true;
-  virtualisation.docker.enable = true;
-  virtualisation.docker.enableOnBoot = false;
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = false;
+  };
+  hardware.nvidia-container-toolkit.enable = true;
   services.avahi.enable = true;
 
   boot = {
@@ -295,6 +299,16 @@
 
   security.polkit.enable = true;
 
+  services.create_ap = {
+    enable = false;
+    settings = {
+      INTERNET_IFACE = "eno1";
+      WIFI_IFACE = "wlp4s0";
+      SSID = "nixos";
+      PASSPHRASE = "12345678";
+    };
+  };
+
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [
     57621 # Spotify app discovery
@@ -305,6 +319,7 @@
     5353 # Google cast discovery
     42000 # warpinator
     42001 # warpinator 
+    67 68 # dhcp
   ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;

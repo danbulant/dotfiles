@@ -12,8 +12,12 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            xournalpp
+            simple-scan
+            dotnet-sdk
             # acpilight
             #kdePackages.plasma-workspace
+            godot_4
             rar
             wootility
             surrealdb
@@ -166,6 +170,7 @@ in
             python312Packages.pypykatz
             screen
             openvpn
+            ghostty
 
             mdbook
             nix-tree
@@ -258,6 +263,7 @@ in
             };
             extraConfig = {
                 pull.rebase = false;
+                pull.ff = "only";
                 gpg.format = "ssh";
                 commit.gpgsign = true;
                 gpg.ssh.allowedSignersFile = "/home/dan/allowed_signers";
