@@ -805,4 +805,7 @@ export-env {
             }
         ]
     }
+
+    # load oh-my-posh config
+    source ~/.oh-my-posh.nu
 }

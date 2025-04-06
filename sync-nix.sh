@@ -1,7 +1,5 @@
 #!/bin/bash
-echo "Copying configurations"
-cp .config/* ~/.config/ -r
-cp .default-python-packages ~
+sh fast-copy.sh
 if [ -z "$(which nh)" ]; then
     sudo cp *.nix /etc/nixos/
     sudo nixos-rebuild switch --show-trace

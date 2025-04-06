@@ -249,8 +249,8 @@ in
             # configFile.source = ./.config/nushell/base-config.nu;
             configFile.text = ''use base-config.nu'';
             shellAliases = {
-                ns = "nix-shell --run nushell";
-                nsp = "nix-shell --run nushell -p";
+                ns = "nix-shell --run nu";
+                nsp = "nix-shell --run nu -p";
             };
         };
         vscode = {
