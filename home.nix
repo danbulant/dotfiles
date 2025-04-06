@@ -251,6 +251,7 @@ in
             shellAliases = {
                 ns = "nix-shell --run nu";
                 nsp = "nix-shell --run nu -p";
+                l = "lsd -la";
             };
         };
         vscode = {

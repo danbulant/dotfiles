@@ -127,7 +127,7 @@
     isNormalUser = true;
     description = "John";
     extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp"];
-    shell = pkgs.nushell;
+    shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
       zen-browser.packages."${system}".specific

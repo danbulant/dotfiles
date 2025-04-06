@@ -2,40 +2,34 @@
 
 My dotfiles and nix setup incl. scripts for hyprland and some other goodies.
 
-super key = windows key
-
 Please do edit configuration of at least hyprland - default configuration is very specific to my setup (involves monitor scaling)
 
 ## Screenshots
 
-![Screenshot of terminal](./screenshots/terminal.png)
-![Screenshot of dolphin](./screenshots/dolphin.png)
-![Screenshot of spotify](./screenshots/spotify.png)
+![](./screenshots/kitty.png)
 
 ## Used software
 
-I'm using NixOS.
+I'm using NixOS. A lot of packages are missing, for the full list see [`home.nix`](./home.nix).
 
 - hyprland - wayland compositor and window manager (also adds blur and rounded corners). Really barebones, see below for shortcuts (read the config file for up to date shortcuts)
-- fish - shell (friendly, interactive, doesn't implement POSIX, I recommend reading it's docs first)
+- ~~fish - shell (friendly, interactive, doesn't implement POSIX, I recommend reading it's docs first)~~
+- nushell - shell (very different)
 - fastfetch - everyone needs a fetch program
 - onefetch - fetch for git repos (fish is configured to show repo details when you cd into a repo)
 - kitty - terminal emulator (GPU accelerated, supports ligatures, unicode, etc)
 - nano - simple text editor. I recommend editing duplicating the file to root's home directory and changing the colors there, so you always see when you're sudo editing something.
-- nushell - for scripting and data management - I don't use it and it's not required for the current setup, but I'm planning to use it in the future.
 - rofi - application launcher, general "chooser" (used for power menu, notification actions, etc)
 - waybar - the top status bar
 - hyprlock - Fancy lock screen
-- spicetify - custom spotify theme
+- ~~spicetify - custom spotify theme~~
 - VSCode - code editor. Current theme/config is not in dotfiles here, but the theme used is Atom One Dark, and the font is Fira Code.
 - dolphin - file browser
-- polkit-kde-authentication-agent-1 - required for sudo gui prompts (like when you open dolphin as root)
 - blueman - bluetooth app indicator
 - swaybg - for showing wallpaper
 - activity-watch and awatcher - for program usage statistics
 - nm-applet - network manager app indicator
 - swayidle - for automatic locking
-- pam_kwallet_init - for storing secrets in kwallet
 
 For base setup, only `hyprland`, `rofi`, `waybar` and `swaylock`/`swaylock-effects-git` is required.
 
@@ -48,7 +42,7 @@ If you don't want to build hyprland yourself and instead use cache, comment out 
 
 ### Lock screen
 
-Lock screen doesn't show what you type, it just changes it's circle for each character. If you delete all the input, it will show "cleared".  
+Lock screen doesn't show what you type, it just changes it's circle for each character. If you delete all the input, it will show "cleared". Escape clears input.  
 Click the crossed eye on the status bar (next to network connection status, on the right side) to disable automatic lock screen (for playing videos, etc, as idle detection is not perfect on hyprland). If it's purple and shows normal eye, automatic lockscreen is disabled.
 
 ### Terminal
@@ -107,3 +101,4 @@ My current setup is set that power button turns off the computer without prompti
 ### Other
 
 ctrl+alt 1/2 is passed on to OBS as a global shortcut. You may want to change this, but it can also serve as an example of a global shortcut.
+Of note, obs isn't installed - nixos tries to build it manually for some reason. I use comma to one-time-install obs (`, obs`).
