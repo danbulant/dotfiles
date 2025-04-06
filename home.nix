@@ -247,12 +247,7 @@ in
             #     units
             # ];
             # configFile.source = ./.config/nushell/base-config.nu;
-            configFile.text = ''use base-config.nu'';
-            shellAliases = {
-                ns = "nix-shell --run nu";
-                nsp = "nix-shell --run nu -p";
-                l = "lsd -la";
-            };
+            configFile.text = ''source base-config.nu'';
         };
         vscode = {
             enable = true;
