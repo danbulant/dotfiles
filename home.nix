@@ -1,5 +1,5 @@
-{ nix-gaming, nixpkgs-unstable, suyu, ... }:
-{ pkgs, hyprland-plugins, inputs, ...}:
+{ nix-gaming, nixpkgs-unstable, suyu, hyprland-plugins, hyprland, ... }:
+{ pkgs, inputs, ...}:
 let
 
   unstable = import inputs.nixpkgs-unstable {
@@ -12,6 +12,8 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+#            davinci-resolve # builds spidermonkey for some reason bruh
+	        anki-bin
             xournalpp
             simple-scan
             dotnet-sdk
@@ -21,8 +23,7 @@ in
             rar
             wootility
             surrealdb
-            surrealist
-            wpsoffice
+            #surrealist
             pico-sdk
             elf2uf2-rs
             # nix-gaming.packages.${pkgs.system}.osu-lazer-bin
@@ -40,7 +41,6 @@ in
             fira-code-nerdfont
             iosevka
             kitty
-            nushell
             rofi-wayland
             discord
             vesktop
@@ -183,6 +183,8 @@ in
             awatcher
             tigervnc
 
+            oh-my-posh
+
             libva-utils
 
             # (python312.withPackages (ps: with ps; [ 
@@ -196,10 +198,15 @@ in
         ];
     };
     services.lorri.enable = true;
-    wayland.windowManager.hyprland.plugins = [
-        hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
-        hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
-    ];
+    wayland.windowManager.hyprland = {
+#        enable = true;
+        # package = hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+        # portalPackage = hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+        # plugins = [
+        #     hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
+        #     hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
+        # ];
+    };
     fonts.fontconfig = {
         enable = true;
         defaultFonts = {
@@ -224,6 +231,27 @@ in
                 { name = "grc"; src = grc.src; }
                 { name = "tide"; src = tide.src; }
             ];
+        };
+        nushell = {
+            enable = true;
+
+            # unstable, perhaps 25.05
+            # plugins = with pkgs.nushellPlugins; [
+            #     query
+            #     skim
+            #     net
+            #     highlight
+            #     gstat
+            #     formats
+            #     dbus
+            #     units
+            # ];
+            # configFile.source = ./.config/nushell/base-config.nu;
+            configFile.text = ''use base-config.nu'';
+            shellAliases = {
+                ns = "nix-shell --run nushell";
+                nsp = "nix-shell --run nushell -p";
+            };
         };
         vscode = {
             enable = true;
