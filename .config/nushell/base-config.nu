@@ -811,4 +811,18 @@ export-env {
 
     print ""
     print (fastfetch --pipe false)
+
+    alias l = lsd -l
+    alias g = git
+    alias gp = git push
+    alias gs = git status
+    alias pr = pnpm run
+    alias prd = pnpm run dev
+    alias prb = pnpm run build
+    alias prt = pnpm run test
+    alias p = pnpm
+    alias pi = pnpm install
+    alias c = code .
+    alias ns = nix-shell --run nu
+    alias nsp = nix-shell --run nu -p
 }
