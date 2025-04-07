@@ -186,6 +186,10 @@ in
             oh-my-posh
 
             libva-utils
+            atuin
+            jc
+            lsof
+            carapace
 
             # (python312.withPackages (ps: with ps; [ 
             #     pyquery
