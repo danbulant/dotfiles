@@ -815,6 +815,7 @@ use sockets.nu
 use jc.nu
 
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
+$env.RUSTC_WRAPPER = (which sccache)
 source ../carapace/init.nu
 
 print ""
@@ -835,3 +836,4 @@ alias pi = pnpm install
 alias c = code .
 alias ns = nix-shell --run nu
 alias nsp = nix-shell --run nu -p
+alias la = ls -la

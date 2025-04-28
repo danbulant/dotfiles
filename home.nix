@@ -1,9 +1,12 @@
-{ nix-gaming, nixpkgs-unstable, suyu, hyprland-plugins, hyprland, ... }:
+{ nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins, hyprland, ... }:
 { pkgs, inputs, ...}:
 let
 
-  unstable = import inputs.nixpkgs-unstable {
+  unstable = import nixpkgs-unstable {
     system = pkgs.system;
+    config = {
+	allowUnfree = true;
+    };
   };
 
 in
@@ -13,6 +16,11 @@ in
 
         packages = with pkgs; [
 #            davinci-resolve # builds spidermonkey for some reason bruh
+#	    robot3t
+	   nixpkgs-unstable.legacyPackages.${system}.jet-pilot
+	   k9s
+	   
+	    syncthingtray
 	        anki-bin
             xournalpp
             simple-scan
@@ -70,6 +78,7 @@ in
             nwg-displays
             wireguard-tools
             mongodb-compass
+            mongo-tools
             hashcat
             tldr
             dunst
@@ -148,6 +157,8 @@ in
             qpwgraph
 
             nixpkgs-unstable.legacyPackages.${system}.zed-editor
+            nixpkgs-unstable.legacyPackages.${system}.pineflash
+            unstable.nosql-booster
             # suyu.packages.${pkgs.stdenv.hostPlatform.system}.suyu
 
             android-tools
@@ -321,4 +332,5 @@ in
             "x-scheme-handler/unknown" = "firefox.desktop";
         };
     };
+    
 }

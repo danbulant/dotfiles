@@ -121,6 +121,7 @@
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   programs.wireshark.enable = true;
+  programs.partition-manager.enable = true;
   time.hardwareClockInLocalTime = true;
 
   users.users.dan = {
@@ -156,7 +157,7 @@
   # Comment out below for the first time to avoid cache miss, if using flake
   programs.hyprland = {
     enable = true;
-    # package = hyprland.packages.${pkgs.system}.hyprland;
+    package = hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
     #  {
     #     inherit (pkgs) mesa;
@@ -197,6 +198,7 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = false;
+    enableNvidia = true;
   };
   hardware.nvidia-container-toolkit.enable = true;
   services.avahi.enable = true;
@@ -267,7 +269,6 @@
     nvtopPackages.full
     btop
     lshw
-    nvidia-docker
   ];
 
   nixpkgs.config.allowUnfree = true;
