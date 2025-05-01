@@ -11,6 +11,10 @@
       # inputs.hyprland.follows = "hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dolphin-overlay = {
+      url = "github:rumboon/dolphin-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 #    suyu = {
 #      url = "git+https://git.suyu.dev/suyu/nix-flake";
 #      inputs.nixpkgs.follows = "nixpkgs";
@@ -26,11 +30,14 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, hyprland-plugins, hyprland, home-manager, nixpkgs-unstable, nix-gaming,/* suyu, */nix-index-database, ... }@attrs: {
+  outputs = { nixpkgs, dolphin-overlay, hyprland-plugins, hyprland, home-manager, nixpkgs-unstable, nix-gaming,/* suyu, */nix-index-database, ... }@attrs: {
     nixosConfigurations.lenovo-nix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
       modules = [
+        {
+          nixpkgs.overlays = [ dolphin-overlay.overlays.default ];
+        }
         # ./obs.nix # doesn't work. Use nix-shell -p obs-studio instead
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;

@@ -78,7 +78,7 @@ in
             nwg-displays
             wireguard-tools
             mongodb-compass
-            mongo-tools
+            unstable.mongodb-tools
             hashcat
             tldr
             dunst
@@ -87,7 +87,6 @@ in
             wl-clipboard
             nextcloud-client
             kdePackages.plasma-workspace
-            kdePackages.partitionmanager
             kdePackages.filelight
             kdePackages.kate
             kdePackages.ksystemstats
@@ -112,6 +111,7 @@ in
             heaptrack
             cinny-desktop
             gping
+            gparted
             # redisinsight
             valgrind
             caddy

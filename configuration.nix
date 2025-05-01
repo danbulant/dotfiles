@@ -157,7 +157,7 @@
   # Comment out below for the first time to avoid cache miss, if using flake
   programs.hyprland = {
     enable = true;
-    package = hyprland.packages.${pkgs.system}.hyprland;
+#    package = hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
     #  {
     #     inherit (pkgs) mesa;
@@ -269,6 +269,7 @@
     nvtopPackages.full
     btop
     lshw
+    hyprpolkitagent
   ];
 
   nixpkgs.config.allowUnfree = true;
