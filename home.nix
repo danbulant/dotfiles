@@ -19,7 +19,9 @@ in
 #	    robot3t
 	   nixpkgs-unstable.legacyPackages.${system}.jet-pilot
 	   k9s
-	   
+prismlauncher
+helix
+	   rawtherapee
 	    syncthingtray
 	        anki-bin
             xournalpp
@@ -106,6 +108,7 @@ in
             udev-block-notify
 
             appimage-run
+            mpv
 
             heroic
             heaptrack
