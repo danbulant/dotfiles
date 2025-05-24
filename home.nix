@@ -17,13 +17,15 @@ in
         packages = with pkgs; [
 #            davinci-resolve # builds spidermonkey for some reason bruh
 #	    robot3t
-	   nixpkgs-unstable.legacyPackages.${system}.jet-pilot
-	   k9s
-prismlauncher
-helix
-	   rawtherapee
-	    syncthingtray
-	        anki-bin
+            # nebula
+            nixpkgs-unstable.legacyPackages.${system}.jet-pilot
+            k9s
+            prismlauncher
+            helix
+            lf
+            rawtherapee
+            syncthingtray
+            anki-bin
             xournalpp
             simple-scan
             dotnet-sdk

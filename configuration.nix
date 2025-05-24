@@ -1,3 +1,4 @@
+
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
@@ -33,6 +34,7 @@
     "dotnet-runtime-6.0.36"
     "dotnet-sdk-wrapped-6.0.428"
     "dotnet-sdk-6.0.428"
+    "electron-33.4.11"
   ];
 
 
@@ -198,7 +200,7 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = false;
-    enableNvidia = true;
+#    enableNvidia = true;
   };
   hardware.nvidia-container-toolkit.enable = true;
   services.avahi.enable = true;
