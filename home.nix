@@ -17,7 +17,7 @@ in
         packages = with pkgs; [
 #            davinci-resolve # builds spidermonkey for some reason bruh
 #	    robot3t
-            # nebula
+            nebula
             nixpkgs-unstable.legacyPackages.${system}.jet-pilot
             k9s
             prismlauncher
