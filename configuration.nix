@@ -3,7 +3,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, hyprland, options, hyprland-plugins, nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+{ config, pkgs, /*hyprland,*/ options, /*hyprland-plugins, nixpkgs-unstable,*/ lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
 # let
   # unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
@@ -120,6 +120,7 @@
   services.localtimed.enable = true;
   services.lorri.enable = true;
   services.blueman.enable = true;
+  qt.enable = true;
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   programs.wireshark.enable = true;
@@ -320,15 +321,17 @@
     57621 # Spotify app discovery
     42000
     42001
+    1716 # kdeconnect
   ];
   networking.firewall.allowedUDPPorts = [
     5353 # Google cast discovery
     42000 # warpinator
     42001 # warpinator 
     67 68 # dhcp
+    1716 # kdeconnect
   ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  networking.firewall.enable = false;
 
   services.udev.extraRules = ''
   # Wooting One Legacy

@@ -1,4 +1,4 @@
-{ nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins, hyprland, ... }:
+{ nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins/*, hyprland*/, ... }:
 { pkgs, inputs, ...}:
 let
 
@@ -15,8 +15,8 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
-#            davinci-resolve # builds spidermonkey for some reason bruh
-#	    robot3t
+            unstable.quickshell
+            minikube
             nebula
             nixpkgs-unstable.legacyPackages.${system}.jet-pilot
             k9s
@@ -28,17 +28,12 @@ in
             anki-bin
             xournalpp
             simple-scan
-            dotnet-sdk
-            # acpilight
-            #kdePackages.plasma-workspace
             godot_4
             rar
             wootility
             surrealdb
-            #surrealist
             pico-sdk
             elf2uf2-rs
-            # nix-gaming.packages.${pkgs.system}.osu-lazer-bin
             obsidian
             betaflight-configurator
             home-manager
@@ -50,7 +45,8 @@ in
             inter
             fira
             fira-code
-            fira-code-nerdfont
+            # fira-code-nerdfont
+            nerd-fonts.fira-code
             iosevka
             kitty
             rofi-wayland
@@ -61,7 +57,6 @@ in
             meslo-lgs-nf
             waybar
             chromium
-            # firefox
             dunst
             sccache
             swaybg
@@ -70,12 +65,8 @@ in
             kubectl
             duf
             dust
-            jetbrains.rust-rover
             jetbrains.webstorm
-            jetbrains.phpstorm
-            jetbrains.pycharm-community-bin
             jetbrains.clion
-            jetbrains.goland
             jetbrains.datagrip
             jetbrains.rider
             datovka
@@ -97,7 +88,7 @@ in
             kdePackages.kinfocenter
             kdePackages.kirigami-addons
             kdePackages.ark
-            #xorg.xbacklight
+            kdePackages.qtdeclarative
             cachix
             playerctl
             libcanberra-gtk3 # sound events
@@ -117,7 +108,6 @@ in
             cinny-desktop
             gping
             gparted
-            # redisinsight
             valgrind
             caddy
             jq
@@ -127,14 +117,12 @@ in
             erlang
             terraform
             nodejs
-            # nodePackages.pnpm
             corepack
             ansible
             aria2
             qbittorrent
             audacity
             bettercap
-            # bitwarden
             duperemove
             ffmpeg
             flameshot
@@ -147,8 +135,6 @@ in
             nheko
             quickemu
             qemu
-            # uwufetch
-            # vagrant
             socat
             websocat
             whois
@@ -164,7 +150,6 @@ in
             nixpkgs-unstable.legacyPackages.${system}.zed-editor
             nixpkgs-unstable.legacyPackages.${system}.pineflash
             unstable.nosql-booster
-            # suyu.packages.${pkgs.stdenv.hostPlatform.system}.suyu
 
             android-tools
             hyperfine
@@ -206,13 +191,6 @@ in
             jc
             lsof
             carapace
-
-            # (python312.withPackages (ps: with ps; [ 
-            #     pyquery
-            #     pygobject3
-            # ]))
-            # pipx
-            # gobject-introspection
 
             crate2nix
         ];
