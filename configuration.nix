@@ -82,7 +82,7 @@ in
     LC_NUMERIC = "cs_CZ.UTF-8";
     LC_PAPER = "cs_CZ.UTF-8";
     LC_TELEPHONE = "cs_CZ.UTF-8";
-    LC_TIME = "cs_CZ.UTF-8";
+    LC_TIME = "en_GB.UTF-8";
   };
   services.dnsmasq.enable = true;
   services.displayManager.sddm.enable = true;
@@ -284,6 +284,26 @@ in
     libsForQt5.kcoreaddons
     libsForQt5.kirigami2
     kdePackages.syntax-highlighting
+
+    (python313.withPackages(ps: with ps; [
+      build
+      pillow
+      cffi
+      libsass
+      material-color-utilities
+      materialyoucolor
+      numpy
+      packaging
+      pillow
+      psutil
+      pycparser
+      pyproject-hooks
+      pywayland
+      setproctitle
+      setuptools
+      setuptools-scm
+      wheel
+    ]))
   ];
 
   environment.variables =  let

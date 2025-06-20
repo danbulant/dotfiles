@@ -10,12 +10,12 @@ Singleton {
     }
 
     property QtObject ai: QtObject {
-        property string systemPrompt: qsTr("Use casual tone. No user knowledge is to be assumed except basic Linux literacy. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. You are also encouraged to split your response with h2 headers, each header title beginning with an emoji, like `## 🐧 Linux`. When making changes to the user's config, you must get the config to know what values there are before setting.")
+        property string systemPrompt: qsTr("Use casual tone. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. User uses NixOS and is knowledgable in rust and web development.")
     }
 
     property QtObject appearance: QtObject {
-        property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
-        property bool transparency: false
+        property int fakeScreenRounding: 0 // 0: None | 1: Always | 2: When not fullscreen
+        property bool transparency: true
         property QtObject palette: QtObject {
             property string type: "auto" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
         }
@@ -46,25 +46,25 @@ Singleton {
     property QtObject bar: QtObject {
         property bool bottom: false // Instead of top
         property bool borderless: false // true for no grouping of items
-        property string topLeftIcon: "spark" // Options: distro, spark
-        property bool showBackground: true
+        property string topLeftIcon: "distro" // Options: distro, spark
+        property bool showBackground: false
         property bool verbose: true
         property QtObject resources: QtObject {
             property bool alwaysShowSwap: true
-            property bool alwaysShowCpu: false
+            property bool alwaysShowCpu: true
         }
         property list<string> screenList: [] // List of names, like "eDP-1", find out with 'hyprctl monitors' command
         property QtObject utilButtons: QtObject {
             property bool showScreenSnip: true
-            property bool showColorPicker: false
-            property bool showMicToggle: false
-            property bool showKeyboardToggle: true
+            property bool showColorPicker: true
+            property bool showMicToggle: true
+            property bool showKeyboardToggle: false
         }
         property QtObject tray: QtObject {
             property bool monochromeIcons: true
         }
         property QtObject workspaces: QtObject {
-            property int shown: 10
+            property int shown: 9
             property bool showAppIcons: true
             property bool alwaysShowNumbers: false
             property int showNumberDelay: 300 // milliseconds
@@ -137,7 +137,7 @@ Singleton {
             property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
         }
         property QtObject booru: QtObject {
-            property bool allowNsfw: false
+            property bool allowNsfw: true
             property string defaultProvider: "yandere"
             property int limit: 20
             property QtObject zerochan: QtObject {
@@ -149,7 +149,7 @@ Singleton {
     property QtObject time: QtObject {
         // https://doc.qt.io/qt-6/qtime.html#toString
         property string format: "hh:mm"
-        property string dateFormat: "dddd, dd/MM"
+        property string dateFormat: "ddd, dd/MM"
     }
 
     property QtObject windows: QtObject {

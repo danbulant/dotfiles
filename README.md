@@ -4,6 +4,8 @@ My dotfiles and nix setup incl. scripts for hyprland and some other goodies.
 
 Please do edit configuration of at least hyprland - default configuration is very specific to my setup (involves monitor scaling)
 
+Quickshell config based on (end-4's config)[https://github.com/end-4/dots-hyprland], you'll have a better time configuring them (gui settings for non-nix users).
+
 ## Screenshots
 
 ![](./screenshots/kitty.png)

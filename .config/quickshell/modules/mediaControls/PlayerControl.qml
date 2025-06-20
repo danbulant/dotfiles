@@ -64,13 +64,13 @@ Item { // Player instance
     }
 
     onArtUrlChanged: {
+        playerController.downloaded = false
         if (playerController.artUrl.length == 0) {
             playerController.artDominantColor = Appearance.m3colors.m3secondaryContainer
             return;
         }
         // console.log("PlayerControl: Art URL changed to", playerController.artUrl)
         // console.log("Download cmd:", coverArtDownloader.command.join(" "))
-        playerController.downloaded = false
         coverArtDownloader.running = true
     }
 

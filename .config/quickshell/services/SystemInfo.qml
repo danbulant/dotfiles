@@ -59,6 +59,7 @@ Singleton {
                 case "arch": distroIcon = "arch-symbolic"; break;
                 case "endeavouros": distroIcon = "endeavouros-symbolic"; break;
                 case "cachyos": distroIcon = "cachyos-symbolic"; break;
+                case "nix-snowflake":
                 case "nixos": distroIcon = "nixos-symbolic"; break;
                 case "fedora": distroIcon = "fedora-symbolic"; break;
                 case "linuxmint":

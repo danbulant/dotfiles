@@ -45,17 +45,17 @@ post_process() {
     local screen_height="$2"
     local wallpaper_path="$3"
 
-    handle_kde_material_you_colors &
+    # handle_kde_material_you_colors &
 
     # Determine the largest region on the wallpaper that's sufficiently un-busy to put widgets in
-    if [ ! -f "$MATUGEN_DIR/scripts/least_busy_region.py" ]; then
-        echo "Error: least_busy_region.py script not found in $MATUGEN_DIR/scripts/"
-    else
-        "$MATUGEN_DIR/scripts/least_busy_region.py" \
-            --screen-width "$screen_width" --screen-height "$screen_height" \
-            --width 300 --height 200 \
-            "$wallpaper_path" > "$STATE_DIR"/user/generated/wallpaper/least_busy_region.json
-    fi
+    # if [ ! -f "$MATUGEN_DIR/scripts/least_busy_region.py" ]; then
+    #     echo "Error: least_busy_region.py script not found in $MATUGEN_DIR/scripts/"
+    # else
+    #     "$MATUGEN_DIR/scripts/least_busy_region.py" \
+    #         --screen-width "$screen_width" --screen-height "$screen_height" \
+    #         --width 300 --height 200 \
+    #         "$wallpaper_path" > "$STATE_DIR"/user/generated/wallpaper/least_busy_region.json
+    # fi
 }
 
 check_and_prompt_upscale() {
@@ -162,7 +162,7 @@ switch() {
             exit 0
         fi
 
-        check_and_prompt_upscale "$imgpath" &
+        # check_and_prompt_upscale "$imgpath" &
         kill_existing_mpvpaper
 
         if is_video "$imgpath"; then
@@ -242,11 +242,11 @@ switch() {
     pre_process "$mode_flag"
 
     matugen "${matugen_args[@]}"
-    source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
+    # source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
     python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
         > "$STATE_DIR"/user/generated/material_colors.scss
     "$SCRIPT_DIR"/applycolor.sh
-    deactivate
+    # deactivate
 
     # Pass screen width, height, and wallpaper path to post_process
     max_width_desired="$(hyprctl monitors -j | jq '([.[].width] | min)' | xargs)"
@@ -333,6 +333,8 @@ main() {
         cd "$(xdg-user-dir PICTURES)/Wallpapers" 2>/dev/null || cd "$(xdg-user-dir PICTURES)" || return 1
         imgpath="$(kdialog --getopenfilename . --title 'Choose wallpaper')"
     fi
+
+    type_flag="scheme-tonal-spot"
 
     # If type_flag is 'auto', detect scheme type from image (after imgpath is set)
     if [[ "$type_flag" == "auto" ]]; then

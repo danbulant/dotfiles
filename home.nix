@@ -26,6 +26,16 @@ in
             hyprwayland-scanner
             hyprcursor
             material-symbols
+            cava
+            cliphist
+            matugen
+            swww
+            kdePackages.fcitx5-with-addons
+            easyeffects
+            mpvpaper
+            uv
+            hyprshot
+            libsecret
             
             # cloud things
             minikube
