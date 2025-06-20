@@ -11,7 +11,8 @@ Scope {
     property font customFont: Qt.font({
         bold: true,
         pointSize: 12,
-        family: "FantasqueSansMNerdFont"
+        // forgot which font I'm actually using, this yields some fallback that works well.
+        family: "NF"
     })
 
     Variants {
@@ -34,8 +35,8 @@ Scope {
                 right: 10
             }
 
-            height: 50
-            color: "#171a18"
+            implicitHeight: 50
+            color: "#15121b"
 
             RowLayout {
                 spacing: 15
@@ -54,8 +55,8 @@ Scope {
 
                 HyprlandWorkspacesWidget {
                     font: customFont
-                    default_color: "#689D6A"
-                    active_color: "#8ec07c"
+                    default_color: "#cdd6f4"
+                    active_color: "#ebbcba"
                     empty_color: "#928374"
                     spacing: 15
                 }

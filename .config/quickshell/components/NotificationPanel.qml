@@ -10,8 +10,8 @@ PanelWindow {
     required property color text_color
     property list<QtObject> notification_objects
 
-    width: 500
-    height: 600
+    implicitWidth: 500
+    implicitHeight: 600
 
     color: "#171a18"
 
