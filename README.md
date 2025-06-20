@@ -40,6 +40,10 @@ For base setup, only `hyprland`, `rofi`, `waybar` and `swaylock`/`swaylock-effec
 Run `sync-nix.sh`, it will copy configurations and run nixos-rebuild.
 If you don't want to build hyprland yourself and instead use cache, comment out programs.hyprland in configuration first, sync, then un-comment it and sync again.
 
+`upgrade-nix.sh` updates lockfile (`pacman -Syu` / `apt update && apt upgrade` equivalent) and syncs.  
+`fast-copy.sh` just copies configuration files without touching nix / system packages and configuration.  
+`remove-old-nix.sh` removes old generations and runs nix gc to save disk space.
+
 ### Lock screen
 
 Lock screen doesn't show what you type, it just changes it's circle for each character. If you delete all the input, it will show "cleared". Escape clears input.  

@@ -15,11 +15,24 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            # required by quickshell config
             unstable.quickshell
+            wlogout
+            fuzzel
+            translate-shell
+            hyprpicker
+            hypridle
+            hyprland-qtutils
+            hyprwayland-scanner
+            hyprcursor
+            material-symbols
+            
+            # cloud things
             minikube
             nebula
             nixpkgs-unstable.legacyPackages.${system}.jet-pilot
             k9s
+
             prismlauncher
             helix
             lf
@@ -251,9 +264,9 @@ in
             enable = true;
             # package = nixpkgs-unstable.packages.${pkgs.system}.vscode;
             # package = unstable.pkgs.vscode;
-            extensions = with pkgs.vscode-extensions; [
+            # extensions = with pkgs.vscode-extensions; [
 
-            ];
+            # ];
         };
         # nixvim = {
         #     enable = true;

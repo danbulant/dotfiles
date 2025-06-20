@@ -3,11 +3,11 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, /*hyprland,*/ options, /*hyprland-plugins, nixpkgs-unstable,*/ lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
-# let
-  # unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
+{ config, pkgs, /*hyprland,*/ options, /*hyprland-plugins, */nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+let
+  unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
-# in
+in
 {
   imports =
     [
@@ -102,7 +102,7 @@
   services.printing.enable = true;
   hardware.sane.enable = true;
   hardware.acpilight.enable = true;
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -273,7 +273,31 @@
     btop
     lshw
     hyprpolkitagent
+
+    # required for quickshell config; needs to be here for them to be included in import/plugin path
+    kdePackages.qt5compat
+    kdePackages.qtdeclarative
+    kdePackages.kirigami
+    kdePackages.kirigami-addons
+    kdePackages.kirigami-addons.dev
+    libsForQt5.appstream-qt
+    libsForQt5.kcoreaddons
+    libsForQt5.kirigami2
+    kdePackages.syntax-highlighting
   ];
+
+  environment.variables =  let
+        qtVersions = with pkgs; [
+          qt5
+          qt6
+        ];
+      in
+      {
+        QT_PLUGIN_PATH = map (qt: "/${qt.qtbase.qtPluginPrefix}") qtVersions;
+        QML2_IMPORT_PATH = map (qt: "/${qt.qtbase.qtQmlPrefix}") qtVersions ++ (with unstable-pkgs; [
+          "${quickshell}/lib/qt-6/qml/"
+        ]);
+      };
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
