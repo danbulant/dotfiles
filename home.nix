@@ -36,6 +36,10 @@ in
             uv
             hyprshot
             libsecret
+            hyprls
+            ddcutil
+            brightnessctl
+            libqalculate
             
             # cloud things
             minikube
