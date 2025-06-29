@@ -25,13 +25,14 @@ Item { // Wrapper
     property string mathResult: ""
 
     function disableExpandAnimation() {
-        searchWidthBehavior.enabled = false;
+        searchWidthBehavior.enabled = false
     }
 
     function cancelSearch() {
-        searchInput.selectAll()
+        // searchInput.selectAll()
+        searchInput.text = ""
         root.searchingText = ""
-        searchWidthBehavior.enabled = true; 
+        searchWidthBehavior.enabled = true
     }
 
     function setSearchingText(text) {
@@ -208,7 +209,7 @@ Item { // Wrapper
                 TextField { // Search box
                     id: searchInput
 
-                    focus: GlobalStates.overviewOpen
+                    focus: GlobalStates.overviewSearchOpen
                     Layout.rightMargin: 15
                     padding: 15
                     renderType: Text.NativeRendering

@@ -112,7 +112,7 @@ Item {
                                 onClicked: {
                                     if (root.draggingTargetWorkspace === -1) {
                                         // Hyprland.dispatch(`exec qs ipc call overview close`)
-                                        GlobalStates.overviewOpen = false
+                                        GlobalStates.overviewWindowsOpen = false
                                         Hyprland.dispatch(`workspace ${workspaceValue}`)
                                     }
                                 }
@@ -225,7 +225,7 @@ Item {
                             if (!windowData) return;
 
                             if (event.button === Qt.LeftButton) {
-                                GlobalStates.overviewOpen = false
+                                GlobalStates.overviewWindowsOpen = false
                                 Hyprland.dispatch(`focuswindow address:${windowData.address}`)
                                 event.accepted = true
                             } else if (event.button === Qt.MiddleButton) {

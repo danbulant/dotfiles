@@ -10,9 +10,11 @@ Singleton {
     id: root
     property bool sidebarLeftOpen: false
     property bool sidebarRightOpen: false
-    property bool overviewOpen: false
+    property bool overviewWindowsOpen: false
+    property bool overviewSearchOpen: false
     property bool workspaceShowNumbers: false
     property bool superReleaseMightTrigger: true
+    property bool dontAutoCancelSearch: false
 
     // When user is not reluctant while pressing super, they probably don't need to see workspace numbers
     onSuperReleaseMightTriggerChanged: { 
