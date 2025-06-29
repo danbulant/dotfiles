@@ -15,6 +15,8 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            lenovo-legion
+            burpsuite
             # required by quickshell config
             unstable.quickshell
             wlogout

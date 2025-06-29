@@ -249,6 +249,7 @@ in
     # OBS Studio virtual camera
     extraModulePackages = with config.boot.kernelPackages; [
       v4l2loopback
+      lenovo-legion-module
     ];
     extraModprobeConfig = ''
       options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
@@ -273,6 +274,9 @@ in
     btop
     lshw
     hyprpolkitagent
+
+    lenovo-legion
+
 
     # required for quickshell config; needs to be here for them to be included in import/plugin path
     kdePackages.qt5compat
@@ -303,6 +307,8 @@ in
       setuptools
       setuptools-scm
       wheel
+
+      pwntools
     ]))
   ];
 
@@ -335,7 +341,7 @@ in
     ];
   };
 
-  boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
+  boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" "lenovo-legion-module"];
   hardware.nvidia = {
     open = false;
     modesetting.enable = true;
