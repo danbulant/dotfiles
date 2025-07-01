@@ -86,7 +86,6 @@ import Quickshell.Hyprland
 
         ColumnLayout {
             id: columnLayout
-            visible: GlobalStates.overviewSearchOpen
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: !ConfigOptions.bar.bottom ? parent.top : undefined

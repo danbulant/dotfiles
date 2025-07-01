@@ -17,6 +17,8 @@ in
         packages = with pkgs; [
             lenovo-legion
             burpsuite
+            zap
+            helm
             # required by quickshell config
             unstable.quickshell
             wlogout

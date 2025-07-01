@@ -124,13 +124,14 @@ in
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   programs.wireshark.enable = true;
+  programs.adb.enable = true;
   programs.partition-manager.enable = true;
   time.hardwareClockInLocalTime = true;
 
   users.users.dan = {
     isNormalUser = true;
     description = "John";
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp"];
+    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp" "kvm" "adbusers"];
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
