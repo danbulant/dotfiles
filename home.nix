@@ -18,7 +18,7 @@ in
             lenovo-legion
             burpsuite
             zap
-            helm
+            kubernetes-helm
             # required by quickshell config
             unstable.quickshell
             wlogout
