@@ -135,7 +135,6 @@ in
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
-      zen-browser.packages."${system}".specific
     ];
   };
   nix.settings.trusted-users = [ "root" "@wheel" "dan" ];

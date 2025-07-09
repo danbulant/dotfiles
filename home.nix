@@ -1,4 +1,4 @@
-{ nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins/*, hyprland*/, ... }:
+{ zen-browser, nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins/*, hyprland*/, ... }:
 { pkgs, inputs, ...}:
 let
 
@@ -11,6 +11,9 @@ let
 
 in
 {
+    imports = [
+      zen-browser.homeModules.beta
+    ];
     home = {
         stateVersion = "24.05";
 
@@ -246,6 +249,7 @@ in
         };
     };
     programs = {
+        zen-browser.enable = true;
         fish = {
             enable = true;
             shellInit = ''
