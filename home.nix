@@ -5,7 +5,7 @@ let
   unstable = import nixpkgs-unstable {
     system = pkgs.system;
     config = {
-	allowUnfree = true;
+	    allowUnfree = true;
     };
   };
 
@@ -55,7 +55,6 @@ in
             k9s
 
             prismlauncher
-            helix
             lf
             rawtherapee
             syncthingtray
