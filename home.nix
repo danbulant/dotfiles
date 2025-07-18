@@ -98,10 +98,10 @@ in
             kubectl
             duf
             dust
-            jetbrains.webstorm
-            jetbrains.clion
+            #jetbrains.webstorm
+            #jetbrains.clion
             jetbrains.datagrip
-            jetbrains.rider
+            #jetbrains.rider
             datovka
             nwg-displays
             wireguard-tools
