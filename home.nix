@@ -18,6 +18,7 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            metasploit
             lenovo-legion
             burpsuite
             zap
