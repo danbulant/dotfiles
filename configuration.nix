@@ -416,6 +416,7 @@ in
     enable = true;
     openDefaultPorts = true;
   };
+  services.lldpd.enable = true;
   systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
 
