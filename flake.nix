@@ -33,7 +33,6 @@
         {
           nixpkgs.overlays = [ dolphin-overlay.overlays.default ];
         }
-        # ./obs.nix # doesn't work. Use nix-shell -p obs-studio instead
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
@@ -45,5 +44,13 @@
         { programs.nix-index-database.comma.enable = true; }
       ];
     };
+
+    nixosConfigurations.eisen = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = attrs;
+      modules = [
+        ./servers/eisen/configuration.nix
+      ]
+    }
   };
 }
