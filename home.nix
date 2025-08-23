@@ -18,11 +18,14 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            usbimager
+            bitwarden-desktop
             metasploit
             lenovo-legion
             burpsuite
             zap
             kubernetes-helm
+
             # required by quickshell config
             unstable.quickshell
             wlogout
@@ -254,12 +257,7 @@ in
             enable = true;
             shellInit = ''
                 source ~/.config/fish/config-old.fish
-
             '';
-            # set -x PRISMA_SCHEMA_ENGINE_BINARY "${prisma-engines}/bin/schema-engine"
-            # set -x PRISMA_QUERY_ENGINE_BINARY "${prisma-engines}/bin/query-engine"
-            # set -x PRISMA_QUERY_ENGINE_LIBRARY "${prisma-engines}/lib/libquery_engine.node"
-            # set -x PRISMA_FMT_BINARY "${prisma-engines}/bin/prisma-fmt"
             plugins = with pkgs.fishPlugins; [
                 { name = "grc"; src = grc.src; }
                 { name = "tide"; src = tide.src; }
@@ -290,25 +288,6 @@ in
 
             # ];
         };
-        # nixvim = {
-        #     enable = true;
-        #     # colorscheme = "hanekawa_tsubasa";w
-        #     colorschemes.onedark.enable = true;
-        #     plugins = {
-        #         wakatime.enable = true;
-        #         cmp = {
-        #             autoEnableSources = true;
-        #             enable = true;
-        #             settings.sources = [
-        #                 { name = "fish"; }
-        #                 { name = "nvim_lsp"; }
-        #                 { name = "path"; }
-        #                 { name = "buffer"; }
-        #                 # { name = "treesitter"; }
-        #             ];
-        #         };
-        #     };
-        # };
         git = {
             enable = true;
             userName  = "Daniel Bulant";
@@ -333,7 +312,6 @@ in
         fastfetch.enable = true;
         direnv.enable = true;
         direnv.nix-direnv.enable = true;
-        # firefox.enable = true;
     };
     services.kdeconnect.enable = true;
     services.kdeconnect.indicator = true;

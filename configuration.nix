@@ -42,6 +42,9 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   boot.supportedFilesystems = [ "ntfs" ];
 
+  nix.daemonCPUSchedPolicy = "idle";
+  nix.daemonIOSchedClass = "idle";
+
   fileSystems."/media/New BTRFS" = {
     device = "/dev/disk/by-uuid/26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
     fsType = "btrfs";
@@ -55,16 +58,16 @@ in
     fsType = "ntfs";
   };
 
-  services.beesd.filesystems = {
-    root = {
-      spec = "UUID=26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
-      hashTableSizeMB = 1024;
-      extraOptions = [
-        "-c" "4"
-        "-g" "10"
-      ];
-    };
-  };
+  # services.beesd.filesystems = {
+  #   root = {
+  #     spec = "UUID=26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
+  #     hashTableSizeMB = 1024;
+  #     extraOptions = [
+  #       "-c" "4"
+  #       "-g" "10"
+  #     ];
+  #   };
+  # };
 
   networking.hostName = "lenovo-nix";
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -72,6 +75,7 @@ in
   networking.nameservers = ["1.1.1.1"];
 
   networking.networkmanager.enable = true;
+  networking.networkmanager.plugins = with pkgs; [networkmanager-openconnect];
   time.timeZone = lib.mkForce "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
@@ -362,8 +366,8 @@ in
     settings = {
       INTERNET_IFACE = "eno1";
       WIFI_IFACE = "wlp4s0";
-      SSID = "nixos";
-      PASSPHRASE = "12345678";
+      SSID = "nixos.create_ap.enable";
+      PASSPHRASE = "";
     };
   };
 
