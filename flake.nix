@@ -50,7 +50,7 @@
       specialArgs = attrs;
       modules = [
         ./servers/eisen/configuration.nix
-      ]
-    }
+      ];
+    };
   };
 }
