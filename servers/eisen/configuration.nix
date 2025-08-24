@@ -1,5 +1,5 @@
 
-{ config, pkgs, /*hyprland,*/ options, /*hyprland-plugins, */nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+{ config, pkgs,nixpkgs-unstable, lib, nixos-hardware, ... }:
 let
   unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
@@ -7,16 +7,7 @@ in
 {
   imports =
     [
-      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
-      # nixos-hardware.nixosModules.common-cpu-amd
-      # nixos-hardware.nixosModules.common-cpu-amd-pstate
-      # nixos-hardware.nixosModules.common-cpu-amd-zenpower
-      # nixos-hardware.nixosModules.common-gpu-amd
-      # nixos-hardware.nixosModules.common-gpu-nvidia
-      # nixos-hardware.nixosModules.common-pc-laptop
-      # nixos-hardware.nixosModules.common-pc-laptop-ssd
       ./hardware-configuration.nix
-      # /etc/nixos/cachix.nix
     ];
 
   nix.daemonCPUSchedPolicy = "idle";
@@ -85,7 +76,7 @@ in
     loader = {
       # systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
-      timeout = 0;
+      # timeout = 0;
       grub.enable = true;
       grub.device = "nodev";
       grub.efiSupport = true;
