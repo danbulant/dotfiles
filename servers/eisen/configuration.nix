@@ -19,9 +19,6 @@ in
       # /etc/nixos/cachix.nix
     ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
@@ -84,8 +81,16 @@ in
     swraid.enable = false;
 
     initrd.systemd.enable = true;
+
+    loader = {
+      # systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+      timeout = 0;
+      grub.enable = true;
+      grub.device = "nodev";
+      grub.efiSupport = true;
+    };
   };
-  boot.loader.timeout = 0;
 
   users.users.dan = {
     isNormalUser = true;
