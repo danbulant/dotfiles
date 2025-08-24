@@ -35,7 +35,7 @@ in
     enable = true;
     enableOnBoot = false;
   };
-  hardware.nvidia-container-toolkit.enable = true;
+  # hardware.nvidia-container-toolkit.enable = true;
   services.avahi.enable = true;
 
   services.syncthing = {
@@ -57,12 +57,12 @@ in
     kernel.sysctl."kernel.sysrq" = 1;
 
     kernelParams = [
-        "nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
         "initcall_blacklist=sysfb_init"
-        "quiet"
-        "splash"
         "boot.shell_on_fail"
         "loglevel=3"
+        "console=tty1"
+        "console=ttyS0"
+        "nomodeset"
         "rd.systemd.show_status=false"
         "rd.udev.log_level=3"
         "udev.log_priority=3"
@@ -74,12 +74,12 @@ in
     initrd.systemd.enable = true;
 
     loader = {
-      # systemd-boot.enable = true;
+      systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
       # timeout = 0;
-      grub.enable = true;
-      grub.device = "nodev";
-      grub.efiSupport = true;
+      # grub.enable = true;
+      # grub.device = "nodev";
+      # grub.efiSupport = true;
     };
   };
 
