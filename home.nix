@@ -1,4 +1,4 @@
-{ zen-browser, nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins/*, hyprland*/, ... }:
+{ colmena, zen-browser, nix-gaming, nixpkgs-unstable,/* suyu, */hyprland-plugins/*, hyprland*/, ... }:
 { pkgs, inputs, ...}:
 let
 
@@ -18,6 +18,7 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            colmena.defaultPackage.${system}
             usbimager
             bitwarden-desktop
             metasploit

@@ -1,10 +1,10 @@
 
-{ config, pkgs,nixpkgs-unstable, lib, nixos-hardware, ... }:
-let
-  unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
-  # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
-in
+{ config, pkgs, lib, name ? "eisen", ... }:
 {
+  deployment = {
+    buildOnTarget = true;
+  };
+
   imports = [
     ./hardware-configuration.nix
   ];
@@ -15,7 +15,7 @@ in
   };
 
   networking = {
-    hostName = "eisen";
+    hostName = name;
     nameservers = ["1.1.1.1"];
     networkmanager.enable = true;
   };
@@ -31,6 +31,8 @@ in
   };
 
   services = {
+    logind.lidSwitchExternalPower = "ignore";
+    
     localtimed.enable = true;
     openssh.enable = true;
     tailscale = {
@@ -45,6 +47,8 @@ in
       enable = true;
       openDefaultPorts = true;
     };
+
+
   };
   systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
@@ -96,6 +100,20 @@ in
     nvtopPackages.full
     btop
     lshw
+    bat
+    lsd
+    fastfetch
+    fish
+    nix-output-monitor
+    nh
+    duf
+    dust
+    cachix
+    qemu
+    ffmpeg
+    httpie
+    socat
+    websocat
   ];
 
   nixpkgs.config.allowUnfree = true;

@@ -24,6 +24,12 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
+  fileSystems."/media/large" = {
+    device = "/dev/disk/by-label/large";
+    fsType = "btrfs";
+    options = [ "subvol=@" "nofail" "exec" "users" ];
+  };
+
   swapDevices =
     [ { device = "/dev/disk/by-uuid/f26a39ff-50dc-46f7-a0e2-1b7b67525c04"; }
     ];

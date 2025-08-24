@@ -2,13 +2,17 @@
 
 My dotfiles and nix setup incl. scripts for hyprland and some other goodies.
 
-Please do edit configuration of at least hyprland - default configuration is very specific to my setup (involves monitor scaling)
+Please do edit configuration of at least hyprland and file systems - default configuration is very specific to my setup (involves monitor scaling).
 
 Quickshell config based on (end-4's config)[https://github.com/end-4/dots-hyprland], you'll have a better time configuring them (gui settings for non-nix users).
 
 ## Screenshots
 
 ![](./screenshots/kitty.png)
+
+## Servers
+
+This also includes configuration for some of my (home) servers. Those are managed by colmena, but can also be instantiated locally using flakes.
 
 ## Used software
 

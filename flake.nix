@@ -23,9 +23,11 @@
 
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    colmena.url = "github:zhaofengli/colmena";
   };
 
-  outputs = { zen-browser, nixpkgs, dolphin-overlay, hyprland-plugins, /*hyprland,*/ home-manager, nixpkgs-unstable, nix-gaming,nix-index-database, ... }@attrs: {
+  outputs = { nixpkgs, colmena, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
     nixosConfigurations.lenovo-nix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
@@ -36,7 +38,7 @@
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.dan = (import ./home.nix) { inherit zen-browser nixpkgs-unstable nix-gaming /*suyu hyprland*/ hyprland-plugins; };
+          home-manager.users.dan = (import ./home.nix) { inherit colmena zen-browser nixpkgs-unstable nix-gaming hyprland-plugins; };
           home-manager.backupFileExtension = "backup";
         }
         ./configuration.nix
@@ -51,6 +53,17 @@
       modules = [
         ./servers/eisen/configuration.nix
       ];
+    };
+
+    colmenaHive = colmena.lib.makeHive {
+      meta = {
+        nixpkgs = import nixpkgs {
+          system = "x86_64-linux";
+          overlays = [];
+        };
+      };
+
+      eisen = import ./servers/eisen/configuration.nix;
     };
   };
 }
