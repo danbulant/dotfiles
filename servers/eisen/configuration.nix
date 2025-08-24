@@ -5,47 +5,57 @@ let
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
 in
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+  ];
 
-  nix.daemonCPUSchedPolicy = "idle";
-  nix.daemonIOSchedClass = "idle";
+  nix = {
+    daemonCPUSchedPolicy = "idle";
+    daemonIOSchedClass = "idle";
+  };
 
-  networking.hostName = "eisen";
-  networking.nameservers = ["1.1.1.1"];
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = "eisen";
+    nameservers = ["1.1.1.1"];
+    networkmanager.enable = true;
+  };
+
   time.timeZone = lib.mkForce "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
 
   services.dnsmasq.enable = true;
-  security.rtkit.enable = true;
-  security.polkit.enable = true;
-  services.localtimed.enable = true;
 
-  services.openssh.enable = true;
-  services.tailscale = {
-    enable = true;
-    useRoutingFeatures = "both";
-    openFirewall = true;
-    extraUpFlags = [ "--advertise-exit-node" ];
+  security = {
+    rtkit.enable = true;
+    polkit.enable = true;
   };
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = false;
-  };
-  # hardware.nvidia-container-toolkit.enable = true;
-  services.avahi.enable = true;
 
-  services.syncthing = {
-    enable = true;
-    openDefaultPorts = true;
+  services = {
+    localtimed.enable = true;
+    openssh.enable = true;
+    tailscale = {
+      enable = true;
+      useRoutingFeatures = "both";
+      openFirewall = true;
+      extraUpFlags = [ "--advertise-exit-node" ];
+    };
+    avahi.enable = true;
+    lldpd.enable = true;
+    syncthing = {
+      enable = true;
+      openDefaultPorts = true;
+    };
   };
-  services.lldpd.enable = true;
   systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+  };
+  # hardware.nvidia-container-toolkit.enable = true;
+
   boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
     # Shortcuts for fixing things
     # alt+sysrq (prtsc) + key
     # h: Print help to the system log.
@@ -56,29 +66,17 @@ in
     # b: Reboot the system.
     kernel.sysctl."kernel.sysrq" = 1;
 
-    kernelParams = [
-        "initcall_blacklist=sysfb_init"
-        "boot.shell_on_fail"
-        "loglevel=3"
-        "console=tty1"
-        "console=ttyS0"
-        "nomodeset"
-        "rd.systemd.show_status=false"
-        "rd.udev.log_level=3"
-        "udev.log_priority=3"
-    ];
-
     # zfs.enabled = false;
     swraid.enable = false;
 
     initrd.systemd.enable = true;
 
     loader = {
-      # systemd-boot.enable = true;
-      # efi.canTouchEfiVariables = true;
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
       # timeout = 0;
-      grub.enable = true;
-      grub.device = "/dev/disk/by-id/ata-Apacer_AS350_512GB_2021012802000028";
+      # grub.enable = true;
+      # grub.device = "/dev/disk/by-id/ata-Apacer_AS350_512GB_2021012802000028";
       # grub.efiSupport = true;
     };
   };
