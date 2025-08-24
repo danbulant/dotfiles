@@ -74,11 +74,11 @@ in
     initrd.systemd.enable = true;
 
     loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
+      # systemd-boot.enable = true;
+      # efi.canTouchEfiVariables = true;
       # timeout = 0;
-      # grub.enable = true;
-      # grub.device = "nodev";
+      grub.enable = true;
+      grub.device = "/dev/disk/by-id/ata-Apacer_AS350_512GB_2021012802000028";
       # grub.efiSupport = true;
     };
   };
