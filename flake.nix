@@ -25,6 +25,8 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
     colmena.url = "github:zhaofengli/colmena";
+
+    copyparty.url = "github:9001/copyparty";
   };
 
   outputs = { nixpkgs, colmena, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
@@ -61,6 +63,7 @@
           system = "x86_64-linux";
           overlays = [];
         };
+        specialArgs = attrs;
       };
 
       eisen = import ./servers/eisen/configuration.nix;

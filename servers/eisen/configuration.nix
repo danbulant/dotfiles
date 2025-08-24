@@ -1,11 +1,24 @@
 
-{ config, pkgs, lib, name ? "eisen", ... }:
+{ config, pkgs, lib, name ? "eisen", copyparty, ... }:
+let
+  # these are used both in service configuration but also to
+  # create mappings {name}.eisen.danbulant.cloud to port in caddy
+  ports = {
+    "uptime-kuma" = 3001;
+    "glance" = 5678;
+    "copyparty" = 3210;
+    "syncthing" = 8384;
+  };
+in
 {
   deployment = {
     buildOnTarget = true;
   };
 
+  nixpkgs.overlays = [ copyparty.overlays.default ];
+
   imports = [
+    copyparty.nixosModules.default
     ./hardware-configuration.nix
   ];
 
@@ -23,8 +36,6 @@
   time.timeZone = lib.mkForce "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  services.dnsmasq.enable = true;
-
   security = {
     rtkit.enable = true;
     polkit.enable = true;
@@ -32,7 +43,8 @@
 
   services = {
     logind.lidSwitchExternalPower = "ignore";
-    
+
+    geoclue2.enable = true;
     localtimed.enable = true;
     openssh.enable = true;
     tailscale = {
@@ -43,12 +55,102 @@
     };
     avahi.enable = true;
     lldpd.enable = true;
+
     syncthing = {
       enable = true;
       openDefaultPorts = true;
+      settings = {
+        gui = {
+          insecureSkipHostCheck = true;
+        };
+      };
+    };
+    
+    copyparty = {
+      enable = true;
+
+      settings = {
+        p = ports.copyparty;
+        idp-hm-usr = "^X-Webauth-Login^danbulant@github^dan";
+      };
+
+      # accounts = {
+      #   dan = {
+
+      #   };
+      # };
+
+      volumes = {
+        "/" = {
+          path = "/media/large";
+          access = {};
+        };
+      };
+
+      openFilesLimit = 8192;
+    };
+    
+    dnsmasq = {
+      enable = true;
+    };
+    
+    uptime-kuma = {
+      enable = true;
+      settings = {
+        PORT = toString ports."uptime-kuma";
+      };
+    };
+    
+    # perhaps add ntfy.sh
+
+    glance = {
+      enable = true;
+      settings = {
+        server = {
+          port = ports.glance;
+        };
+        pages = import ./glance-pages.nix;
+      };
     };
 
+    caddy = {
+      enable = true;
 
+      extraConfig = ''
+        (auth) {
+          forward_auth unix//run/tailscale-nginx-auth/tailscale-nginx-auth.sock {
+            uri /auth
+            header_up Remote-Addr {remote_host}
+            header_up Remote-Port {remote_port}
+            header_up Original-URI {uri}
+            copy_headers {
+              Tailscale-User>X-Webauth-User
+              Tailscale-Name>X-Webauth-Name
+              Tailscale-Login>X-Webauth-Login
+              Tailscale-Tailnet>X-Webauth-Tailnet
+              Tailscale-Profile-Picture>X-Webauth-Profile-Picture
+            }
+          }
+        }
+      '';
+
+      virtualHosts = builtins.listToAttrs (
+        map (k: {
+          name = "${k}.eisen.danbulant.cloud:80, ${k}.eisen:80";
+          value = {
+            extraConfig = ''
+              import auth
+              reverse_proxy http://localhost:${toString ports.${k}}
+            '';
+          };
+        }) (builtins.attrNames ports)
+      );
+    };
+    tailscaleAuth = {
+       # this is what's used above in forward_auth
+      enable = true;
+      group = "caddy";
+    };
   };
   systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 

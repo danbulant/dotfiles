@@ -25,9 +25,9 @@
     };
 
   fileSystems."/media/large" = {
-    device = "/dev/disk/by-label/large";
+    device = "/dev/disk/by-uuid/79f63619-39db-4fbe-8036-f2279f6067a3";
     fsType = "btrfs";
-    options = [ "subvol=@" "nofail" "exec" "users" ];
+    options = [ "nofail" "defaults" ];
   };
 
   swapDevices =
