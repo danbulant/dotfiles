@@ -18,6 +18,11 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            thunderbird
+            logisim-evolution
+            typst
+            typstyle
+            typstwriter
             colmena.defaultPackage.${system}
             usbimager
             bitwarden-desktop
@@ -106,7 +111,9 @@ in
             #jetbrains.webstorm
             #jetbrains.clion
             jetbrains.datagrip
-            #jetbrains.rider
+            # jetbrains.rider
+            jetbrains.idea-ultimate
+            jre_minimal
             datovka
             nwg-displays
             wireguard-tools

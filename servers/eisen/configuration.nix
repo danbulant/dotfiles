@@ -4,10 +4,14 @@ let
   # these are used both in service configuration but also to
   # create mappings {name}.eisen.danbulant.cloud to port in caddy
   ports = {
-    "uptime-kuma" = 3001;
+    "status" = 3001;
     "glance" = 5678;
     "copyparty" = 3210;
     "syncthing" = 8384;
+    "gitea" = 3000;
+    "immich" = 2283;
+    "grafana" = 3002;
+    "ntfy" = 3003;
   };
 in
 {
@@ -72,18 +76,24 @@ in
       settings = {
         p = ports.copyparty;
         idp-hm-usr = "^X-Webauth-Login^danbulant@github^dan";
+        rproxy = 1;
+        xff-hdr = "X-Forwarded-For";
+        ipu = [ "100.103.148.81/32=dan" /*"100.79.186.114/32=dan" "100.76.144.133/32=dan" "100.114.62.113/32=dan" */ ];
       };
 
-      # accounts = {
-      #   dan = {
-
-      #   };
-      # };
+      accounts = {
+        dan = {
+          passwordFile = "/dev/null";
+        };
+      };
 
       volumes = {
         "/" = {
           path = "/media/large";
-          access = {};
+          access = {
+            rwa = [ "dan" ];
+            r = [ "*" ];
+          };
         };
       };
 
@@ -97,11 +107,45 @@ in
     uptime-kuma = {
       enable = true;
       settings = {
-        PORT = toString ports."uptime-kuma";
+        PORT = toString ports.status;
       };
     };
+
+    grafana = {
+      enable = true;
+      settings.server.http_port = ports.grafana;
+    };
+
+    gitea = {
+      enable = true;
+      lfs = {
+        enable = true;
+        contentDir = "/media/large/gitea-lfs";
+      };
+      appName = "Eisen git";
+      settings.server.DOMAIN = "gitea.eisen";
+      settings.server.HTTP_PORT = ports.gitea;
+      settings.server.ROOT_URL = "http://gitea.eisen/";
+    };
+
+    immich = {
+      enable = true;
+    };
     
-    # perhaps add ntfy.sh
+    ntfy-sh = {
+      enable = true;
+      settings = {
+        listen-http = ":${toString ports.ntfy}";
+        base-url = "http://ntfy.eisen";
+      };
+    };
+
+    grafana-to-ntfy = {
+      enable = true;
+      settings = {
+        ntfyUrl = "http://ntfy.eisen/grafana";
+      };
+    };
 
     glance = {
       enable = true;
@@ -138,8 +182,8 @@ in
         map (k: {
           name = "${k}.eisen.danbulant.cloud:80, ${k}.eisen:80";
           value = {
+            # import auth
             extraConfig = ''
-              import auth
               reverse_proxy http://localhost:${toString ports.${k}}
             '';
           };
