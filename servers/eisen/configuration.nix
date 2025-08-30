@@ -12,6 +12,7 @@ let
     "immich" = 2283;
     "grafana" = 3002;
     "ntfy" = 3003;
+    "suwayomi" = 3004;
   };
 in
 {
@@ -128,9 +129,21 @@ in
       settings.server.ROOT_URL = "http://gitea.eisen/";
     };
 
-    immich = {
+    suwayomi-server = {
       enable = true;
+      settings.server = {
+        port = ports.suwayomi;
+        extensionRepos = [
+          "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
+        ];
+      };
     };
+
+    flaresolverr.enable = true;
+
+    # immich = {
+    #   enable = true;
+    # };
     
     ntfy-sh = {
       enable = true;
@@ -140,12 +153,12 @@ in
       };
     };
 
-    grafana-to-ntfy = {
-      enable = true;
-      settings = {
-        ntfyUrl = "http://ntfy.eisen/grafana";
-      };
-    };
+    # grafana-to-ntfy = {
+    #   enable = true;
+    #   settings = {
+    #     ntfyUrl = "http://ntfy.eisen/grafana";
+    #   };
+    # };
 
     glance = {
       enable = true;
