@@ -145,9 +145,9 @@ in
   nix.settings.trusted-users = [ "root" "@wheel" "dan" ];
 
   # Other defaults are set in home.nix
-  environment.sessionVariables.DEFAULT_BROWSER = "firefox";
+  # environment.sessionVariables.DEFAULT_BROWSER = "firefox";
 
-  programs.firefox.enable = true;
+  # programs.firefox.enable = true;
   nix.settings = {
     substituters = [
       "https://cache.nixos.org"
@@ -359,6 +359,15 @@ in
       nvidiaBusId = lib.mkForce "PCI:01:00:0";
     };
   };
+  services.cpupower-gui.enable = true;
+  services.upower.enable = true;
+  services.power-profiles-daemon.enable = false;
+  services.tlp = {
+    enable = true;
+    USB_DENYLIST = "04d9:a0b8";
+  };
+  # powerManagement.powertop.enable = true;
+  # powerManagement.cpuFreqGovernor = "powersave";
 
   security.polkit.enable = true;
 

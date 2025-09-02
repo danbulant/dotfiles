@@ -18,7 +18,12 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
-            thunderbird
+            upower
+            usbutils
+            killall
+            powertop
+            pgadmin4-desktopmode
+            thunderbird-bin
             logisim-evolution
             typst
             typstyle
@@ -126,7 +131,6 @@ in
             slurp
             wl-clipboard
             nextcloud-client
-            kdePackages.plasma-workspace
             kdePackages.filelight
             kdePackages.kate
             kdePackages.ksystemstats
@@ -134,6 +138,7 @@ in
             kdePackages.kirigami-addons
             kdePackages.ark
             kdePackages.qtdeclarative
+            kdePackages.dolphin
             cachix
             playerctl
             libcanberra-gtk3 # sound events
@@ -328,13 +333,13 @@ in
     xdg.mimeApps = {
         enable = true;
 
-        defaultApplications = {
-            "text/html" = "firefox.desktop";
-            "x-scheme-handler/http" = "firefox.desktop";
-            "x-scheme-handler/https" = "firefox.desktop";
-            "x-scheme-handler/about" = "firefox.desktop";
-            "x-scheme-handler/unknown" = "firefox.desktop";
-        };
+        # defaultApplications = {
+        #     "text/html" = "firefox.desktop";
+        #     "x-scheme-handler/http" = "firefox.desktop";
+        #     "x-scheme-handler/https" = "firefox.desktop";
+        #     "x-scheme-handler/about" = "firefox.desktop";
+        #     "x-scheme-handler/unknown" = "firefox.desktop";
+        # };
     };
     
 }

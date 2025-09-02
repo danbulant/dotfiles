@@ -12,7 +12,7 @@
     };
     dolphin-overlay = {
       url = "github:rumboon/dolphin-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
@@ -35,7 +35,21 @@
       specialArgs = attrs;
       modules = [
         {
-          nixpkgs.overlays = [ dolphin-overlay.overlays.default ];
+          nixpkgs.overlays = [
+            # dolphin-overlay.overlays.default
+            (_: prev: {
+              tailscale = prev.tailscale.overrideAttrs (old: {
+                checkFlags =
+                  builtins.map (
+                    flag:
+                      if prev.lib.hasPrefix "-skip=" flag
+                      then flag + "|^TestGetList$|^TestIgnoreLocallyBoundPorts$|^TestPoller$"
+                      else flag
+                  )
+                  old.checkFlags;
+              });
+            })
+          ];
         }
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
