@@ -11,9 +11,9 @@
   config = lib.mkIf config.nyx.low-power.enable {
     boot = {
       kernelParams = [
-      "pcie_aspm.policy=powersupersave"
-      "amd_pstate=passive"
-      "mitigations=auto"
+#      "pcie_aspm.policy=powersupersave"
+#      "amd_pstate=passive"
+#      "mitigations=auto"
       ];
 
       extraModprobeConfig = ''
@@ -39,10 +39,11 @@
       settings = {
         battery = {
           governor = "powersave";
+          energy_performance_preference = "power";
           turbo = "never";
         };
         charger = {
-          governor = "powersave";
+#          governor = "powersave";
           turbo = "auto";
         };
       };
@@ -71,6 +72,8 @@
         SATA_LINKPWR_ON_BAT = "min_power";
         SOUND_POWER_SAVE_ON_AC = "1";
         SOUND_POWER_SAVE_ON_BAT = "1";
+#        PLATFORM_PROFILE_ON_AC = "performance";
+#        PLATFORM_PROFILE_ON_BAT = "balanced";
         PLATFORM_PROFILE_ON_AC = "balanced";
         PLATFORM_PROFILE_ON_BAT = "low-power";
       };
