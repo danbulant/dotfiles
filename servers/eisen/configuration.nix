@@ -116,6 +116,7 @@ in
       enable = true;
       settings.server.http_port = ports.grafana;
     };
+    prometheus.enable = true;
 
     gitea = {
       enable = true;

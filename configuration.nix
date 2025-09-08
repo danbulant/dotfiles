@@ -22,6 +22,7 @@ in
       ./hardware-configuration.nix
       # /etc/nixos/cachix.nix
     ];
+  nyx.low-power.enable = true;
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
@@ -359,12 +360,13 @@ in
       nvidiaBusId = lib.mkForce "PCI:01:00:0";
     };
   };
+  hardware.enableAllFirmware = true;
   services.cpupower-gui.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = false;
   services.tlp = {
     enable = true;
-    USB_DENYLIST = "04d9:a0b8";
+   # USB_DENYLIST = "04d9:a0b8";
   };
   # powerManagement.powertop.enable = true;
   # powerManagement.cpuFreqGovernor = "powersave";
