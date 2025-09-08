@@ -73,10 +73,40 @@ in
   networking.hostName = "lenovo-nix";
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-  networking.nameservers = ["1.1.1.1"];
+  # networking.nameservers = ["1.1.1.1"];
+  services.dnsmasq.settings.server = [ "127.0.0.1#5053" ];
 
   networking.networkmanager.enable = true;
   networking.networkmanager.plugins = with pkgs; [networkmanager-openconnect];
+  networking.networkmanager.dns = "none";
+
+  services.dnscrypt-proxy2 = {
+    enable = true;
+    # See https://github.com/DNSCrypt/dnscrypt-proxy/blob/master/dnscrypt-proxy/example-dnscrypt-proxy.toml
+    settings = {
+      sources.public-resolvers = {
+        urls = [
+          "https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md"
+          "https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md"
+        ];
+        minisign_key = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3"; # See https://github.com/DNSCrypt/dnscrypt-resolvers/blob/master/v3/public-resolvers.md
+        cache_file = "/var/lib/dnscrypt-proxy/public-resolvers.md";
+      };
+
+      listen_addresses = ["127.0.0.1:5053"];
+      ipv6_servers = false;
+      block_ipv6 = ! (false);
+
+      require_dnssec = true;
+      require_nolog = false;
+      require_nofilter = true;
+      # aarhus university dns
+      # bootstrap_resolvers = ["10.192.232.113:53"];
+
+      # server_names = [ ... ];
+    };
+  };
+
   time.timeZone = lib.mkForce "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
