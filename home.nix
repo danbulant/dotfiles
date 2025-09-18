@@ -18,6 +18,15 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+#            dioxus-cli
+            cosmic-files
+            cosmic-player
+            cosmic-screenshot
+            cosmic-applibrary
+            cosmic-ext-calculator
+            examine
+
+            flix
             postgresql
             upower
             usbutils
@@ -78,7 +87,7 @@ in
             xournalpp
             simple-scan
             godot_4
-            rar
+            #rar
             wootility
             surrealdb
             pico-sdk
@@ -98,7 +107,8 @@ in
             nerd-fonts.fira-code
             iosevka
             kitty
-            rofi-wayland
+            #rofi-wayland
+            rofi
             discord
             vesktop
             spotify
@@ -125,7 +135,7 @@ in
             wireguard-tools
             mongodb-compass
             unstable.mongodb-tools
-            hashcat
+            #hashcat
             tldr
             dunst
             grim
@@ -156,7 +166,7 @@ in
 
             heroic
             heaptrack
-            cinny-desktop
+            #cinny-desktop
             gping
             gparted
             valgrind
@@ -189,7 +199,7 @@ in
             socat
             websocat
             whois
-            wifite2
+            #wifite2
             dig
             httpie
             inxi
@@ -222,7 +232,7 @@ in
             python312Packages.pypykatz
             screen
             openvpn
-            ghostty
+            #ghostty
 
             mdbook
             nix-tree

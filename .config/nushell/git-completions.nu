@@ -82,7 +82,7 @@ module git-completion-utils {
   }
 
   export def get-all-git-branches []: nothing -> list<string> {
-    ^git branch -a --format '%(refname:lstrip=2)%09%(upstream:lstrip=2)' | lines | str trim | filter { not ($in ends-with 'HEAD' ) }
+    ^git branch -a --format '%(refname:lstrip=2)%09%(upstream:lstrip=2)' | lines | str trim | where { not ($in ends-with 'HEAD' ) }
   }
 
   # Extract remote branches which do not have local counterpart
@@ -103,9 +103,9 @@ module git-completion-utils {
     # and we pick ['feature/awesome-2', 'awesome-3']
     let lines = $in
     let long_current = if ($current | is-empty) { '' } else { $'origin/($current)' }
-    let branches = $lines | filter { ($in != $long_current) and not ($in starts-with $"($current)\t") }
+    let branches = $lines | where { ($in != $long_current) and not ($in starts-with $"($current)\t") }
     let tracked_remotes = $branches | find "\t" | each { split row "\t" -n 2 | get 1 }
-    let floating_remotes = $lines | filter { "\t" not-in $in and $in not-in $tracked_remotes }
+    let floating_remotes = $lines | where { "\t" not-in $in and $in not-in $tracked_remotes }
     $floating_remotes | each {
       let v = $in | split row -n 2 '/' | get 1
       if $v == $current { null } else $v
@@ -115,10 +115,10 @@ module git-completion-utils {
   export def extract-mergable-sources [current: string]: list<string> -> list<record<value: string, description: string>> {
     let lines = $in
     let long_current = if ($current | is-empty) { '' } else { $'origin/($current)' }
-    let branches = $lines | filter { ($in != $long_current) and not ($in starts-with $"($current)\t") }
+    let branches = $lines | where { ($in != $long_current) and not ($in starts-with $"($current)\t") }
     let git_table: list<record<n: string, u: string>>  = $branches | each {|v| if "\t" in $v { $v | split row "\t" -n 2 | {n: $in.0, u: $in.1 } } else {n: $v, u: null } }
     let siblings = $git_table | where u == null and n starts-with 'origin/' | get n | str substring 7..
-    let remote_branches = $git_table | filter {|r| $r.u == null and not ($r.n starts-with 'origin/') } | get n
+    let remote_branches = $git_table | where {|r| $r.u == null and not ($r.n starts-with 'origin/') } | get n
     [...($siblings | wrap value | insert description Local), ...($remote_branches | wrap value | insert description Remote)]
   }
 
@@ -171,7 +171,7 @@ def "nu-complete git mergable sources" [] {
 def "nu-complete git switch" [] {
   use git-completion-utils *
   let current = (^git branch --show-current)  # Can be empty if in detached HEAD
-  let local_branches = ^git branch --format '%(refname:short)' | lines | filter { $in != $current } | wrap value | insert description 'Local branch'
+  let local_branches = ^git branch --format '%(refname:short)' | lines | where { $in != $current } | wrap value | insert description 'Local branch'
   let remote_branches = (get-all-git-branches | extract-remote-branches-nonlocal-short $current) | wrap value | insert description 'Remote branch'
   [...$local_branches, ...$remote_branches]
 }

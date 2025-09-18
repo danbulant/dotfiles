@@ -96,7 +96,6 @@
     services.locate.enable = false;
     services.openssh.enable = lib.mkForce false;
     programs.java.enable = lib.mkForce false;
-    services.upower.enable = lib.mkForce false;
     services = {
       xserver.windowManager.fvwm2.gestures = lib.mkForce false;
       libinput.enable = lib.mkForce false;
