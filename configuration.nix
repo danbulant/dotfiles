@@ -319,6 +319,10 @@ in
     # required for quickshell config; needs to be here for them to be included in import/plugin path
     kdePackages.qt5compat
     kdePackages.qtdeclarative
+    kdePackages.qtlocation
+    kdePackages.qtlocation.dev
+    kdePackages.qtpositioning
+    kdePackages.qtpositioning.dev
     kdePackages.kirigami
     kdePackages.kirigami-addons
     kdePackages.kirigami-addons.dev

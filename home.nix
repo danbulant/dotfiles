@@ -137,7 +137,7 @@ in
             unstable.mongodb-tools
             #hashcat
             tldr
-            dunst
+            #dunst
             grim
             slurp
             wl-clipboard
