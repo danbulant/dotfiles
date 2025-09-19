@@ -116,7 +116,7 @@ in
             meslo-lgs-nf
             waybar
             chromium
-            dunst
+            #dunst
             sccache
             swaybg
             activitywatch
