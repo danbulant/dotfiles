@@ -24,6 +24,7 @@ in
             cosmic-screenshot
             cosmic-applibrary
             cosmic-ext-calculator
+            cosmic-icons
             examine
 
             flix

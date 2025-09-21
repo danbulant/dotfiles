@@ -1,5 +1,5 @@
 #!/bin/bash
-sh fast-copy.sh
+#sh fast-copy.sh
 if [ -z "$(which nh)" ]; then
     sudo cp *.nix /etc/nixos/
     sudo nixos-rebuild switch --show-trace

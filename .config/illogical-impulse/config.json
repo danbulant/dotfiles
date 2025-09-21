@@ -70,7 +70,7 @@
         "parallax": {
             "autoVertical": false,
             "enableSidebar": true,
-            "enableWorkspace": true,
+            "enableWorkspace": false,
             "vertical": false,
             "workspaceZoom": 1.07
         },
