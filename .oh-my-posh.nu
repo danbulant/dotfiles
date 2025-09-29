@@ -4,10 +4,14 @@ if ($env.config? | is-not-empty) {
 }
 
 $env.POWERLINE_COMMAND = 'oh-my-posh'
-$env.POSH_THEME = '/home/dan/.config/oh-my-posh/powerlevel10k_rainbow.omp.json'
 $env.PROMPT_INDICATOR = ""
-$env.POSH_SESSION_ID = (echo "ed3af1b9-5277-4c80-9fbe-daaaf73eabb3")
+$env.POSH_SESSION_ID = "b6c2131d-3745-4432-850c-1bcf19d1b8a0"
+$env.POSH_SHELL = "nu"
 $env.POSH_SHELL_VERSION = (version | get version)
+
+# disable all known python virtual environment prompts
+$env.VIRTUAL_ENV_DISABLE_PROMPT = 1
+$env.PYENV_VIRTUALENV_DISABLE_PROMPT = 1
 
 let _omp_executable: string = (which oh-my-posh | first | get path)
 
@@ -35,6 +39,7 @@ def --wrapped _omp_get_prompt [
             $"--no-status=($no_status)"
             $"--execution-time=($execution_time)"
             $"--terminal-width=((term size).columns)"
+            $"--job-count=(job list | length)"
             ...$args
     )
 }

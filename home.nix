@@ -18,6 +18,10 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            font-awesome
+	    arduino-ide
+	    xorg.libxkbfile
+        
 #            dioxus-cli
             cosmic-files
             cosmic-player

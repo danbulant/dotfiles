@@ -168,7 +168,7 @@ in
   users.users.dan = {
     isNormalUser = true;
     description = "John";
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp" "kvm" "adbusers"];
+    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp" "kvm" "adbusers" "dialout"];
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
@@ -241,7 +241,7 @@ in
     enableOnBoot = false;
 #    enableNvidia = true;
   };
-  hardware.nvidia-container-toolkit.enable = true;
+  # hardware.nvidia-container-toolkit.enable = true;
   services.avahi.enable = true;
 
   boot = {
@@ -268,6 +268,7 @@ in
     kernelParams = [
         # attempt to fix nvidia perf
         "nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
+        "delayacct"
         "initcall_blacklist=sysfb_init"
         "quiet"
         "splash"
@@ -386,9 +387,9 @@ in
   boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" "lenovo-legion-module"];
   hardware.nvidia = {
     open = false;
-    modesetting.enable = true;
-    powerManagement.enable = true;
-    nvidiaSettings = true;
+    # modesetting.enable = true;
+    # powerManagement.enable = true;
+    # nvidiaSettings = true;
     prime = {
       # hardware specific, beware!
       amdgpuBusId = lib.mkForce "PCI:06:00:0";
