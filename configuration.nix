@@ -23,6 +23,7 @@ in
       # /etc/nixos/cachix.nix
     ];
   nyx.low-power.enable = true;
+  hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
@@ -81,7 +82,7 @@ in
   networking.networkmanager.plugins = with pkgs; [networkmanager-openconnect];
   networking.networkmanager.dns = "none";
 
-  services.dnscrypt-proxy2 = {
+  services.dnscrypt-proxy = {
     enable = true;
     # See https://github.com/DNSCrypt/dnscrypt-proxy/blob/master/dnscrypt-proxy/example-dnscrypt-proxy.toml
     settings = {
@@ -124,10 +125,10 @@ in
   services.dnsmasq.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
-   services.desktopManager.plasma6 = {
-     enable = true;
-   };
-  #services.desktopManager.gnome.enable = true;
+  # services.desktopManager.plasma6 = {
+  #   enable = true;
+  # };
+  # services.desktopManager.gnome.enable = true;
   services.xserver = {
     enable = false;
     xkb = {
@@ -166,13 +167,7 @@ in
   time.hardwareClockInLocalTime = true;
 
   fonts.fontDir.enable = true;
-  fonts.enableDefaultPackages = false;
-
-  fonts.packages = with pkgs; [
-    noto-fonts 
-    liberation_ttf
-    noto-fonts-color-emoji
-  ];
+  fonts.enableDefaultPackages = true;
 
   users.users.dan = {
     isNormalUser = true;

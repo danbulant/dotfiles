@@ -263,6 +263,12 @@ in
             carapace
 
             crate2nix
+            
+            liberation_ttf
+            noto-fonts-color-emoji
+            rubik
+            nerd-fonts.jetbrains-mono
+            google-fonts
         ];
     };
     services.lorri.enable = true;
