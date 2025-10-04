@@ -75,7 +75,7 @@ in
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   # networking.nameservers = ["1.1.1.1"];
-  services.dnsmasq.settings.server = [ "127.0.0.1#5053" ];
+  services.dnsmasq.settings.server = [ "100.100.100.100" "127.0.0.1#5053" ];
 
   networking.networkmanager.enable = true;
   networking.networkmanager.plugins = with pkgs; [networkmanager-openconnect];
@@ -165,6 +165,15 @@ in
   programs.partition-manager.enable = true;
   time.hardwareClockInLocalTime = true;
 
+  fonts.fontDir.enable = true;
+  fonts.enableDefaultPackages = false;
+
+  fonts.packages = with pkgs; [
+    noto-fonts 
+    liberation_ttf
+    noto-fonts-color-emoji
+  ];
+
   users.users.dan = {
     isNormalUser = true;
     description = "John";
@@ -187,11 +196,13 @@ in
       "https://hyprland.cachix.org"
       "https://nix-gaming.cachix.org"
       "https://colmena.cachix.org"
+      "https://install.determinate.systems"
     ];
     trusted-public-keys = [
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
     ];
   };
   

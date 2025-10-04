@@ -18,9 +18,13 @@ in
         stateVersion = "24.05";
 
         packages = with pkgs; [
+            linuxKernel.packages.linux_6_12.perf
+            obs-studio
+            flamegraph
+            samply
             font-awesome
-	    arduino-ide
-	    xorg.libxkbfile
+            arduino-ide
+            xorg.libxkbfile
         
 #            dioxus-cli
             cosmic-files

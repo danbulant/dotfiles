@@ -26,12 +26,14 @@
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+
     colmena.url = "github:zhaofengli/colmena";
 
     copyparty.url = "github:9001/copyparty";
   };
 
-  outputs = { nixpkgs, colmena, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
+  outputs = { nixpkgs, determinate, colmena, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
     nixosConfigurations.lenovo-nix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
@@ -53,6 +55,7 @@
             })
           ];
         }
+        determinate.nixosModules.default
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;

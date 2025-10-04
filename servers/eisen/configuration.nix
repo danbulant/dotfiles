@@ -1,5 +1,5 @@
 
-{ config, pkgs, lib, name ? "eisen", copyparty, ... }:
+{ config, nix-index-database, pkgs, lib, name ? "eisen", copyparty, ... }:
 let
   # these are used both in service configuration but also to
   # create mappings {name}.eisen.danbulant.cloud to port in caddy
@@ -22,7 +22,10 @@ in
 
   nixpkgs.overlays = [ copyparty.overlays.default ];
 
+  programs.nix-index-database.comma.enable = true;
+
   imports = [
+    nix-index-database.nixosModules.nix-index
     copyparty.nixosModules.default
     ./hardware-configuration.nix
   ];
