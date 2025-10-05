@@ -270,6 +270,21 @@ in
             nerd-fonts.jetbrains-mono
             google-fonts
         ];
+
+        pointerCursor = {
+          gtk.enable = true;
+          package = pkgs.bibata-cursors;
+          name = "Bibata-Modern-Classic";
+          size = 16;
+        };
+    };
+    gtk = {
+      enable = true;
+
+      theme = {
+        package = pkgs.orchis-theme;
+        name = "Orchis";
+      };
     };
     services.lorri.enable = true;
     wayland.windowManager.hyprland = {
@@ -359,13 +374,19 @@ in
     xdg.mimeApps = {
         enable = true;
 
-        # defaultApplications = {
-        #     "text/html" = "firefox.desktop";
-        #     "x-scheme-handler/http" = "firefox.desktop";
-        #     "x-scheme-handler/https" = "firefox.desktop";
-        #     "x-scheme-handler/about" = "firefox.desktop";
-        #     "x-scheme-handler/unknown" = "firefox.desktop";
-        # };
+        defaultApplications = {
+          "x-scheme-handler/http"="zen-beta.desktop";
+          "x-scheme-handler/https"="zen-beta.desktop";
+          "x-scheme-handler/chrome"="zen-beta.desktop";
+          "text/html"="zen-beta.desktop";
+          "application/x-extension-htm"="zen-beta.desktop";
+          "application/x-extension-html"="zen-beta.desktop";
+          "application/x-extension-shtml"="zen-beta.desktop";
+          "application/xhtml+xml"="zen-beta.desktop";
+          "application/x-extension-xhtml"="zen-beta.desktop";
+          "application/x-extension-xht"="zen-beta.desktop";
+          "x-scheme-handler/discord"="vesktop.desktop";
+        };
     };
     
 }
