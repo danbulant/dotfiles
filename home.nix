@@ -1,4 +1,4 @@
-{ colmena, zen-browser, nix-gaming, nixpkgs-unstable, /* suyu, */hyprland-plugins/*, hyprland*/, ... }:
+{ helium, colmena, zen-browser, nix-gaming, nixpkgs-unstable, /* suyu, */hyprland-plugins/*, hyprland*/, ... }:
 { pkgs, inputs, ...}:
 let
 
@@ -15,9 +15,12 @@ in
       zen-browser.homeModules.beta
     ];
     home = {
-        stateVersion = "24.05";
+        stateVersion = "25.11";
 
         packages = with pkgs; [
+            steam
+            helium
+	    opencode
             linuxKernel.packages.linux_6_12.perf
             obs-studio
             flamegraph
@@ -98,13 +101,13 @@ in
             godot_4
             #rar
             wootility
-            surrealdb
+            #surrealdb
             pico-sdk
             elf2uf2-rs
             obsidian
             betaflight-configurator
             home-manager
-            glxinfo
+            #glxinfo
             pciutils
             nix-top
             grc
@@ -135,9 +138,9 @@ in
             dust
             #jetbrains.webstorm
             #jetbrains.clion
-            jetbrains.datagrip
+            #jetbrains.datagrip
             # jetbrains.rider
-            jetbrains.idea-ultimate
+            #jetbrains.idea-ultimate
             jre_minimal
             datovka
             nwg-displays
@@ -162,7 +165,7 @@ in
             cachix
             playerctl
             libcanberra-gtk3 # sound events
-            qt6ct
+            #qt6ct
             nil # nix language server
             nix-output-monitor
             expect
@@ -187,7 +190,7 @@ in
             erlang
             terraform
             nodejs
-            corepack
+            #corepack
             ansible
             aria2
             qbittorrent
@@ -248,7 +251,7 @@ in
             nix-du
             graphviz
 
-            blender
+            #blender
             warpinator
 
             awatcher

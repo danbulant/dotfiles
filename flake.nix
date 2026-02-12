@@ -1,6 +1,10 @@
 {
   inputs = {
     #nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    helium = {
+	url = "github:schembriaiden/helium-browser-nix-flake";
+	inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
@@ -33,8 +37,8 @@
     copyparty.url = "github:9001/copyparty";
   };
 
-  outputs = { nixpkgs, determinate, colmena, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
-    nixosConfigurations.lenovo-nix = nixpkgs.lib.nixosSystem {
+  outputs = { nixpkgs, determinate, colmena, helium, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
+    nixosConfigurations.aura = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
       modules = [
@@ -59,13 +63,13 @@
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.dan = (import ./home.nix) { inherit colmena zen-browser nixpkgs-unstable nix-gaming hyprland-plugins; };
+          home-manager.users.dan = (import ./home.nix) { inherit helium colmena zen-browser nixpkgs-unstable nix-gaming hyprland-plugins; };
           home-manager.backupFileExtension = "backup";
         }
         ./configuration.nix
         nix-index-database.nixosModules.nix-index
         { programs.nix-index-database.comma.enable = true; }
-        ./powersave.nix
+        #./powersave.nix
       ];
     };
 

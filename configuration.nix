@@ -11,7 +11,7 @@ in
 {
   imports =
     [
-      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
+#      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
       # nixos-hardware.nixosModules.common-cpu-amd
       # nixos-hardware.nixosModules.common-cpu-amd-pstate
       # nixos-hardware.nixosModules.common-cpu-amd-zenpower
@@ -22,7 +22,7 @@ in
       ./hardware-configuration.nix
       # /etc/nixos/cachix.nix
     ];
-  nyx.low-power.enable = true;
+ # nyx.low-power.enable = true;
   hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -48,18 +48,18 @@ in
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
-  fileSystems."/media/New BTRFS" = {
-    device = "/dev/disk/by-uuid/26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
-    fsType = "btrfs";
-  };
-  fileSystems."/media/secondary" = {
-    device = "/dev/disk/by-uuid/050574C34881C3B9";
-    fsType = "ntfs";
-  };
-  fileSystems."/media/windows" = {
-    device = "/dev/disk/by-uuid/846A9EF06A9EDE6C";
-    fsType = "ntfs";
-  };
+  #fileSystems."/media/New BTRFS" = {
+  #  device = "/dev/disk/by-uuid/26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
+  #  fsType = "btrfs";
+  #};
+  #fileSystems."/media/secondary" = {
+  #  device = "/dev/disk/by-uuid/050574C34881C3B9";
+  #  fsType = "ntfs";
+  #};
+  #fileSystems."/media/windows" = {
+  #  device = "/dev/disk/by-uuid/846A9EF06A9EDE6C";
+  #  fsType = "ntfs";
+  #};
 
   # services.beesd.filesystems = {
   #   root = {
@@ -72,7 +72,7 @@ in
   #   };
   # };
 
-  networking.hostName = "lenovo-nix";
+  networking.hostName = "aura";
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   # networking.nameservers = ["1.1.1.1"];
@@ -125,9 +125,9 @@ in
   services.dnsmasq.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
-  # services.desktopManager.plasma6 = {
-  #   enable = true;
-  # };
+   services.desktopManager.plasma6 = {
+     enable = true;
+   };
   # services.desktopManager.gnome.enable = true;
   services.xserver = {
     enable = false;
@@ -162,7 +162,7 @@ in
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   programs.wireshark.enable = true;
-  programs.adb.enable = true;
+  #programs.adb.enable = true;
   programs.partition-manager.enable = true;
   time.hardwareClockInLocalTime = true;
 
@@ -263,7 +263,7 @@ in
 
     # Visuals
     plymouth = {
-        enable = true;
+        enable = false;
         theme = "deus_ex"; # motion is also cool
         themePackages = with pkgs; [
           (adi1090x-plymouth-themes.override {
@@ -273,11 +273,11 @@ in
     };
     kernelParams = [
         # attempt to fix nvidia perf
-        "nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
+        #"nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
         "delayacct"
         "initcall_blacklist=sysfb_init"
-        "quiet"
-        "splash"
+        #"quiet"
+        #"splash"
         "boot.shell_on_fail"
         "loglevel=3"
         "rd.systemd.show_status=false"
@@ -315,12 +315,12 @@ in
 
   environment.systemPackages = with pkgs; [
     git
-    nvtopPackages.full
+#    nvtopPackages.full
     btop
     lshw
     hyprpolkitagent
 
-    lenovo-legion
+#    lenovo-legion
 
 
     # required for quickshell config; needs to be here for them to be included in import/plugin path
@@ -378,30 +378,41 @@ in
   nixpkgs.config.cudaSupport = true;
 
   # The nvidia fun part
-  hardware.graphics = {
+ hardware.graphics = {
     enable = true;
     # package = unstable-pkgs.mesa.drivers;
     # Steam support
     enable32Bit = true;
     # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
     extraPackages = with pkgs; [
-      libvdpau-va-gl
-      nvidia-vaapi-driver
+    
+      # Required for modern Intel GPUs (Xe iGPU and ARC)
+      intel-media-driver     # VA-API (iHD) userspace
+      vpl-gpu-rt             # oneVPL (QSV) runtime
+
+      # Optional (compute / tooling):
+      intel-compute-runtime  # OpenCL (NEO) + Level Zero for Arc/Xe
+ #     libvdpau-va-gl
+ #     nvidia-vaapi-driver
     ];
   };
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "iHD"; 
+    };
+     hardware.enableRedistributableFirmware = true;
 
-  boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" "lenovo-legion-module"];
-  hardware.nvidia = {
-    open = false;
+  #boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" "lenovo-legion-module"];
+  #hardware.nvidia = {
+  #  open = false;
     # modesetting.enable = true;
     # powerManagement.enable = true;
     # nvidiaSettings = true;
-    prime = {
+  #  prime = {
       # hardware specific, beware!
-      amdgpuBusId = lib.mkForce "PCI:06:00:0";
-      nvidiaBusId = lib.mkForce "PCI:01:00:0";
-    };
-  };
+  #    amdgpuBusId = lib.mkForce "PCI:06:00:0";
+  #    nvidiaBusId = lib.mkForce "PCI:01:00:0";
+  #  };
+  #};
   hardware.enableAllFirmware = true;
   services.cpupower-gui.enable = true;
   services.upower.enable = true;
@@ -457,7 +468,7 @@ in
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "25.11"; # Did you read the comment?
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
