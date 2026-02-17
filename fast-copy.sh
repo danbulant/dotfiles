@@ -1,4 +1,3 @@
-
 echo "Copying configurations"
 cp .config/* ~/.config/ -r
 echo fixing quickshell copy

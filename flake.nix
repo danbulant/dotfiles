@@ -1,9 +1,17 @@
 {
   inputs = {
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     #nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     helium = {
-	url = "github:schembriaiden/helium-browser-nix-flake";
-	inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:schembriaiden/helium-browser-nix-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -37,60 +45,77 @@
     copyparty.url = "github:9001/copyparty";
   };
 
-  outputs = { nixpkgs, determinate, colmena, helium, zen-browser, dolphin-overlay, hyprland-plugins, home-manager, nixpkgs-unstable, nix-gaming, nix-index-database, ... }@attrs: {
-    nixosConfigurations.aura = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = attrs;
-      modules = [
-        {
-          nixpkgs.overlays = [
-            # dolphin-overlay.overlays.default
-            (_: prev: {
-              tailscale = prev.tailscale.overrideAttrs (old: {
-                checkFlags =
-                  builtins.map (
-                    flag:
-                      if prev.lib.hasPrefix "-skip=" flag
-                      then flag + "|^TestGetList$|^TestIgnoreLocallyBoundPorts$|^TestPoller$"
-                      else flag
-                  )
-                  old.checkFlags;
-              });
-            })
-          ];
-        }
-        determinate.nixosModules.default
-        home-manager.nixosModules.home-manager {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.dan = (import ./home.nix) { inherit helium colmena zen-browser nixpkgs-unstable nix-gaming hyprland-plugins; };
-          home-manager.backupFileExtension = "backup";
-        }
-        ./configuration.nix
-        nix-index-database.nixosModules.nix-index
-        { programs.nix-index-database.comma.enable = true; }
-        #./powersave.nix
-      ];
-    };
-
-    nixosConfigurations.eisen = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = attrs;
-      modules = [
-        ./servers/eisen/configuration.nix
-      ];
-    };
-
-    colmenaHive = colmena.lib.makeHive {
-      meta = {
-        nixpkgs = import nixpkgs {
-          system = "x86_64-linux";
-          overlays = [];
-        };
+  outputs =
+    {
+      nixpkgs,
+      determinate,
+      colmena,
+      helium,
+      zen-browser,
+      dolphin-overlay,
+      hyprland-plugins,
+      home-manager,
+      nixpkgs-unstable,
+      nix-gaming,
+      nix-index-database,
+      dms,
+      ...
+    }@attrs:
+    {
+      nixosConfigurations.aura = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
         specialArgs = attrs;
+        modules = [
+          {
+            nixpkgs.overlays = [
+              # dolphin-overlay.overlays.default
+              (_: prev: {
+                tailscale = prev.tailscale.overrideAttrs (old: {
+                  checkFlags = builtins.map (
+                    flag:
+                    if prev.lib.hasPrefix "-skip=" flag then
+                      flag + "|^TestGetList$|^TestIgnoreLocallyBoundPorts$|^TestPoller$"
+                    else
+                      flag
+                  ) old.checkFlags;
+                });
+              })
+            ];
+          }
+          determinate.nixosModules.default
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.extraSpecialArgs = attrs;
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.dan = import ./home.nix;
+            home-manager.backupFileExtension = "backup";
+          }
+          ./configuration.nix
+          nix-index-database.nixosModules.nix-index
+          { programs.nix-index-database.comma.enable = true; }
+          #./powersave.nix
+        ];
       };
 
-      eisen = import ./servers/eisen/configuration.nix;
+      nixosConfigurations.eisen = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = attrs;
+        modules = [
+          ./servers/eisen/configuration.nix
+        ];
+      };
+
+      colmenaHive = colmena.lib.makeHive {
+        meta = {
+          nixpkgs = import nixpkgs {
+            system = "x86_64-linux";
+            overlays = [ ];
+          };
+          specialArgs = attrs;
+        };
+
+        eisen = import ./servers/eisen/configuration.nix;
+      };
     };
-  };
 }
