@@ -18,6 +18,7 @@ in
         stateVersion = "25.11";
 
         packages = with pkgs; [
+            tail-tray
             steam
             helium
 	    opencode
