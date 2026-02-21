@@ -7,6 +7,7 @@
   nixpkgs-unstable, # suyu,
   hyprland-plugins, # , hyprland
   pkgs,
+  danksearch,
   niri,
   inputs,
   ...
@@ -19,12 +20,13 @@ let
       allowUnfree = true;
     };
   };
-
+  # system = stdenv.hostPlatform.system;
 in
 {
   imports = [
     zen-browser.homeModules.beta
     dms.homeModules.dank-material-shell
+    danksearch.homeModules.default
     # niri.homeManagerModules.default
     # dms.homeModules.niri
   ];
@@ -32,7 +34,17 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      bun
+      lenovo-legion
+      itch
+      filezilla
+      nicotine-plus
+      protonvpn-gui
+      dgop
       mysql-workbench
+      i2c-tools
+      kdePackages.kimageformats
+      power-profiles-daemon
       tail-tray
       steam
       helium
@@ -43,7 +55,7 @@ in
       samply
       font-awesome
       arduino-ide
-      xorg.libxkbfile
+      libxkbfile
 
       #            dioxus-cli
       cosmic-files
@@ -233,7 +245,7 @@ in
       inxi
       numbat
       wireshark
-      nixfmt-rfc-style
+      nixfmt
       qpwgraph
 
       nixpkgs-unstable.legacyPackages.${system}.zed-editor
@@ -315,9 +327,10 @@ in
     #     hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
     # ];
   };
+  programs.dsearch.enable = true;
   programs.dank-material-shell = {
     enable = true;
-    systemd.enable = true;
+    systemd.enable = false;
     # niri = {
     #   enableKeybinds = false; # Sets static preset keybinds
     #   # enableSpawn = true; # Auto-start DMS with niri, if enabled
@@ -380,22 +393,22 @@ in
 
       # ];
     };
+    difftastic.enable = true;
     difftastic.git.enable = true;
     git = {
       enable = true;
-      userName = "Daniel Bulant";
-      userEmail = "danbulant@gmail.com";
-      difftastic.enable = true;
-      signing = {
-        signByDefault = true;
-        key = "/home/dan/.ssh/id_ed25519";
-      };
-      extraConfig = {
+      settings = {
+        user.name = "Daniel Bulant";
+        user.email = "danbulant@gmail.com";
         pull.rebase = false;
         pull.ff = "only";
         gpg.format = "ssh";
         commit.gpgsign = true;
         gpg.ssh.allowedSignersFile = "/home/dan/allowed_signers";
+      };
+      signing = {
+        signByDefault = true;
+        key = "/home/dan/.ssh/id_ed25519";
       };
     };
     gitui.enable = true;

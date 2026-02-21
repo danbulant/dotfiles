@@ -1,35 +1,42 @@
-
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, /*hyprland,*/ options, /*hyprland-plugins, */nixpkgs-unstable, lib, nixos-hardware, zen-browser/*, kwin-effects-forceblur*/, ... }:
+{
+  config,
+  pkgs,
+  options,
+  nixpkgs-unstable,
+  lib,
+  dms,
+  ...
+}:
 let
-  unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; #import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
+  unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; # import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
   # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
 in
 {
-  imports =
-    [
-#      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
-      # nixos-hardware.nixosModules.common-cpu-amd
-      # nixos-hardware.nixosModules.common-cpu-amd-pstate
-      # nixos-hardware.nixosModules.common-cpu-amd-zenpower
-      # nixos-hardware.nixosModules.common-gpu-amd
-      # nixos-hardware.nixosModules.common-gpu-nvidia
-      # nixos-hardware.nixosModules.common-pc-laptop
-      # nixos-hardware.nixosModules.common-pc-laptop-ssd
-      ./hardware-configuration.nix
-      # /etc/nixos/cachix.nix
-    ];
- # nyx.low-power.enable = true;
+  imports = [
+    #      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
+    # nixos-hardware.nixosModules.common-cpu-amd
+    # nixos-hardware.nixosModules.common-cpu-amd-pstate
+    # nixos-hardware.nixosModules.common-cpu-amd-zenpower
+    # nixos-hardware.nixosModules.common-gpu-amd
+    # nixos-hardware.nixosModules.common-gpu-nvidia
+    # nixos-hardware.nixosModules.common-pc-laptop
+    # nixos-hardware.nixosModules.common-pc-laptop-ssd
+    ./hardware-configuration.nix
+    dms.nixosModules.greeter
+    # /etc/nixos/cachix.nix
+  ];
+  # nyx.low-power.enable = true;
   hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
     "cinny-unwrapped-4.2.3"
     "cinny-4.2.3"
-     "libsoup-2.74.3"
+    "libsoup-2.74.3"
     # "qbittorrent-4.6.4"
     # "cinny-3.2.0"
     "dotnet-sdk-wrapped-7.0.410"
@@ -39,7 +46,6 @@ in
     "dotnet-sdk-6.0.428"
     "electron-33.4.11"
   ];
-
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -76,10 +82,13 @@ in
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   # networking.nameservers = ["1.1.1.1"];
-  services.dnsmasq.settings.server = [ "100.100.100.100" "127.0.0.1#5053" ];
+  services.dnsmasq.settings.server = [
+    "100.100.100.100"
+    "127.0.0.1#5053"
+  ];
 
   networking.networkmanager.enable = true;
-  networking.networkmanager.plugins = with pkgs; [networkmanager-openconnect];
+  networking.networkmanager.plugins = with pkgs; [ networkmanager-openconnect ];
   networking.networkmanager.dns = "none";
 
   services.dnscrypt-proxy = {
@@ -95,9 +104,9 @@ in
         cache_file = "/var/lib/dnscrypt-proxy/public-resolvers.md";
       };
 
-      listen_addresses = ["127.0.0.1:5053"];
+      listen_addresses = [ "127.0.0.1:5053" ];
       ipv6_servers = false;
-      block_ipv6 = ! (false);
+      block_ipv6 = !(false);
 
       require_dnssec = true;
       require_nolog = false;
@@ -125,9 +134,9 @@ in
   services.dnsmasq.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
-   services.desktopManager.plasma6 = {
-     enable = true;
-   };
+  services.desktopManager.plasma6 = {
+    enable = true;
+  };
   # services.desktopManager.gnome.enable = true;
   services.xserver = {
     enable = false;
@@ -148,12 +157,14 @@ in
     alsa.support32Bit = true;
     pulse.enable = true;
   };
-  security.pam.loginLimits = [{
-    domain = "*";
-    type = "soft";
-    item = "nofile";
-    value = "64000";
-  }];
+  security.pam.loginLimits = [
+    {
+      domain = "*";
+      type = "soft";
+      item = "nofile";
+      value = "64000";
+    }
+  ];
   services.geoclue2.enable = true;
   services.localtimed.enable = true;
   services.lorri.enable = true;
@@ -171,14 +182,32 @@ in
 
   users.users.dan = {
     isNormalUser = true;
-    description = "John";
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp" "kvm" "adbusers" "dialout"];
+    description = "Dan";
+    extraGroups = [
+      "i2c"
+      "networkmanager"
+      "wheel"
+      "docker"
+      "fuse"
+      "video"
+      "wireshark"
+      "gamemode"
+      "scanner"
+      "lp"
+      "kvm"
+      "adbusers"
+      "dialout"
+    ];
     shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
     ];
   };
-  nix.settings.trusted-users = [ "root" "@wheel" "dan" ];
+  nix.settings.trusted-users = [
+    "root"
+    "@wheel"
+    "dan"
+  ];
 
   # Other defaults are set in home.nix
   # environment.sessionVariables.DEFAULT_BROWSER = "firefox";
@@ -200,11 +229,11 @@ in
       "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
     ];
   };
-  
+
   # Comment out below for the first time to avoid cache miss, if using flake
   programs.hyprland = {
     enable = true;
-#    package = hyprland.packages.${pkgs.system}.hyprland;
+    #    package = hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
     #  {
     #     inherit (pkgs) mesa;
@@ -213,9 +242,16 @@ in
     # package = unstable-pkgs.hyprland;
   };
   # End comment out
-  
+  #
+  programs.dank-material-shell.greeter = {
+    enable = true;
+    compositor.name = "hyprland"; # Or "hyprland" or "sway"
+    configHome = "/home/dan";
+  };
+
   #xdg.configFile."menus/applications.menu".text = builtins.readFile ./applications.menu;
-  environment.etc."/xdg/menus/plasma-applications.menu".text = builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
+  environment.etc."/xdg/menus/plasma-applications.menu".text =
+    builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
 
   # programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
@@ -225,14 +261,17 @@ in
   # Fix dynamic binaries from outside of nix
   programs.nix-ld = {
     enable = true;
-    libraries = options.programs.nix-ld.libraries.default ++ (with pkgs; [
-      libdrm
-      mesa
-      libxkbcommon
-      openssl
-      libGL libva
-      libelf
-    ]);
+    libraries =
+      options.programs.nix-ld.libraries.default
+      ++ (with pkgs; [
+        libdrm
+        mesa
+        libxkbcommon
+        openssl
+        libGL
+        libva
+        libelf
+      ]);
   };
   services.openssh.enable = true;
   services.tailscale = {
@@ -245,7 +284,7 @@ in
   virtualisation.docker = {
     enable = true;
     enableOnBoot = false;
-#    enableNvidia = true;
+    #    enableNvidia = true;
   };
   # hardware.nvidia-container-toolkit.enable = true;
   services.avahi.enable = true;
@@ -263,26 +302,26 @@ in
 
     # Visuals
     plymouth = {
-        enable = false;
-        theme = "deus_ex"; # motion is also cool
-        themePackages = with pkgs; [
-          (adi1090x-plymouth-themes.override {
-            selected_themes = [ "deus_ex" ];
-          })
-        ];
+      enable = false;
+      theme = "deus_ex"; # motion is also cool
+      themePackages = with pkgs; [
+        (adi1090x-plymouth-themes.override {
+          selected_themes = [ "deus_ex" ];
+        })
+      ];
     };
     kernelParams = [
-        # attempt to fix nvidia perf
-        #"nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
-        "delayacct"
-        "initcall_blacklist=sysfb_init"
-        #"quiet"
-        #"splash"
-        "boot.shell_on_fail"
-        "loglevel=3"
-        "rd.systemd.show_status=false"
-        "rd.udev.log_level=3"
-        "udev.log_priority=3"
+      # attempt to fix nvidia perf
+      #"nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
+      "delayacct"
+      "initcall_blacklist=sysfb_init"
+      #"quiet"
+      #"splash"
+      "boot.shell_on_fail"
+      "loglevel=3"
+      "rd.systemd.show_status=false"
+      "rd.udev.log_level=3"
+      "udev.log_priority=3"
     ];
 
     # Removing support for unneeded stuff
@@ -315,13 +354,12 @@ in
 
   environment.systemPackages = with pkgs; [
     git
-#    nvtopPackages.full
+    #    nvtopPackages.full
     btop
     lshw
     hyprpolkitagent
 
-#    lenovo-legion
-
+    #    lenovo-legion
 
     # required for quickshell config; needs to be here for them to be included in import/plugin path
     kdePackages.qt5compat
@@ -338,77 +376,82 @@ in
     libsForQt5.kirigami2
     kdePackages.syntax-highlighting
 
-    (python313.withPackages(ps: with ps; [
-      build
-      pillow
-      cffi
-      libsass
-      material-color-utilities
-      materialyoucolor
-      numpy
-      packaging
-      pillow
-      psutil
-      pycparser
-      pyproject-hooks
-      pywayland
-      setproctitle
-      setuptools
-      setuptools-scm
-      wheel
+    (python313.withPackages (
+      ps: with ps; [
+        build
+        pillow
+        cffi
+        libsass
+        material-color-utilities
+        materialyoucolor
+        numpy
+        packaging
+        pillow
+        psutil
+        pycparser
+        pyproject-hooks
+        pywayland
+        setproctitle
+        setuptools
+        setuptools-scm
+        wheel
 
-      pwntools
-    ]))
+        pwntools
+      ]
+    ))
   ];
 
-  environment.variables =  let
-        qtVersions = with pkgs; [
-          qt5
-          qt6
-        ];
-      in
-      {
-        QT_PLUGIN_PATH = map (qt: "/${qt.qtbase.qtPluginPrefix}") qtVersions;
-        QML2_IMPORT_PATH = map (qt: "/${qt.qtbase.qtQmlPrefix}") qtVersions ++ (with unstable-pkgs; [
+  environment.variables =
+    let
+      qtVersions = with pkgs; [
+        qt5
+        qt6
+      ];
+    in
+    {
+      QT_PLUGIN_PATH = map (qt: "/${qt.qtbase.qtPluginPrefix}") qtVersions;
+      QML2_IMPORT_PATH =
+        map (qt: "/${qt.qtbase.qtQmlPrefix}") qtVersions
+        ++ (with unstable-pkgs; [
           "${quickshell}/lib/qt-6/qml/"
         ]);
-      };
+    };
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
 
   # The nvidia fun part
- hardware.graphics = {
+  hardware.graphics = {
     enable = true;
     # package = unstable-pkgs.mesa.drivers;
     # Steam support
     enable32Bit = true;
     # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
     extraPackages = with pkgs; [
-    
+
       # Required for modern Intel GPUs (Xe iGPU and ARC)
-      intel-media-driver     # VA-API (iHD) userspace
-      vpl-gpu-rt             # oneVPL (QSV) runtime
+      intel-media-driver # VA-API (iHD) userspace
+      vpl-gpu-rt # oneVPL (QSV) runtime
 
       # Optional (compute / tooling):
-      intel-compute-runtime  # OpenCL (NEO) + Level Zero for Arc/Xe
- #     libvdpau-va-gl
- #     nvidia-vaapi-driver
+      intel-compute-runtime # OpenCL (NEO) + Level Zero for Arc/Xe
+      #     libvdpau-va-gl
+      #     nvidia-vaapi-driver
     ];
   };
   environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "iHD"; 
-    };
-     hardware.enableRedistributableFirmware = true;
+    LIBVA_DRIVER_NAME = "iHD";
+  };
+  hardware.enableRedistributableFirmware = true;
 
   #boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" "lenovo-legion-module"];
   #hardware.nvidia = {
   #  open = false;
-    # modesetting.enable = true;
-    # powerManagement.enable = true;
-    # nvidiaSettings = true;
+  # modesetting.enable = true;
+  # powerManagement.enable = true;
+  # nvidiaSettings = true;
   #  prime = {
-      # hardware specific, beware!
+  # hardware specific, beware!
   #    amdgpuBusId = lib.mkForce "PCI:06:00:0";
   #    nvidiaBusId = lib.mkForce "PCI:01:00:0";
   #  };
@@ -417,12 +460,14 @@ in
   services.cpupower-gui.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = false;
-  services.tlp = {
-    enable = true;
-   # USB_DENYLIST = "04d9:a0b8";
-  };
-  # powerManagement.powertop.enable = true;
-  # powerManagement.cpuFreqGovernor = "powersave";
+  # services.tlp = {
+  # enable = true;
+  # USB_DENYLIST = "04d9:a0b8";
+  # };
+  powerManagement.enable = true;
+  powerManagement.powertop.enable = true;
+  powerManagement.cpuFreqGovernor = "schedutil";
+  services.thermald.enable = true;
 
   security.polkit.enable = true;
 
@@ -446,21 +491,21 @@ in
   networking.firewall.allowedUDPPorts = [
     5353 # Google cast discovery
     42000 # warpinator
-    42001 # warpinator 
-    67 68 # dhcp
+    42001 # warpinator
+    67
+    68 # dhcp
     1716 # kdeconnect
   ];
   # Or disable the firewall altogether.
   networking.firewall.enable = false;
   hardware.wooting.enable = true;
-  
+
   services.syncthing = {
     enable = true;
     openDefaultPorts = true;
   };
   services.lldpd.enable = true;
   systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
-
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -470,9 +515,11 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.11"; # Did you read the comment?
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # /etc/hosts :)
-  networking.extraHosts = ''
-  '';
+  networking.extraHosts = "";
 }
