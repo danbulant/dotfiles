@@ -9,6 +9,7 @@
   pkgs,
   danksearch,
   niri,
+  affinity-nix,
   inputs,
   ...
 }:
@@ -34,6 +35,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+     affinity-nix.packages.x86_64-linux.v3
+      biome
       bun
       lenovo-legion
       itch

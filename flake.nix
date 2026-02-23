@@ -45,6 +45,7 @@
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 
     colmena.url = "github:zhaofengli/colmena";
+    affinity-nix.url = "github:mrshmllow/affinity-nix";
 
     copyparty.url = "github:9001/copyparty";
   };
