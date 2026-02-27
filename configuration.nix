@@ -289,6 +289,10 @@ in
     #    enableNvidia = true;
   };
   # hardware.nvidia-container-toolkit.enable = true;
+
+  # Enable sysbox for system containers
+  virtualisation.sysbox.enable = true;
+
   services.avahi.enable = true;
 
   boot = {
@@ -467,7 +471,7 @@ in
   # USB_DENYLIST = "04d9:a0b8";
   # };
   powerManagement.enable = true;
-  powerManagement.powertop.enable = true;
+  #powerManagement.powertop.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil";
   services.thermald.enable = true;
 

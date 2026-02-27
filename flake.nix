@@ -67,6 +67,14 @@
       ...
     }@attrs:
     {
+      # Export sysbox package overlay for external use
+      overlays.default = final: prev: {
+        sysbox = final.callPackage ./pkgs/sysbox/package.nix { };
+      };
+
+      # Export sysbox NixOS module for external use
+      nixosModules.sysbox = import ./modules/sysbox.nix;
+
       nixosConfigurations.aura = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = attrs;
@@ -74,7 +82,9 @@
           {
             nixpkgs.overlays = [
               # dolphin-overlay.overlays.default
-              (_: prev: {
+              # Add sysbox overlay
+              (final: prev: {
+                sysbox = final.callPackage ./pkgs/sysbox/package.nix { };
                 tailscale = prev.tailscale.overrideAttrs (old: {
                   checkFlags = builtins.map (
                     flag:
@@ -97,6 +107,8 @@
             home-manager.backupFileExtension = "backup";
           }
           ./configuration.nix
+          # Import sysbox module
+          ./modules/sysbox.nix
           nix-index-database.nixosModules.nix-index
           { programs.nix-index-database.comma.enable = true; }
           #./powersave.nix
