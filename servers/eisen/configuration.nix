@@ -1,16 +1,23 @@
-
-{ config, nix-index-database, pkgs, lib, name ? "eisen", copyparty, ... }:
+{
+  config,
+  nix-index-database,
+  pkgs,
+  lib,
+  name ? "eisen",
+  copyparty,
+  ...
+}:
 let
   # these are used both in service configuration but also to
   # create mappings {name}.eisen.danbulant.cloud to port in caddy
   ports = {
     "status" = 3001;
     "glance" = 5678;
-    "copyparty" = 3210;
-    "syncthing" = 8384;
-    "gitea" = 3000;
-    "immich" = 2283;
-    "grafana" = 3002;
+    # "copyparty" = 3210;
+    # "syncthing" = 8384;
+    # "gitea" = 3000;
+    # "immich" = 2283;
+    # "grafana" = 3002;
     "ntfy" = 3003;
     "suwayomi" = 3004;
   };
@@ -20,13 +27,13 @@ in
     buildOnTarget = true;
   };
 
-  nixpkgs.overlays = [ copyparty.overlays.default ];
+  # nixpkgs.overlays = [ copyparty.overlays.default ];
 
   programs.nix-index-database.comma.enable = true;
 
   imports = [
     nix-index-database.nixosModules.nix-index
-    copyparty.nixosModules.default
+    # copyparty.nixosModules.default
     ./hardware-configuration.nix
   ];
 
@@ -37,7 +44,7 @@ in
 
   networking = {
     hostName = name;
-    nameservers = ["1.1.1.1"];
+    nameservers = [ "1.1.1.1" ];
     networkmanager.enable = true;
   };
 
@@ -64,50 +71,50 @@ in
     avahi.enable = true;
     lldpd.enable = true;
 
-    syncthing = {
-      enable = true;
-      openDefaultPorts = true;
-      settings = {
-        gui = {
-          insecureSkipHostCheck = true;
-        };
-      };
-    };
-    
-    copyparty = {
-      enable = true;
+    # syncthing = {
+    #   enable = true;
+    #   openDefaultPorts = true;
+    #   settings = {
+    #     gui = {
+    #       insecureSkipHostCheck = true;
+    #     };
+    #   };
+    # };
 
-      settings = {
-        p = ports.copyparty;
-        idp-hm-usr = "^X-Webauth-Login^danbulant@github^dan";
-        rproxy = 1;
-        xff-hdr = "X-Forwarded-For";
-        ipu = [ "100.103.148.81/32=dan" /*"100.79.186.114/32=dan" "100.76.144.133/32=dan" "100.114.62.113/32=dan" */ ];
-      };
+    # copyparty = {
+    #   enable = true;
 
-      accounts = {
-        dan = {
-          passwordFile = "/dev/null";
-        };
-      };
+    #   settings = {
+    #     p = ports.copyparty;
+    #     idp-hm-usr = "^X-Webauth-Login^danbulant@github^dan";
+    #     rproxy = 1;
+    #     xff-hdr = "X-Forwarded-For";
+    #     ipu = [ "100.103.148.81/32=dan" /*"100.79.186.114/32=dan" "100.76.144.133/32=dan" "100.114.62.113/32=dan" */ ];
+    #   };
 
-      volumes = {
-        "/" = {
-          path = "/media/large";
-          access = {
-            rwa = [ "dan" ];
-            r = [ "*" ];
-          };
-        };
-      };
+    #   accounts = {
+    #     dan = {
+    #       passwordFile = "/dev/null";
+    #     };
+    #   };
 
-      openFilesLimit = 8192;
-    };
-    
+    #   volumes = {
+    #     "/" = {
+    #       path = "/media/large";
+    #       access = {
+    #         rwa = [ "dan" ];
+    #         r = [ "*" ];
+    #       };
+    #     };
+    #   };
+
+    #   openFilesLimit = 8192;
+    # };
+
     dnsmasq = {
       enable = true;
     };
-    
+
     uptime-kuma = {
       enable = true;
       settings = {
@@ -115,23 +122,11 @@ in
       };
     };
 
-    grafana = {
-      enable = true;
-      settings.server.http_port = ports.grafana;
-    };
-    prometheus.enable = true;
-
-    gitea = {
-      enable = true;
-      lfs = {
-        enable = true;
-        contentDir = "/media/large/gitea-lfs";
-      };
-      appName = "Eisen git";
-      settings.server.DOMAIN = "gitea.eisen";
-      settings.server.HTTP_PORT = ports.gitea;
-      settings.server.ROOT_URL = "http://gitea.eisen/";
-    };
+    # grafana = {
+    #   enable = true;
+    #   settings.server.http_port = ports.grafana;
+    # };
+    # prometheus.enable = true;
 
     suwayomi-server = {
       enable = true;
@@ -148,7 +143,7 @@ in
     # immich = {
     #   enable = true;
     # };
-    
+
     ntfy-sh = {
       enable = true;
       settings = {
@@ -207,13 +202,14 @@ in
         }) (builtins.attrNames ports)
       );
     };
+    tailscale.permitCertUid = "caddy";
     tailscaleAuth = {
-       # this is what's used above in forward_auth
+      # this is what's used above in forward_auth
       enable = true;
       group = "caddy";
     };
   };
-  systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
+  # systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
   virtualisation.docker = {
     enable = true;
@@ -250,13 +246,29 @@ in
 
   users.users.dan = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "docker" "fuse" "video" "wireshark" "gamemode" "scanner" "lp" "kvm" "adbusers"];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+      "fuse"
+      "video"
+      "wireshark"
+      "gamemode"
+      "scanner"
+      "lp"
+      "kvm"
+      "adbusers"
+    ];
     shell = pkgs.nushell;
     packages = with pkgs; [
-      
+
     ];
   };
-  nix.settings.trusted-users = [ "root" "@wheel" "dan" ];
+  nix.settings.trusted-users = [
+    "root"
+    "@wheel"
+    "dan"
+  ];
 
   environment.systemPackages = with pkgs; [
     git
@@ -299,9 +311,11 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # /etc/hosts :)
-  networking.extraHosts = ''
-  '';
+  networking.extraHosts = "";
 }
