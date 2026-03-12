@@ -48,6 +48,11 @@
     affinity-nix.url = "github:mrshmllow/affinity-nix";
 
     copyparty.url = "github:9001/copyparty";
+    
+    nix-monitor = {
+      url = "github:antonjah/nix-monitor";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -64,6 +69,7 @@
       nix-gaming,
       nix-index-database,
       dms,
+      nix-monitor,
       ...
     }@attrs:
     {
@@ -106,6 +112,19 @@
             home-manager.users.dan = import ./home.nix;
             home-manager.backupFileExtension = "backup";
           }
+          
+#          nix-monitor.nixosModules.default
+#        {
+#          programs.nix-monitor = {
+#            enable = true;
+            
+            # Required: customize for your setup
+#            rebuildCommand = [ 
+#              "bash" "-c" 
+#              "cd /home/dan/projects/dotfiles; nh os switch . 2>&1"
+#            ];
+#          };
+#        }
           ./configuration.nix
           # Import sysbox module
           ./modules/sysbox.nix

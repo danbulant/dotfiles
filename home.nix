@@ -11,6 +11,7 @@
   niri,
   affinity-nix,
   inputs,
+  nix-monitor,
   ...
 }:
 let
@@ -28,6 +29,7 @@ in
     zen-browser.homeModules.beta
     dms.homeModules.dank-material-shell
     danksearch.homeModules.default
+    nix-monitor.homeManagerModules.default
     # niri.homeManagerModules.default
     # dms.homeModules.niri
   ];
@@ -35,7 +37,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
-     affinity-nix.packages.x86_64-linux.v3
+      voxtype-onnx
+     #affinity-nix.packages.x86_64-linux.v3
       biome
       bun
       lenovo-legion
@@ -52,7 +55,7 @@ in
       steam
       helium
       opencode
-      linuxKernel.packages.linux_6_12.perf
+      perf
       obs-studio
       flamegraph
       samply
@@ -354,6 +357,8 @@ in
     };
   };
   programs = {
+    nix-monitor.enable = true;
+    nix-monitor.rebuildCommand = ["bash" "-c" "cd /home/dan/projects/dotfiles; nh os switch ."];
     zen-browser.enable = true;
     fish = {
       enable = true;

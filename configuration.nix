@@ -31,6 +31,13 @@ in
   ];
   # nyx.low-power.enable = true;
   hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
+  services.sunshine = {
+    enable = true;
+    autoStart = true;
+    capSysAdmin = true;
+    openFirewall = true;
+    
+  };
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
@@ -377,7 +384,7 @@ in
     kdePackages.kirigami
     kdePackages.kirigami-addons
     kdePackages.kirigami-addons.dev
-    libsForQt5.appstream-qt
+    #    libsForQt5.appstream-qt
     libsForQt5.kcoreaddons
     libsForQt5.kirigami2
     kdePackages.syntax-highlighting
@@ -466,14 +473,19 @@ in
   services.cpupower-gui.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = false;
-  # services.tlp = {
-  # enable = true;
-  # USB_DENYLIST = "04d9:a0b8";
-  # };
+  services.tlp = {
+    enable = true;
+    settings = {
+      USB_DENYLIST = "04d9:a0b8";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "balance_power";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
+    };
+  };
   powerManagement.enable = true;
   #powerManagement.powertop.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil";
   services.thermald.enable = true;
+  hardware.cpu.intel.updateMicrocode = true;
 
   security.polkit.enable = true;
 
