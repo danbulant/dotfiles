@@ -289,6 +289,7 @@ in
     httpie
     socat
     websocat
+    oh-my-posh
   ];
 
   nixpkgs.config.allowUnfree = true;

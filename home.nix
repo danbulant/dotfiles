@@ -37,8 +37,9 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      affine
       voxtype-onnx
-     #affinity-nix.packages.x86_64-linux.v3
+      #affinity-nix.packages.x86_64-linux.v3
       biome
       bun
       lenovo-legion
@@ -358,7 +359,11 @@ in
   };
   programs = {
     nix-monitor.enable = true;
-    nix-monitor.rebuildCommand = ["bash" "-c" "cd /home/dan/projects/dotfiles; nh os switch ."];
+    nix-monitor.rebuildCommand = [
+      "bash"
+      "-c"
+      "cd /home/dan/projects/dotfiles; nh os switch ."
+    ];
     zen-browser.enable = true;
     fish = {
       enable = true;
