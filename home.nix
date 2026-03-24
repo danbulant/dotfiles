@@ -12,6 +12,7 @@
   affinity-nix,
   inputs,
   nix-monitor,
+  rusic,
   ...
 }:
 let
@@ -37,6 +38,9 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      nixd
+      buck2
+      (rusic.packages.${system}.default)
       affine
       voxtype-onnx
       #affinity-nix.packages.x86_64-linux.v3
