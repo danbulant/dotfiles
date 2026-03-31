@@ -38,6 +38,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      spacetimedb
       nixd
       buck2
       (rusic.packages.${system}.default)
