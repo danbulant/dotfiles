@@ -38,6 +38,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      lmstudio
       spacetimedb
       nixd
       buck2
@@ -93,7 +94,7 @@ in
       colmena.defaultPackage.${system}
       usbimager
       bitwarden-desktop
-      metasploit
+      #metasploit
       lenovo-legion
       burpsuite
       zap
@@ -153,8 +154,8 @@ in
       grc
       onefetch
       inter
-      fira
-      fira-code
+      #fira
+      #fira-code
       # fira-code-nerdfont
       nerd-fonts.fira-code
       iosevka
