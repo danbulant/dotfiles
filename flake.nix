@@ -82,6 +82,24 @@
       # Export sysbox NixOS module for external use
       nixosModules.sysbox = import ./modules/sysbox.nix;
 
+      nixosConfigurations.fern = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = attrs;
+        modules = [
+          determinate.nixosModules.default
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.extraSpecialArgs = attrs;
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.dan = import ./servers/ui-mode/home.nix;
+            networking.hostName = "fern";
+            imports = [ ./servers/fern/hardware-configuration.nix ];
+          }
+          ./servers/ui-mode/configuration.nix
+        ];
+      };
+
       nixosConfigurations.aura = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = attrs;
@@ -110,8 +128,10 @@
             home-manager.extraSpecialArgs = attrs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.dan = import ./home.nix;
+            home-manager.users.dan = import ./servers/ui-mode/home.nix;
             home-manager.backupFileExtension = "backup";
+            networking.hostName = "aura";
+            imports = [ ./servers/aura/hardware-configuration.nix ];
           }
 
           #          nix-monitor.nixosModules.default
@@ -126,7 +146,7 @@
           #            ];
           #          };
           #        }
-          ./configuration.nix
+          ./servers/ui-mode/configuration.nix
           # Import sysbox module
           ./modules/sysbox.nix
           nix-index-database.nixosModules.nix-index

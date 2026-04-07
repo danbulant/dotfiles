@@ -25,7 +25,7 @@ in
     # nixos-hardware.nixosModules.common-gpu-nvidia
     # nixos-hardware.nixosModules.common-pc-laptop
     # nixos-hardware.nixosModules.common-pc-laptop-ssd
-    ./hardware-configuration.nix
+#    ./hardware-configuration.nix
     dms.nixosModules.greeter
     # /etc/nixos/cachix.nix
   ];
@@ -85,7 +85,7 @@ in
   #   };
   # };
 
-  networking.hostName = "aura";
+  #networking.hostName = "aura";
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   # networking.nameservers = ["1.1.1.1"];
@@ -305,7 +305,7 @@ in
   # hardware.nvidia-container-toolkit.enable = true;
 
   # Enable sysbox for system containers
-  virtualisation.sysbox.enable = true;
+  #virtualisation.sysbox.enable = true;
 
   services.avahi.enable = true;
 
@@ -321,15 +321,15 @@ in
     kernel.sysctl."kernel.sysrq" = 1;
 
     # Visuals
-    plymouth = {
-      enable = false;
-      theme = "deus_ex"; # motion is also cool
-      themePackages = with pkgs; [
-        (adi1090x-plymouth-themes.override {
-          selected_themes = [ "deus_ex" ];
-        })
-      ];
-    };
+    #plymouth = {
+    #  enable = false;
+    #  theme = "deus_ex"; # motion is also cool
+    #  themePackages = with pkgs; [
+    #    (adi1090x-plymouth-themes.override {
+    #      selected_themes = [ "deus_ex" ];
+    #    })
+    #  ];
+    #};
     kernelParams = [
       # attempt to fix nvidia perf
       #"nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
@@ -353,7 +353,7 @@ in
     # OBS Studio virtual camera
     extraModulePackages = with config.boot.kernelPackages; [
       v4l2loopback
-      lenovo-legion-module
+      #lenovo-legion-module
     ];
     extraModprobeConfig = ''
       options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1

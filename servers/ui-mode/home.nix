@@ -63,7 +63,7 @@ in
       helium
       opencode
       perf
-      obs-studio
+      #obs-studio
       flamegraph
       samply
       font-awesome
