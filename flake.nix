@@ -96,6 +96,7 @@
             networking.hostName = "fern";
             imports = [ ./servers/fern/hardware-configuration.nix ];
           }
+          ./servers/fern/configuration.nix
           ./servers/ui-mode/configuration.nix
         ];
       };

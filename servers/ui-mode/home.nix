@@ -128,8 +128,8 @@ in
 
       # cloud things
       minikube
-      nebula
-      nixpkgs-unstable.legacyPackages.${system}.jet-pilot
+      #nebula
+      #nixpkgs-unstable.legacyPackages.${system}.jet-pilot
       k9s
 
       prismlauncher
@@ -286,6 +286,8 @@ in
       screen
       openvpn
       #ghostty
+      nvtopPackages.full
+      openrgb-with-all-plugins
 
       mdbook
       nix-tree

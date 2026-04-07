@@ -1,15 +1,10 @@
 {
-  config,
   pkgs,
-  options,
-  nixpkgs-unstable,
-  lib,
-  dms,
   ...
 }:
 
 {
-
+  services.hardware.openrgb.enable = true;
   boot = {
     kernelParams = [
       # attempt to fix nvidia perf
@@ -34,14 +29,6 @@
     enable32Bit = true;
     # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
     extraPackages = with pkgs; [
-
-      # Required for modern Intel GPUs (Xe iGPU and ARC)
-      intel-media-driver # VA-API (iHD) userspace
-      vpl-gpu-rt # oneVPL (QSV) runtime
-
-      # Optional (compute / tooling):
-      intel-compute-runtime # OpenCL (NEO) + Level Zero for Arc/Xe
-      #     libvdpau-va-gl
       nvidia-vaapi-driver
     ];
   };
