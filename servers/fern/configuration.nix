@@ -32,10 +32,17 @@
       nvidia-vaapi-driver
     ];
   };
+  environment.systemPackages = with pkgs; [
+    nvitop
+  ];
   hardware.nvidia = {
-    open = false;
+    open = true;
     modesetting.enable = true;
-    powerManagement.enable = true;
+    # powerManagement.enable = true;
     nvidiaSettings = true;
   };
+  services.xserver.videoDrivers = [ "nvidia" ];
+  # powerManagement.enable = true;
+  hardware.nvidia-container-toolkit.enable = true;
+  virtualisation.docker.daemon.settings.features.cdi = true;
 }

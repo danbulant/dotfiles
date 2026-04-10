@@ -38,6 +38,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      unstable.gearlever
+      linux-wallpaperengine
       lmstudio
       spacetimedb
       nixd
@@ -52,7 +54,7 @@ in
       itch
       filezilla
       nicotine-plus
-      protonvpn-gui
+      proton-vpn
       dgop
       mysql-workbench
       i2c-tools
@@ -114,7 +116,7 @@ in
       cava
       cliphist
       matugen
-      swww
+      #awww
       kdePackages.fcitx5-with-addons
       easyeffects
       mpvpaper
