@@ -1,10 +1,10 @@
 {
-  config,
+  # config,
   nix-index-database,
   pkgs,
   lib,
   name ? "eisen",
-  copyparty,
+  # copyparty,
   ...
 }:
 let
@@ -13,13 +13,14 @@ let
   ports = {
     "status" = 3001;
     "glance" = 5678;
+    "jellyfin" = 8096;
     # "copyparty" = 3210;
     # "syncthing" = 8384;
     # "gitea" = 3000;
     # "immich" = 2283;
     # "grafana" = 3002;
     "ntfy" = 3003;
-    "suwayomi" = 3004;
+    # "suwayomi" = 3004;
   };
 in
 {
@@ -70,6 +71,10 @@ in
     };
     avahi.enable = true;
     lldpd.enable = true;
+
+    jellyfin = {
+      enable = true;
+    };
 
     # syncthing = {
     #   enable = true;
@@ -128,17 +133,17 @@ in
     # };
     # prometheus.enable = true;
 
-    suwayomi-server = {
-      enable = true;
-      settings.server = {
-        port = ports.suwayomi;
-        extensionRepos = [
-          "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
-        ];
-      };
-    };
+    # suwayomi-server = {
+    #   enable = true;
+    #   settings.server = {
+    #     port = ports.suwayomi;
+    #     extensionRepos = [
+    #       "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
+    #     ];
+    #   };
+    # };
 
-    flaresolverr.enable = true;
+    # flaresolverr.enable = true;
 
     # immich = {
     #   enable = true;
@@ -260,9 +265,6 @@ in
       "adbusers"
     ];
     shell = pkgs.nushell;
-    packages = with pkgs; [
-
-    ];
   };
   nix.settings.trusted-users = [
     "root"
@@ -271,6 +273,8 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
+    lsof
+    rsync
     git
     nvtopPackages.full
     btop

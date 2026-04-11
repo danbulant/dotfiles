@@ -17,26 +17,14 @@ let
 in
 {
   imports = [
-    #      nixos-hardware.nixosModules.lenovo-legion-16ach6h-hybrid # this is borked in latest update for some reason, edid doesn't build
-    # nixos-hardware.nixosModules.common-cpu-amd
-    # nixos-hardware.nixosModules.common-cpu-amd-pstate
-    # nixos-hardware.nixosModules.common-cpu-amd-zenpower
-    # nixos-hardware.nixosModules.common-gpu-amd
-    # nixos-hardware.nixosModules.common-gpu-nvidia
-    # nixos-hardware.nixosModules.common-pc-laptop
-    # nixos-hardware.nixosModules.common-pc-laptop-ssd
-#    ./hardware-configuration.nix
     dms.nixosModules.greeter
-    # /etc/nixos/cachix.nix
   ];
-  # nyx.low-power.enable = true;
   hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
   services.sunshine = {
     enable = true;
     autoStart = true;
     capSysAdmin = true;
     openFirewall = true;
-
   };
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -61,38 +49,16 @@ in
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
-  #fileSystems."/media/New BTRFS" = {
-  #  device = "/dev/disk/by-uuid/26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
-  #  fsType = "btrfs";
-  #};
-  #fileSystems."/media/secondary" = {
-  #  device = "/dev/disk/by-uuid/050574C34881C3B9";
-  #  fsType = "ntfs";
-  #};
-  #fileSystems."/media/windows" = {
-  #  device = "/dev/disk/by-uuid/846A9EF06A9EDE6C";
-  #  fsType = "ntfs";
-  #};
-
-  # services.beesd.filesystems = {
-  #   root = {
-  #     spec = "UUID=26b1fa88-e270-45c7-a6c0-d46c9d4c6c90";
-  #     hashTableSizeMB = 1024;
-  #     extraOptions = [
-  #       "-c" "4"
-  #       "-g" "10"
-  #     ];
-  #   };
-  # };
-
-  #networking.hostName = "aura";
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   # networking.nameservers = ["1.1.1.1"];
-  services.dnsmasq.settings.server = [
-    "100.100.100.100"
-    "127.0.0.1#5053"
-  ];
+  services.dnsmasq = {
+    enable = true;
+    settings = {
+      server = [
+        "/ts.net/100.100.100.100"
+        "127.0.0.1#5053"
+      ];
+    };
+  };
 
   networking.networkmanager.enable = true;
   networking.networkmanager.plugins = with pkgs; [ networkmanager-openconnect ];
@@ -113,7 +79,7 @@ in
 
       listen_addresses = [ "127.0.0.1:5053" ];
       ipv6_servers = false;
-      block_ipv6 = !(false);
+      block_ipv6 = !false;
 
       require_dnssec = true;
       require_nolog = false;
@@ -138,7 +104,6 @@ in
     LC_TELEPHONE = "cs_CZ.UTF-8";
     LC_TIME = "en_GB.UTF-8";
   };
-  services.dnsmasq.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
   services.desktopManager.plasma6 = {
@@ -242,7 +207,6 @@ in
     ];
   };
 
-  # Comment out below for the first time to avoid cache miss, if using flake
   programs.hyprland = {
     enable = true;
     #    package = hyprland.packages.${pkgs.system}.hyprland;
@@ -253,8 +217,6 @@ in
 
     # package = unstable-pkgs.hyprland;
   };
-  # End comment out
-  #
   programs.dank-material-shell.greeter = {
     enable = true;
     compositor.name = "hyprland"; # "niri" or "hyprland" or "sway"
@@ -343,10 +305,6 @@ in
       "rd.udev.log_level=3"
       "udev.log_priority=3"
     ];
-
-    # Removing support for unneeded stuff
-    # zfs.enabled = false;
-    swraid.enable = false;
 
     initrd.systemd.enable = true;
 
@@ -440,15 +398,11 @@ in
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
 
-  # The nvidia fun part
   hardware.graphics = {
     enable = true;
-    # package = unstable-pkgs.mesa.drivers;
     # Steam support
     enable32Bit = true;
-    # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
     extraPackages = with pkgs; [
-
       # Required for modern Intel GPUs (Xe iGPU and ARC)
       intel-media-driver # VA-API (iHD) userspace
       vpl-gpu-rt # oneVPL (QSV) runtime
@@ -464,18 +418,6 @@ in
   };
   hardware.enableRedistributableFirmware = true;
 
-  #boot.kernelModules = ["amdgpu" "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" "lenovo-legion-module"];
-  #hardware.nvidia = {
-  #  open = false;
-  # modesetting.enable = true;
-  # powerManagement.enable = true;
-  # nvidiaSettings = true;
-  #  prime = {
-  # hardware specific, beware!
-  #    amdgpuBusId = lib.mkForce "PCI:06:00:0";
-  #    nvidiaBusId = lib.mkForce "PCI:01:00:0";
-  #  };
-  #};
   hardware.enableAllFirmware = true;
   services.cpupower-gui.enable = true;
   services.upower.enable = true;
