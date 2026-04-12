@@ -22,6 +22,32 @@
       "udev.log_priority=3"
     ];
   };
+
+  # vr
+  services.monado = {
+    enable = true;
+    defaultRuntime = true; # Register as default OpenXR runtime
+  };
+  systemd.user.services.monado.environment = {
+    STEAMVR_LH_ENABLE = "1";
+    XRT_COMPOSITOR_COMPUTE = "1";
+    WMR_HANDTRACKING = "0";
+    VIT_SYSTEM_LIBRARY_PATH = "${pkgs.basalt-monado}/lib/libbasalt.so";
+  };
+  programs.steam = {
+    enable = true;
+    package = pkgs.steam.override {
+      extraProfile = ''
+        # Fixes timezones on VRChat
+        unset TZ
+        # Allows Monado/WiVRn to be used
+        export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
+      '';
+    };
+  };
+
+  hardware.cpu.amd.updateMicrocode = true;
+
   hardware.graphics = {
     enable = true;
     # package = unstable-pkgs.mesa.drivers;
@@ -34,6 +60,7 @@
   };
   environment.systemPackages = with pkgs; [
     nvitop
+    basalt-monado
   ];
   hardware.nvidia = {
     open = true;

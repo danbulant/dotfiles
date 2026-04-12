@@ -13,6 +13,7 @@
   inputs,
   nix-monitor,
   rusic,
+  config,
   ...
 }:
 let
@@ -62,7 +63,6 @@ in
       kdePackages.kimageformats
       power-profiles-daemon
       tail-tray
-      steam
       helium
       opencode
       perf
@@ -447,21 +447,44 @@ in
   services.kdeconnect.indicator = true;
   services.blueman-applet.enable = true;
   services.mpris-proxy.enable = true;
-  xdg.mimeApps = {
-    enable = true;
+  xdg = {
+    configFile."openxr/1/active_runtime.json".source =
+      "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+    configFile."openvr/openvrpaths.vrpath".text = ''
+      {
+        "config" :
+        [
+          "${config.xdg.dataHome}/Steam/config"
+        ],
+        "external_drivers" : null,
+        "jsonid" : "vrpathreg",
+        "log" :
+        [
+          "${config.xdg.dataHome}/Steam/logs"
+        ],
+        "runtime" :
+        [
+          "${pkgs.opencomposite}/lib/opencomposite"
+        ],
+        "version" : 1
+      }
+    '';
+    mimeApps = {
+      enable = true;
 
-    defaultApplications = {
-      "x-scheme-handler/http" = "zen-beta.desktop";
-      "x-scheme-handler/https" = "zen-beta.desktop";
-      "x-scheme-handler/chrome" = "zen-beta.desktop";
-      "text/html" = "zen-beta.desktop";
-      "application/x-extension-htm" = "zen-beta.desktop";
-      "application/x-extension-html" = "zen-beta.desktop";
-      "application/x-extension-shtml" = "zen-beta.desktop";
-      "application/xhtml+xml" = "zen-beta.desktop";
-      "application/x-extension-xhtml" = "zen-beta.desktop";
-      "application/x-extension-xht" = "zen-beta.desktop";
-      "x-scheme-handler/discord" = "vesktop.desktop";
+      defaultApplications = {
+        "x-scheme-handler/http" = "zen-beta.desktop";
+        "x-scheme-handler/https" = "zen-beta.desktop";
+        "x-scheme-handler/chrome" = "zen-beta.desktop";
+        "text/html" = "zen-beta.desktop";
+        "application/x-extension-htm" = "zen-beta.desktop";
+        "application/x-extension-html" = "zen-beta.desktop";
+        "application/x-extension-shtml" = "zen-beta.desktop";
+        "application/xhtml+xml" = "zen-beta.desktop";
+        "application/x-extension-xhtml" = "zen-beta.desktop";
+        "application/x-extension-xht" = "zen-beta.desktop";
+        "x-scheme-handler/discord" = "vesktop.desktop";
+      };
     };
   };
 
