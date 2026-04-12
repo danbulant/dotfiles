@@ -1,40 +1,43 @@
 {
-  # config,
   nix-index-database,
   pkgs,
   lib,
   name ? "eisen",
-  # copyparty,
   ...
 }:
 let
   # these are used both in service configuration but also to
   # create mappings {name}.eisen.danbulant.cloud to port in caddy
   ports = {
-    "status" = 3001;
-    "glance" = 5678;
-    "jellyfin" = 8096;
-    # "copyparty" = 3210;
-    # "syncthing" = 8384;
-    # "gitea" = 3000;
-    # "immich" = 2283;
-    # "grafana" = 3002;
-    "ntfy" = 3003;
-    # "suwayomi" = 3004;
+    status = 3001;
+    glance = 5678;
+    jellyfin = 8096;
+    qb = 8081;
+    sonarr = 8989;
+    radarr = 7878;
+    jackett = 9117;
+    keep = 8100;
+    grafana = 3002;
+    # ntfy = 3003;
+  };
+  internalPorts = {
+    prometheus-node = 9000;
+    prometheus-qb = 9200;
+    prometheus-sonarr = 9101;
+    prometheus-radarr = 9102;
+    prometheus = 9090;
   };
 in
 {
   deployment = {
     buildOnTarget = true;
+    targetHost = "192.168.1.114";
   };
-
-  # nixpkgs.overlays = [ copyparty.overlays.default ];
 
   programs.nix-index-database.comma.enable = true;
 
   imports = [
     nix-index-database.nixosModules.nix-index
-    # copyparty.nixosModules.default
     ./hardware-configuration.nix
   ];
 
@@ -76,45 +79,30 @@ in
       enable = true;
     };
 
-    # syncthing = {
-    #   enable = true;
-    #   openDefaultPorts = true;
-    #   settings = {
-    #     gui = {
-    #       insecureSkipHostCheck = true;
-    #     };
-    #   };
-    # };
+    sonarr = {
+      enable = true;
+      settings.server.port = ports.sonarr;
+    };
 
-    # copyparty = {
-    #   enable = true;
+    radarr = {
+      enable = true;
+      settings.server.port = ports.radarr;
+    };
 
-    #   settings = {
-    #     p = ports.copyparty;
-    #     idp-hm-usr = "^X-Webauth-Login^danbulant@github^dan";
-    #     rproxy = 1;
-    #     xff-hdr = "X-Forwarded-For";
-    #     ipu = [ "100.103.148.81/32=dan" /*"100.79.186.114/32=dan" "100.76.144.133/32=dan" "100.114.62.113/32=dan" */ ];
-    #   };
+    jackett = {
+      enable = true;
+      port = ports.jackett;
+    };
 
-    #   accounts = {
-    #     dan = {
-    #       passwordFile = "/dev/null";
-    #     };
-    #   };
-
-    #   volumes = {
-    #     "/" = {
-    #       path = "/media/large";
-    #       access = {
-    #         rwa = [ "dan" ];
-    #         r = [ "*" ];
-    #       };
-    #     };
-    #   };
-
-    #   openFilesLimit = 8192;
-    # };
+    karakeep = {
+      enable = true;
+      extraEnvironment = {
+        PORT = toString ports.keep;
+        # DISABLE_SIGNUPS = "true";
+        DISABLE_NEW_RELEASE_CHECK = "true";
+      };
+      environmentFile = "/etc/secrets/karakeep.env";
+    };
 
     dnsmasq = {
       enable = true;
@@ -127,35 +115,79 @@ in
       };
     };
 
-    # grafana = {
-    #   enable = true;
-    #   settings.server.http_port = ports.grafana;
-    # };
-    # prometheus.enable = true;
-
-    # suwayomi-server = {
-    #   enable = true;
-    #   settings.server = {
-    #     port = ports.suwayomi;
-    #     extensionRepos = [
-    #       "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
-    #     ];
-    #   };
-    # };
-
-    # flaresolverr.enable = true;
-
-    # immich = {
-    #   enable = true;
-    # };
-
-    ntfy-sh = {
+    grafana = {
       enable = true;
       settings = {
-        listen-http = ":${toString ports.ntfy}";
-        base-url = "http://ntfy.eisen";
+        server.http_port = ports.grafana;
+        security = {
+          secret_key = "$__file{/etc/secrets/gf_secret_key}";
+        };
       };
     };
+    prometheus = {
+      enable = true;
+      exporters = {
+        exportarr-radarr = {
+          enable = true;
+          url = "http://127.0.0.1:${toString ports.radarr}";
+          port = internalPorts.prometheus-radarr;
+          apiKeyFile = "/etc/secrets/radarr_api_key";
+        };
+        exportarr-sonarr = {
+          enable = true;
+          url = "http://127.0.0.1:${toString ports.sonarr}";
+          port = internalPorts.prometheus-sonarr;
+          apiKeyFile = "/etc/secrets/sonarr_api_key";
+        };
+        node = {
+          enable = true;
+          port = internalPorts.prometheus-node;
+        };
+      };
+
+      scrapeConfigs = [
+        {
+          job_name = "node";
+          static_configs = [
+            {
+              targets = [ "localhost:${toString internalPorts.prometheus-node}" ];
+            }
+          ];
+        }
+        {
+          job_name = "qb";
+          static_configs = [
+            {
+              targets = [ "localhost:${toString internalPorts.prometheus-qb}" ];
+            }
+          ];
+        }
+        {
+          job_name = "sonarr";
+          static_configs = [
+            {
+              targets = [ "localhost:${toString internalPorts.prometheus-sonarr}" ];
+            }
+          ];
+        }
+        {
+          job_name = "radarr";
+          static_configs = [
+            {
+              targets = [ "localhost:${toString internalPorts.prometheus-radarr}" ];
+            }
+          ];
+        }
+      ];
+    };
+
+    # ntfy-sh = {
+    #   enable = true;
+    #   settings = {
+    #     listen-http = ":${toString ports.ntfy}";
+    #     base-url = "http://ntfy.eisen";
+    #   };
+    # };
 
     # grafana-to-ntfy = {
     #   enable = true;
@@ -216,9 +248,68 @@ in
   };
   # systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = true;
+  virtualisation = {
+    docker = {
+      enable = true;
+      enableOnBoot = true;
+    };
+
+    oci-containers = {
+      backend = "docker";
+      containers = {
+        gluetun = {
+          image = "qmcgaw/gluetun";
+          capabilities = {
+            NET_ADMIN = true;
+          };
+          devices = [ "/dev/net/tun" ];
+          environmentFiles = [ "/etc/secrets/gluetun.env" ];
+          ports = [
+            "${toString ports.qb}:${toString ports.qb}"
+          ];
+          # VPN_SERVICE_PROVIDER=protonvpn
+          # VPN_TYPE=wireguard
+          # WIREGUARD_PRIVATE_KEY=wOEI9rqqbDwnN8/Bpp22sVz48T71vJ4fYmFWujulwUU
+          # SERVER_COUNTRIES=Denmark
+          environment = {
+            VPN_PORT_FORWARDING = "on";
+            # TOR_ONLY = "on";
+            PORT_FORWARD_ONLY = "on";
+            FIREWALL_OUTBOUND_SUBNETS = "192.168.1.0/24,100.64.0.0/10";
+            FIREWALL_INPUT_PORTS = "41641,22,80,443,53";
+
+            VPN_PORT_FORWARDING_UP_COMMAND = ''
+              /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://172.17.0.1:${toString ports.qb}/api/v2/app/setPreferences'
+            '';
+            VPN_PORT_FORWARDING_DOWN_COMMAND = ''
+              /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://172.17.0.1:${toString ports.qb}/api/v2/app/setPreferences'
+            '';
+          };
+          # extraOptions = [ "--network=host" ];
+        };
+        qbittorrent = {
+          image = "lscr.io/linuxserver/qbittorrent";
+
+          environment = {
+            WEBUI_PORT = toString ports.qb;
+          };
+
+          volumes = [ "/media/large/downloads:/large" ];
+
+          extraOptions = [ "--network=container:gluetun" ];
+        };
+        prometheus-qb = {
+          image = "ghcr.io/esanchezm/prometheus-qbittorrent-exporter";
+          environment = {
+            QBITTORRENT_PORT = toString ports.qb;
+            QBITTORRENT_HOST = "localhost";
+            EXPORTER_PORT = toString internalPorts.prometheus-qb;
+          };
+          extraOptions = [ "--network=host" ];
+          # ports = [ "8000:${toString internalPorts.prometheus-qb}" ];
+        };
+      };
+    };
   };
   # hardware.nvidia-container-toolkit.enable = true;
 

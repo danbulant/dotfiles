@@ -38,6 +38,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      ddcutil
       unstable.gearlever
       linux-wallpaperengine
       lmstudio

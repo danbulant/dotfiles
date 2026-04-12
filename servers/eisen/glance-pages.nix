@@ -10,29 +10,10 @@
             "first-day-of-week" = "monday";
           }
           {
-            type = "rss";
-            limit = 10;
-            "collapse-after" = 3;
-            cache = "12h";
-            feeds = [
+            type = "server-stats";
+            servers = [
               {
-                url = "https://selfh.st/rss/";
-                title = "selfh.st";
-                limit = 4;
-              }
-              {
-                url = "https://ciechanow.ski/atom.xml";
-              }
-              {
-                url = "https://www.joshwcomeau.com/rss.xml";
-                title = "Josh Comeau";
-              }
-              {
-                url = "https://samwho.dev/rss.xml";
-              }
-              {
-                url = "https://ishadeed.com/feed.xml";
-                title = "Ahmad Shadeed";
+                type = "local";
               }
             ];
           }
@@ -65,7 +46,7 @@
                   <a class="size-title-dynamic color-highlight text-truncate block grow" href="http://status.eisen/dashboard/{{ $id }}"
                     target="_blank" rel="noreferrer">
                     {{ .String "name" }} </a>
-              
+
                   {{ if gt (len $hbArray) 0 }}
                     {{ $latest := index $hbArray (sub (len $hbArray) 1) }}
                     {{ if eq ($latest.Int "status") 1 }}
@@ -116,30 +97,56 @@
             ];
           }
           {
-            type = "videos";
-            channels = [
-              "UCXuqSBlHAE6Xw-yeJA0Tunw" # Linus Tech Tips
-              "UCR-DXc1voovS8nhAvccRZhg" # Jeff Geerling
-              "UCsBjURrPoezykLs9EqgamOA" # Fireship
-              "UCBJycsmduvYEL83R_U4JriQ" # Marques Brownlee
-              "UCHnyfMqiRRG1u-2MsSQLbXA" # Veritasium
-            ];
-          }
-          {
-            type = "group";
-            widgets = [
+            type = "monitor";
+            cache = "1m";
+            title = "Services";
+
+            sites = [
               {
-                type = "reddit";
-                subreddit = "technology";
-                "show-thumbnails" = true;
+                title = "Jellyfin";
+                url = "http://jellyfin.eisen.danbulant.cloud";
+                icon = "si:jellyfin";
               }
               {
-                type = "reddit";
-                subreddit = "selfhosted";
-                "show-thumbnails" = true;
+                title = "qBittorrent";
+                url = "http://qb.eisen.danbulant.cloud";
+                icon = "si:qbittorrent";
+              }
+              {
+                title = "Radarr";
+                url = "http://radarr.eisen.danbulant.cloud";
+                icon = "si:radarr";
+              }
+              {
+                title = "Sonarr";
+                url = "http://sonarr.eisen.danbulant.cloud";
+                icon = "si:sonarr";
+              }
+              {
+                title = "Vaultwarden";
+                url = "https://vaultwarden.danbulant.cloud";
+                icon = "si:vaultwarden";
+              }
+              {
+                title = "Nextcloud";
+                url = "https://direct.danbulant.cloud";
+                icon = "si:nextcloud";
+              }
+              {
+                title = "Grafana";
+                url = "http://grafana.eisen.danbulant.cloud";
+                icon = "si:grafana";
+              }
+              {
+                title = "Karakeep";
+                url = "http://keep.eisen.danbulant.cloud";
+                icon = "si:karakeep";
               }
             ];
           }
+          # {
+          #   type = "docker-containers";
+          # }
         ];
       }
       {
@@ -165,57 +172,23 @@
           }
           {
             type = "custom-api";
-            title = "Epic Games";
-            cache = "1h";
-            url = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en&country=US&allowCountries=US";
+            title = "Steam specials";
+            cache = "12h";
+            url = "https://store.steampowered.com/api/featuredcategories?cc=us";
             template = ''
-              <div>
-                {{ if eq .Response.StatusCode 200 }}
-                  <div class="horizontal-cards-2">
-                    {{ range .JSON.Array "data.Catalog.searchStore.elements" }}
-                      {{ $price := .String "price.totalPrice.discountPrice" }}
-                      {{ $hasPromo := gt (len (.Array "promotions.promotionalOffers")) 0 }}
-                      {{ if and $hasPromo (eq $price "0") }}
-                        {{ $gamePage := .String "productSlug" }}
-                        {{ if gt (len (.Array "offerMappings")) 0 }}
-                          {{ $gamePage = .String "offerMappings.0.pageSlug" }}
-                        {{end }}
-                        <a href="https://store.epicgames.com/en-US/p/{{ $gamePage }}" target="_blank" class="card">
-                          {{ $title := .String "title" }}
-                          {{ range .Array "keyImages" }}
-                            {{ if eq (.String "type") "OfferImageWide" }}
-                              <img src="{{ .String "url" }}" alt="{{ $title }}" style="width: 100%; max-width: 300px; height: 150px; object-fit: cover; border-radius: var(--border-radius);">
-                            {{ end }}
-                          {{ end }}
-                          <div class="card-content">
-                            <span class="size-base color-primary">{{ $title }}</span><br>
-                            <span class="size-h5 color-subdue">
-                              {{ if $hasPromo }}
-                                {{ $promotions := .Array "promotions.promotionalOffers" }}
-                                {{ if gt (len $promotions) 0 }}
-                                  {{ $firstPromo := index $promotions 0 }}
-                                  {{ $offers := $firstPromo.Array "promotionalOffers" }}
-                                  {{ if gt (len $offers) 0 }}
-                                    {{ $firstOffer := index $offers 0 }}
-                                    Free until {{ slice ($firstOffer.String "endDate") 0 10 }}
-                                  {{ else }}
-                                    Free this week!
-                                  {{ end }}
-                                {{ else }}
-                                  Free this week!
-                                {{ end }}
-                              {{ end }}
-                            </span>
-                          </div>
-                        </a>
-                      {{ end }}
-                    {{ end }}
-                  </div>
-                {{ else }}
-                  <p class="color-negative">Error fetching Epic Games data.</p>
-                {{ end }}
-              </div>
-              '';
+              <ul class="list list-gap-10 collapsible-container" data-collapse-after="5">
+              {{ range .JSON.Array "specials.items" }}
+                <li>
+                  <a class="size-h4 color-highlight block text-truncate" href="https://store.steampowered.com/app/{{ .Int "id" }}/">{{ .String "name" }}</a>
+                  <ul class="list-horizontal-text">
+                    <li>{{ div (.Int "final_price" | toFloat) 100 | printf "$%.2f" }}</li>
+                    {{ $discount := .Int "discount_percent" }}
+                    <li{{ if ge $discount 40 }} class="color-positive"{{ end }}>{{ $discount }}% off</li>
+                  </ul>
+                </li>
+              {{ end }}
+              </ul>
+            '';
           }
         ];
       }
