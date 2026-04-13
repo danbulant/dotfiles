@@ -46,6 +46,15 @@
     };
   };
 
+  services.paseo = {
+    enable = true;
+    relay.enable = false;
+    user = "dan";
+    group = "users";
+    port = 5656;
+    openFirewall = true;
+  };
+
   hardware.cpu.amd.updateMicrocode = true;
 
   hardware.graphics = {

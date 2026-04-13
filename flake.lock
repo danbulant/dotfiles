@@ -9,15 +9,15 @@
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-wine": "nixpkgs-wine",
         "on-linux": "on-linux",
-        "plugin-loader": "plugin-loader",
+        "plugin-loader-src": "plugin-loader-src",
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1775783274,
-        "narHash": "sha256-Ebvn8gN4Vw4FJBQZxKm3sV9Cw+/99IwT7U83zIsboN8=",
+        "lastModified": 1776067772,
+        "narHash": "sha256-cvFa7mQ80lDhfk8g3uGNhQLA8HrL3y9EW3AJPPmzeKI=",
         "owner": "mrshmllow",
         "repo": "affinity-nix",
-        "rev": "1aa96ece7d3c39aee027b126005cf401cfb591f2",
+        "rev": "20fd4d95a634303e1beb55fab3d138f4e7ea6006",
         "type": "github"
       },
       "original": {
@@ -602,11 +602,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776015217,
-        "narHash": "sha256-PUb9TTfqsA1g+aHJt5s8tIP7QdX8xHeOtDMPVRuylfM=",
+        "lastModified": 1776046499,
+        "narHash": "sha256-Wzc4nn07/0RL21ypPHRzNDQZcjhIC8LaYo7QJQjM5T4=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "f6196e5b4d3f0168d09feab9ba678fa18ca58cbb",
+        "rev": "287f84846c1eb3b72c986f5f6bebcff0bd67440d",
         "type": "github"
       },
       "original": {
@@ -1511,16 +1511,41 @@
         "type": "github"
       }
     },
-    "plugin-loader": {
-      "flake": false,
+    "paseo": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
       "locked": {
-        "narHash": "sha256-kNkJdzyH7hWjFNuXohGNYazYaqNgJQSpWFT3fRIdcsg=",
-        "type": "file",
-        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.3.0/affinitypluginloader-plus-winefix.tar.xz"
+        "lastModified": 1776090352,
+        "narHash": "sha256-QuAtNxvtyeoKcJvRfyCXjL66jRHFCoYjVfXvVPi3mwM=",
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "rev": "8d1def4615f8611c3f8f0b397a0c404fc473b932",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.3.0/affinitypluginloader-plus-winefix.tar.xz"
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "type": "github"
+      }
+    },
+    "plugin-loader-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775508798,
+        "narHash": "sha256-cD2G3M83wCEXVMMl9YoHMLxPIvbXeESgQTkXiM+lzns=",
+        "owner": "noahc3",
+        "repo": "AffinityPluginLoader",
+        "rev": "bd93bbf9f84735d8ba6538596620bbe8d8b90efd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noahc3",
+        "ref": "v0.3.0",
+        "repo": "AffinityPluginLoader",
+        "type": "github"
       }
     },
     "pre-commit-hooks": {
@@ -1588,6 +1613,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_11",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "paseo": "paseo",
         "rusic": "rusic",
         "zen-browser": "zen-browser"
       }
@@ -1599,11 +1625,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1775941509,
-        "narHash": "sha256-NlNzLZmr2ugPxruIM20XiOeMMhCpV+jMoDWiH4ZbTnM=",
+        "lastModified": 1776033313,
+        "narHash": "sha256-9dJwCBWX3orxU88YsyFzTrpYRkzCOLaQqtGaP1mUHTQ=",
         "owner": "temidaradev",
         "repo": "rusic",
-        "rev": "34e87aa43374af774a56d011648d0229b69a3fb0",
+        "rev": "a07e743f451e771d506ace1e0430af69bbb42366",
         "type": "github"
       },
       "original": {
@@ -1816,11 +1842,11 @@
         "nixpkgs": "nixpkgs_13"
       },
       "locked": {
-        "lastModified": 1775961625,
-        "narHash": "sha256-8SjilptVv9dSTvn0Z5j65vHHu+flmPXeyrGaSyRJm7U=",
+        "lastModified": 1776091817,
+        "narHash": "sha256-Vwmi3P4LAUmOrE2zc9JpnRrNxNwamDN46hqcXpWTkp0=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "0eaab249f5ca1c55921e99cfe07187410758c9fa",
+        "rev": "4f2e98c1125ab4be758cd1b51b526ad998e9618f",
         "type": "github"
       },
       "original": {

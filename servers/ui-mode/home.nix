@@ -14,6 +14,7 @@
   nix-monitor,
   rusic,
   config,
+#  paseo,
   ...
 }:
 let

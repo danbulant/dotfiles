@@ -1,5 +1,9 @@
 {
   inputs = {
+    paseo = {
+      url = "github:getpaseo/paseo";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dms = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,6 +75,7 @@
       nix-index-database,
       dms,
       nix-monitor,
+      paseo,
       ...
     }@attrs:
     {
@@ -86,6 +91,7 @@
         system = "x86_64-linux";
         specialArgs = attrs;
         modules = [
+          paseo.nixosModules.paseo
           determinate.nixosModules.default
           home-manager.nixosModules.home-manager
           {
