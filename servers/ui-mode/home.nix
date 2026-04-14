@@ -14,7 +14,7 @@
   nix-monitor,
   rusic,
   config,
-#  paseo,
+  #  paseo,
   ...
 }:
 let
@@ -40,6 +40,13 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
+        patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
+        name = "qt6ct-kde";
+      }))
+      kdePackages.qtstyleplugin-kvantum
+      libsForQt5.qt5ct
+      libsForQt5.qtstyleplugin-kvantum
       ddcutil
       unstable.gearlever
       linux-wallpaperengine
