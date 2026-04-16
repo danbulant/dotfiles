@@ -383,7 +383,16 @@ in
       "-c"
       "cd /home/dan/projects/dotfiles; nh os switch ."
     ];
-    zen-browser.enable = true;
+    zen-browser = {
+      enable = true;
+      extraPrefsFiles = [
+        # (builtins.fetchurl {
+        #   url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
+        #   sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
+        # })
+        (builtins.readFile ./uc.js)
+      ];
+    };
     fish = {
       enable = true;
       shellInit = ''

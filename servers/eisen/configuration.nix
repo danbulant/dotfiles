@@ -16,6 +16,7 @@ let
     sonarr = 8989;
     radarr = 7878;
     jackett = 9117;
+    prowlarr = 9696;
     keep = 8100;
     grafana = 3002;
     # ntfy = 3003;
@@ -25,6 +26,7 @@ let
     prometheus-qb = 9200;
     prometheus-sonarr = 9101;
     prometheus-radarr = 9102;
+    prometheus-prowlarr = 9103;
     prometheus = 9090;
   };
 in
@@ -88,12 +90,10 @@ in
       enable = true;
       settings.server.port = ports.radarr;
     };
-
-    jackett = {
+    prowlarr = {
       enable = true;
-      port = ports.jackett;
+      settings.server.port = ports.prowlarr;
     };
-
     karakeep = {
       enable = true;
       extraEnvironment = {
@@ -138,6 +138,12 @@ in
           url = "http://127.0.0.1:${toString ports.sonarr}";
           port = internalPorts.prometheus-sonarr;
           apiKeyFile = "/etc/secrets/sonarr_api_key";
+        };
+        exportarr-prowlarr = {
+          enable = true;
+          url = "http://127.0.0.1:${toString ports.prowlarr}";
+          port = internalPorts.prometheus-prowlarr;
+          apiKeyFile = "/etc/secrets/prowlarr_api_key";
         };
         node = {
           enable = true;
@@ -266,6 +272,7 @@ in
           environmentFiles = [ "/etc/secrets/gluetun.env" ];
           ports = [
             "${toString ports.qb}:${toString ports.qb}"
+            "${toString ports.jackett}:${toString ports.jackett}"
           ];
           # VPN_SERVICE_PROVIDER=protonvpn
           # VPN_TYPE=wireguard
@@ -279,10 +286,10 @@ in
             FIREWALL_INPUT_PORTS = "41641,22,80,443,53";
 
             VPN_PORT_FORWARDING_UP_COMMAND = ''
-              /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://172.17.0.1:${toString ports.qb}/api/v2/app/setPreferences'
+              /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:${toString ports.qb}/api/v2/app/setPreferences'
             '';
             VPN_PORT_FORWARDING_DOWN_COMMAND = ''
-              /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://172.17.0.1:${toString ports.qb}/api/v2/app/setPreferences'
+              /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://127.0.0.1:${toString ports.qb}/api/v2/app/setPreferences'
             '';
           };
           # extraOptions = [ "--network=host" ];
@@ -294,7 +301,19 @@ in
             WEBUI_PORT = toString ports.qb;
           };
 
-          volumes = [ "/media/large/downloads:/large" ];
+          volumes = [
+            "/media/large/downloads:/downloads"
+            "qbittorrent-config:/config"
+          ];
+
+          extraOptions = [ "--network=container:gluetun" ];
+        };
+        jackett = {
+          image = "lscr.io/linuxserver/jackett";
+
+          volumes = [
+            "jackett-config:/config"
+          ];
 
           extraOptions = [ "--network=container:gluetun" ];
         };
