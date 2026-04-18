@@ -123,6 +123,11 @@
                 icon = "si:sonarr";
               }
               {
+                title = "Prowlarr";
+                url = "http://prowlarr.eisen.danbulant.cloud";
+                icon = "si:prowlarr";
+              }
+              {
                 title = "Vaultwarden";
                 url = "https://vaultwarden.danbulant.cloud";
                 icon = "si:vaultwarden";

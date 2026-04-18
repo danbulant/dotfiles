@@ -70,6 +70,31 @@
   environment.systemPackages = with pkgs; [
     nvitop
     basalt-monado
+    cudaPackages.cuda_nvcc
+    (llama-cpp.overrideAttrs (prevAttrs: {
+      cmakeFlags = with lib; [
+        # -march=native is non-deterministic; override with platform-specific flags if needed
+        (cmakeBool "GGML_NATIVE" true)
+        (cmakeBool "LLAMA_BUILD_EXAMPLES" false)
+        (cmakeBool "LLAMA_BUILD_SERVER" true)
+        (cmakeBool "LLAMA_BUILD_TESTS" false)
+        (cmakeBool "LLAMA_OPENSSL" true)
+        (cmakeBool "BUILD_SHARED_LIBS" true)
+        (cmakeBool "GGML_BLAS" false)
+        (cmakeBool "GGML_LTO" true)
+        (cmakeBool "GGML_CLBLAST" true)
+        (cmakeBool "GGML_CUDA" true)
+        (cmakeBool "GGML_CUDA_GRAPHS" true)
+        (cmakeBool "GGML_CUDA_F16" true)
+        (cmakeBool "GGML_CUDA_FA_ALL_QUANTS" true)
+        (cmakeBool "GGML_HIP" false)
+        (cmakeBool "GGML_METAL" false)
+        (cmakeBool "GGML_RPC" false)
+        (cmakeBool "GGML_VULKAN" false)
+        (cmakeFeature "LLAMA_BUILD_NUMBER" "8770")
+        (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "120")
+      ];
+    }))
   ];
   hardware.nvidia = {
     open = true;

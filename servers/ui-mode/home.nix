@@ -390,7 +390,11 @@ in
         #   url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
         #   sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
         # })
-        (builtins.readFile ./uc.js)
+        # (builtins.toFile (builtins.readFile ./uc.js))
+        (builtins.path {
+          path = ./uc.js;
+          name = "config.js";
+        })
       ];
     };
     fish = {
