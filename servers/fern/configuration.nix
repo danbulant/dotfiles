@@ -25,7 +25,7 @@
 
   # vr
   services.monado = {
-    enable = true;
+    enable = false;
     defaultRuntime = true; # Register as default OpenXR runtime
   };
   systemd.user.services.monado.environment = {

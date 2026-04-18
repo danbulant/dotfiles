@@ -234,17 +234,25 @@ in
         }
       '';
 
-      virtualHosts = builtins.listToAttrs (
-        map (k: {
-          name = "${k}.eisen.danbulant.cloud:80, ${k}.eisen:80";
-          value = {
-            # import auth
+      virtualHosts =
+        builtins.listToAttrs (
+          map (k: {
+            name = "${k}.eisen.danbulant.cloud:80, ${k}.eisen:80";
+            value = {
+              # import auth
+              extraConfig = ''
+                reverse_proxy http://localhost:${toString ports.${k}}
+              '';
+            };
+          }) (builtins.attrNames ports)
+        )
+        // {
+          "translations.danbulant.cloud:80, translations.rpi1.danbulant.cloud:80" = {
             extraConfig = ''
-              reverse_proxy http://localhost:${toString ports.${k}}
+              reverse_proxy http://localhost:${toString ports.tolgee}
             '';
           };
-        }) (builtins.attrNames ports)
-      );
+        };
     };
     tailscale.permitCertUid = "caddy";
     tailscaleAuth = {
