@@ -19,6 +19,7 @@ let
     prowlarr = 9696;
     keep = 8100;
     grafana = 3002;
+    tolgee = 8200;
     # ntfy = 3003;
   };
   internalPorts = {
@@ -326,6 +327,19 @@ in
           };
           extraOptions = [ "--network=host" ];
           # ports = [ "8000:${toString internalPorts.prometheus-qb}" ];
+        };
+
+        tolgee = {
+          image = "tolgee/tolgee";
+          volumes = [
+            "data:/data"
+          ];
+          ports = [
+            "${toString ports.tolgee}:8080"
+          ];
+          environment = {
+            TOLGEE_AUTHENTICATION_ENABLED = "true";
+          };
         };
       };
     };
