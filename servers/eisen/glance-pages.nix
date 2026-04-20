@@ -1,3 +1,29 @@
+let
+  jellyfinConfig =
+    {
+      title,
+      library-name ? null,
+      mode,
+    }:
+    {
+      inherit title;
+      type = "custom-api";
+      # url = "http://jellyfin.eisen.danbulant.cloud";
+      frameless = true;
+      cache = "5m";
+      options = {
+        inherit library-name mode;
+        base-url = "http://jellyfin.eisen.danbulant.cloud";
+        api-key = "\${JELLYFIN_KEY}";
+        user-name = "dan";
+        item-count = "10";
+        small-column = false;
+        show-thumbnail = true;
+        thumbnail-aspect-ratio = "default";
+      };
+      template = builtins.readFile ./glance/jellyfin-latest;
+    };
+in
 [
   {
     name = "Home";
@@ -18,6 +44,24 @@
             ];
           }
           {
+
+            # - type: custom-api
+            #   title: "Jellyfin/Emby Stats"
+            #   base-url: ${JELLYFIN_URL}
+            #   options:
+            #     url: ${JELLYFIN_URL}
+            #     key: ${JELLYFIN_API_KEY}
+            #
+            type = "custom-api";
+            title = "Jellyfin Stats";
+            # url = "http://jellyfin.eisen.danbulant.cloud";
+            options = {
+              url = "http://jellyfin.eisen.danbulant.cloud";
+              key = "\${JELLYFIN_KEY}";
+            };
+            template = builtins.readFile ./glance/jellyfin-stats;
+          }
+          {
             type = "custom-api";
             title = "Uptime Kuma";
             title-url = "http://status.eisen";
@@ -28,61 +72,24 @@
               };
             };
             cache = "10m";
-            template = ''
-              {{ $hb := .Subrequest "heartbeats" }}
-
-              {{ if not (.JSON.Exists "publicGroupList") }}
-              <p class="color-negative">Error reading response</p>
-              {{ else if eq (len (.JSON.Array "publicGroupList")) 0 }}
-              <p>No monitors found</p>
-              {{ else }}
-
-              <ul class="dynamic-columns list-gap-8">
-                {{ range .JSON.Array "publicGroupList" }}
-                {{ range .Array "monitorList" }}
-                {{ $id := .String "id" }}
-                {{ $hbArray := $hb.JSON.Array (print "heartbeatList." $id) }}
-                <div class="flex items-center gap-12">
-                  <a class="size-title-dynamic color-highlight text-truncate block grow" href="http://status.eisen/dashboard/{{ $id }}"
-                    target="_blank" rel="noreferrer">
-                    {{ .String "name" }} </a>
-
-                  {{ if gt (len $hbArray) 0 }}
-                    {{ $latest := index $hbArray (sub (len $hbArray) 1) }}
-                    {{ if eq ($latest.Int "status") 1 }}
-                    <div>{{ $latest.Int "ping" }}ms</div>
-                    <div class="monitor-site-status-icon-compact" title="OK">
-                      <svg fill="var(--color-positive)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                          d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                          clip-rule="evenodd"></path>
-                      </svg>
-                    </div>
-                    {{ else }}
-                    <div><span class="color-negative">DOWN</span></div>
-                    <div class="monitor-site-status-icon-compact" title="{{ if $latest.Exists "msg" }}{{ $latest.String "msg" }}{{ else
-                      }}Error{{ end }}">
-                      <svg fill="var(--color-negative)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                          d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                          clip-rule="evenodd"></path>
-                      </svg>
-                    </div>
-                    {{ end }}
-                  {{ else }}
-                    <div><span class="color-negative">No data</span></div>
-                    <div class="monitor-site-status-icon-compact" title="No data available">
-                      <svg fill="var(--color-negative)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12zm-.75-8a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-1.5 0V8zm.75 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                      </svg>
-                    </div>
-                  {{ end }}
-                </div>
-                {{ end }}
-                {{ end }}
-              </ul>
-              {{ end }}
-            '';
+            template = builtins.readFile ./glance/uptime-kuma;
+          }
+          {
+            type = "custom-api";
+            title = "Tailscale";
+            title-url = "https://login.tailscale.com/admin/machines";
+            url = "https://api.tailscale.com/api/v2/tailnet/-/devices";
+            headers = {
+              Authorization = "Bearer \${TAILSCALE_API_KEY}";
+            };
+            cache = "10m";
+            options = {
+              # collapseAfter: 4
+              # disableOfflineIndicator: true
+              # disableUpdateIndicator: true
+              # prioritiseTags: true
+            };
+            template = builtins.readFile ./glance/tailscale;
           }
         ];
       }
@@ -149,6 +156,25 @@
               }
             ];
           }
+          (jellyfinConfig {
+            title = "Movies";
+            mode = "nextup";
+          })
+          {
+            type = "group";
+            widgets = [
+              (jellyfinConfig {
+                title = "Shows";
+                library-name = "Shows";
+                mode = "latest";
+              })
+              (jellyfinConfig {
+                title = "Movies";
+                library-name = "Movies";
+                mode = "latest";
+              })
+            ];
+          }
           # {
           #   type = "docker-containers";
           # }
@@ -163,17 +189,27 @@
             units = "metric";
             "hour-format" = "24h";
           }
+          # {
+          #   type = "releases";
+          #   cache = "1d";
+          #   repositories = [
+          #     "glanceapp/glance"
+          #     "go-gitea/gitea"
+          #     "immich-app/immich"
+          #     "syncthing/syncthing"
+          #     "9001/copyparty"
+          #     "caddyserver/caddy"
+          #   ];
+          # }
           {
-            type = "releases";
-            cache = "1d";
-            repositories = [
-              "glanceapp/glance"
-              "go-gitea/gitea"
-              "immich-app/immich"
-              "syncthing/syncthing"
-              "9001/copyparty"
-              "caddyserver/caddy"
-            ];
+            type = "custom-api";
+            title = "xkcd";
+            cache = "10m";
+            url = "https://xkcd.com/info.0.json";
+            template = ''
+              <body> {{ .JSON.String "title" }}</body>
+              <img src="{{ .JSON.String "img" }}"></img>
+            '';
           }
           {
             type = "custom-api";

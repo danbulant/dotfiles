@@ -211,6 +211,7 @@ in
         };
         pages = import ./glance-pages.nix;
       };
+      environmentFile = "/etc/secrets/glance.env";
     };
 
     caddy = {
