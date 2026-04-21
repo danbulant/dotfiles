@@ -24,16 +24,16 @@
   };
 
   # vr
-  services.monado = {
-    enable = false;
-    defaultRuntime = true; # Register as default OpenXR runtime
-  };
-  systemd.user.services.monado.environment = {
-    STEAMVR_LH_ENABLE = "1";
-    XRT_COMPOSITOR_COMPUTE = "1";
-    WMR_HANDTRACKING = "0";
-    VIT_SYSTEM_LIBRARY_PATH = "${pkgs.basalt-monado}/lib/libbasalt.so";
-  };
+  # services.monado = {
+  #   enable = false;
+  #   defaultRuntime = true; # Register as default OpenXR runtime
+  # };
+  # systemd.user.services.monado.environment = {
+  #   STEAMVR_LH_ENABLE = "1";
+  #   XRT_COMPOSITOR_COMPUTE = "1";
+  #   WMR_HANDTRACKING = "0";
+  #   VIT_SYSTEM_LIBRARY_PATH = "${pkgs.basalt-monado}/lib/libbasalt.so";
+  # };
   programs.steam = {
     enable = true;
     package = pkgs.steam.override {
@@ -69,7 +69,7 @@
   };
   environment.systemPackages = with pkgs; [
     nvitop
-    basalt-monado
+    # basalt-monado
     cudaPackages.cuda_nvcc
     # llama-cpp
     (llama-cpp.overrideAttrs (prevAttrs: {

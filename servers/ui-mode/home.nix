@@ -56,7 +56,7 @@ in
       buck2
       (rusic.packages.${system}.default)
       affine
-      voxtype-onnx
+      voxtype-vulkan
       #affinity-nix.packages.x86_64-linux.v3
       biome
       bun
@@ -341,7 +341,9 @@ in
     theme = {
       package = pkgs.orchis-theme;
       name = "Orchis";
+
     };
+    gtk4.theme = config.gtk.theme;
   };
   services.lorri.enable = true;
   wayland.windowManager.hyprland = {
