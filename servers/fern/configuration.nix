@@ -3,6 +3,44 @@
   ...
 }:
 
+let
+  llama-cpp = (
+    (pkgs.llama-cpp.override {
+      cudaSupport = true;
+      rocmSupport = false;
+      metalSupport = false;
+      blasSupport = true;
+    }).overrideAttrs
+      (prevAttrs: {
+        preConfigure = ''
+          export NIX_ENFORCE_NO_NATIVE=0
+          ${prevAttrs.preConfigure or ""}
+        '';
+        cmakeFlags = with pkgs.lib; [
+          # -march=native is non-deterministic; override with platform-specific flags if needed
+          (cmakeBool "GGML_NATIVE" true)
+          (cmakeBool "LLAMA_BUILD_EXAMPLES" false)
+          (cmakeBool "LLAMA_BUILD_SERVER" true)
+          (cmakeBool "LLAMA_BUILD_TESTS" false)
+          (cmakeBool "LLAMA_OPENSSL" true)
+          (cmakeBool "BUILD_SHARED_LIBS" true)
+          # (cmakeBool "GGML_BLAS" false)
+          (cmakeBool "GGML_LTO" true)
+          (cmakeBool "GGML_CLBLAST" true)
+          (cmakeBool "GGML_CUDA" true)
+          (cmakeBool "GGML_CUDA_GRAPHS" true)
+          (cmakeBool "GGML_CUDA_F16" true)
+          (cmakeBool "GGML_CUDA_FA_ALL_QUANTS" true)
+          # (cmakeBool "GGML_HIP" false)
+          # (cmakeBool "GGML_METAL" false)
+          # (cmakeBool "GGML_RPC" false)
+          # (cmakeBool "GGML_VULKAN" false)
+          (cmakeFeature "LLAMA_BUILD_NUMBER" "8667")
+          (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "120")
+        ];
+      })
+  );
+in
 {
   services.hardware.openrgb.enable = true;
   boot = {
@@ -71,32 +109,60 @@
     nvitop
     # basalt-monado
     cudaPackages.cuda_nvcc
-    # llama-cpp
-    (llama-cpp.overrideAttrs (prevAttrs: {
-      cmakeFlags = with lib; [
-        # -march=native is non-deterministic; override with platform-specific flags if needed
-        (cmakeBool "GGML_NATIVE" true)
-        (cmakeBool "LLAMA_BUILD_EXAMPLES" false)
-        (cmakeBool "LLAMA_BUILD_SERVER" true)
-        (cmakeBool "LLAMA_BUILD_TESTS" false)
-        (cmakeBool "LLAMA_OPENSSL" true)
-        (cmakeBool "BUILD_SHARED_LIBS" true)
-        # (cmakeBool "GGML_BLAS" false)
-        (cmakeBool "GGML_LTO" true)
-        (cmakeBool "GGML_CLBLAST" true)
-        (cmakeBool "GGML_CUDA" true)
-        (cmakeBool "GGML_CUDA_GRAPHS" true)
-        (cmakeBool "GGML_CUDA_F16" true)
-        (cmakeBool "GGML_CUDA_FA_ALL_QUANTS" true)
-        # (cmakeBool "GGML_HIP" false)
-        # (cmakeBool "GGML_METAL" false)
-        # (cmakeBool "GGML_RPC" false)
-        # (cmakeBool "GGML_VULKAN" false)
-        (cmakeFeature "LLAMA_BUILD_NUMBER" "8667")
-        (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "120")
-      ];
-    }))
+    llama-cpp
   ];
+  services.llama-swap = {
+    enable = true;
+    settings = {
+      macros = {
+        llama = ''
+          ${pkgs.lib.getExe' llama-cpp "llama-server"} \
+          --port ${"\${PORT}"} \
+          --alias "unsloth/qwen" \
+          --no-webui \
+          --ctx-size 131072 \
+          --fit on --fit-ctx 131072 --fit-target 256 \
+          --temp 1.0 --top-p 0.95 --top-k 64 \
+          --repeat-penalty 1.0 \
+          -ctk q8_0 -ctv q8_0 \
+          --flash-attn on \
+          --batch-size 1024 --ubatch-size 512 \
+          --threads 12 --threads-batch 12 \
+          --no-mmap --mlock \
+          --parallel 1 --prio 2 --no-warmup --jinja
+        '';
+        models_dir = "\${env.HOME}/models";
+      };
+      models = {
+        # qwen3-embedding-8b = {
+        # };
+        # "qwen3-embedding-0.6" = { };
+        "qwen3.6-35B-A3B" = {
+          cmd = "\${llama} -m /home/dan/.lmstudio/models/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
+        };
+        "gemma-4-26B-A4B" = {
+          cmd = "\${llama} -m /home/dan/.lmstudio/models/lmstudio-community/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-Q4_K_M.gguf";
+        };
+        "qwen3.5-9B" = {
+          cmd = "\${llama} -m /home/dan/.lmstudio/models/lmstudio-community/Qwen3.5-9B-GGUF/Qwen3.5-9B-Q4_K_M.gguf";
+        };
+        "qwen3.5-9B-sushi" = {
+          cmd = "\${llama} -m /home/dan/.lmstudio/models/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF/Qwen3.5-9b-Sushi-Coder-RL.Q4_K_M.gguf";
+        };
+      };
+    };
+  };
+  systemd.services.llama-swap = {
+    environment = {
+      HOME = "/home/dan";
+    };
+    serviceConfig = {
+      ProtectHome = pkgs.lib.mkForce false;
+      DynamicUser = pkgs.lib.mkForce false;
+      User = pkgs.lib.mkForce "dan";
+      Group = pkgs.lib.mkForce "users"; # or dan's primary group
+    };
+  };
   hardware.nvidia = {
     open = true;
     modesetting.enable = true;
