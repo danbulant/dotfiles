@@ -1,5 +1,7 @@
 {
   pkgs,
+  lib,
+  config,
   ...
 }:
 
@@ -113,7 +115,9 @@ in
   ];
   services.llama-swap = {
     enable = true;
+    openFirewall = true;
     settings = {
+      #      listen = "0.0.0.0:8080";
       macros = {
         llama = ''
           ${pkgs.lib.getExe' llama-cpp "llama-server"} \
@@ -161,6 +165,11 @@ in
       DynamicUser = pkgs.lib.mkForce false;
       User = pkgs.lib.mkForce "dan";
       Group = pkgs.lib.mkForce "users"; # or dan's primary group
+      ExecStart = lib.mkForce ''
+        ${lib.getExe pkgs.llama-swap} --listen 0.0.0.0:${toString config.services.llama-swap.port} --config ${
+          (pkgs.formats.yaml { }).generate "config.yaml" config.services.llama-swap.settings
+        }
+      '';
     };
   };
   hardware.nvidia = {

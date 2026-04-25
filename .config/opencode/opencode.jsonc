@@ -1,0 +1,71 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "",
+      },
+      "enabled": true,
+    },
+    "firecrawl-mcp": {
+      "type": "local",
+      "command": ["bun", "x", "firecrawl-mcp"],
+      "environment": {
+        "FIRECRAWL_API_KEY": "",
+      },
+    },
+  },
+  "agent": {
+    "explore": {
+      "_model": "github-copilot/gpt-5-mini",
+    },
+    "title": {
+      "_model": "github-copilot/gpt-5-mini",
+    },
+    "summary": {
+      "_model": "github-copilot/gpt-5-mini",
+    },
+  },
+
+  "provider": {
+    "lmstudio": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LM Studio (local)",
+      "options": {
+        "baseURL": "http://127.0.0.1:8080/v1",
+      },
+      "models": {
+        "gemma-4-26B-A4B": {
+          "name": "Gemma 4 26B A4B",
+          "limit": {
+            "context": 100000,
+            "output": 8192,
+          },
+        },
+        "qwen3.6-35B-A3B": {
+          "name": "Qwen 3.6 35B A3B",
+          "limit": {
+            "context": 100000,
+            "output": 8192,
+          },
+        },
+        "qwen3.5-9B": {
+          "name": "Qwen 3.5 9B",
+          "limit": {
+            "context": 100000,
+            "output": 8192,
+          },
+        },
+        "qwen3.5-9B-sushi": {
+          "name": "Qwen 3.5 9B Sushi coder",
+          "limit": {
+            "context": 100000,
+            "output": 8192,
+          },
+        },
+      },
+    },
+  },
+}
