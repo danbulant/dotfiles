@@ -70,7 +70,7 @@ in
       i2c-tools
       kdePackages.kimageformats
       power-profiles-daemon
-      tail-tray
+      #tail-tray
       helium
       opencode
       perf

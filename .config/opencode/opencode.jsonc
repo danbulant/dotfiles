@@ -41,28 +41,28 @@
         "gemma-4-26B-A4B": {
           "name": "Gemma 4 26B A4B",
           "limit": {
-            "context": 100000,
+            "context": 130000,
             "output": 8192,
           },
         },
         "qwen3.6-35B-A3B": {
           "name": "Qwen 3.6 35B A3B",
           "limit": {
-            "context": 100000,
+            "context": 130000,
             "output": 8192,
           },
         },
         "qwen3.5-9B": {
           "name": "Qwen 3.5 9B",
           "limit": {
-            "context": 100000,
+            "context": 130000,
             "output": 8192,
           },
         },
         "qwen3.5-9B-sushi": {
           "name": "Qwen 3.5 9B Sushi coder",
           "limit": {
-            "context": 100000,
+            "context": 130000,
             "output": 8192,
           },
         },
