@@ -151,6 +151,8 @@ in
 
   fonts.fontDir.enable = true;
   fonts.enableDefaultPackages = true;
+  # https://github.com/NixOS/nixpkgs/issues/409986
+  environment.etc."xdg/menus/applications.menu".source = ./dolphin.menu;
 
   users.users.dan = {
     isNormalUser = true;
