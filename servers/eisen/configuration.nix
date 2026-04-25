@@ -21,6 +21,7 @@ let
     grafana = 3002;
     tolgee = 8200;
     # ntfy = 3003;
+    llama-swap = 8080;
   };
   internalPorts = {
     prometheus-node = 9000;
@@ -28,6 +29,7 @@ let
     prometheus-sonarr = 9101;
     prometheus-radarr = 9102;
     prometheus-prowlarr = 9103;
+    prometheus-llama-swap = 9409;
     prometheus = 9090;
   };
 in
@@ -42,6 +44,7 @@ in
   imports = [
     nix-index-database.nixosModules.nix-index
     ./hardware-configuration.nix
+    ../../modules/llama-swap-exporter.nix
   ];
 
   nix = {
@@ -103,6 +106,12 @@ in
         DISABLE_NEW_RELEASE_CHECK = "true";
       };
       environmentFile = "/etc/secrets/karakeep.env";
+    };
+
+    llama-swap-exporter = {
+      enable = true;
+      url = "http://100.120.15.10:${toString ports.llama-swap}/api/metrics";
+      port = internalPorts.prometheus-llama-swap;
     };
 
     dnsmasq = {
@@ -182,6 +191,14 @@ in
           static_configs = [
             {
               targets = [ "localhost:${toString internalPorts.prometheus-radarr}" ];
+            }
+          ];
+        }
+        {
+          job_name = "llama-swap";
+          static_configs = [
+            {
+              targets = [ "localhost:${toString internalPorts.prometheus-llama-swap}" ];
             }
           ];
         }
