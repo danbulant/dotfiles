@@ -64,11 +64,11 @@ in
           {
             type = "custom-api";
             title = "Uptime Kuma";
-            title-url = "http://status.eisen";
-            url = "http://status.eisen/api/status-page/base";
+            title-url = "http://status.eisen.danbulant.cloud";
+            url = "http://status.eisen.danbulant.cloud/api/status-page/base";
             subrequests = {
               heartbeats = {
-                url = "http://status.eisen/api/status-page/heartbeat/base";
+                url = "http://status.eisen.danbulant.cloud/api/status-page/heartbeat/base";
               };
             };
             cache = "10m";
