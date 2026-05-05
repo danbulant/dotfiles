@@ -13,11 +13,24 @@ let
       metalSupport = false;
       blasSupport = true;
     }).overrideAttrs
-      (prevAttrs: {
+      (prevAttrs: rec {
         preConfigure = ''
           export NIX_ENFORCE_NO_NATIVE=0
           ${prevAttrs.preConfigure or ""}
         '';
+        version = "8999";
+        src = pkgs.fetchFromGitHub {
+          owner = "ggml-org";
+          repo = "llama.cpp";
+          tag = "b${version}";
+          hash = "sha256-EgJ3Die/WpVm9dtQ2kwXoV4RAWNY9x7lT4wun79qqCI=";
+          leaveDotGit = true;
+          postFetch = ''
+            git -C "$out" rev-parse --short HEAD > $out/COMMIT
+            find "$out" -name .git -print0 | xargs -0 rm -rf
+          '';
+        };
+        npmDepsHash = "sha256-k62LIbyY2DXvs7XXbX0lNPiYxuYzeJUyQtS4eA+68f8=";
         cmakeFlags = with pkgs.lib; [
           # -march=native is non-deterministic; override with platform-specific flags if needed
           (cmakeBool "GGML_NATIVE" true)
