@@ -35,7 +35,7 @@ let
 in
 {
   deployment = {
-    buildOnTarget = true;
+    # buildOnTarget = true;
     targetHost = "192.168.1.114";
   };
 
@@ -208,9 +208,12 @@ in
             {
               targets = [ "localhost:${toString ports.status}" ];
               # generated, only accessible through tailscale, not really sensitive
-              authorization = "uk1_SAAatRz9luyFXItVnbXyOdVuU2fkMhZITrnPY27z";
             }
           ];
+          basic_auth = {
+            username = "";
+            password = "uk1_SAAatRz9luyFXItVnbXyOdVuU2fkMhZITrnPY27z";
+          };
         }
       ];
     };
@@ -432,7 +435,24 @@ in
     "dan"
   ];
 
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+      intel-vaapi-driver
+      intel-ocl
+      libva-vdpau-driver
+      intel-compute-runtime-legacy1
+    ];
+  };
+
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "i965";
+  };
+
   environment.systemPackages = with pkgs; [
+    jellyfin-ffmpeg
+    intel-gpu-tools
     lsof
     rsync
     git

@@ -40,6 +40,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      jellyfin-desktop
       (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
         name = "qt6ct-kde";
@@ -471,27 +472,29 @@ in
   services.blueman-applet.enable = true;
   services.mpris-proxy.enable = true;
   xdg = {
-    /*configFile."openxr/1/active_runtime.json".source =
-      "${pkgs.monado}/share/openxr/1/openxr_monado.json";
-    configFile."openvr/openvrpaths.vrpath".text = ''
-      {
-        "config" :
-        [
-          "${config.xdg.dataHome}/Steam/config"
-        ],
-        "external_drivers" : null,
-        "jsonid" : "vrpathreg",
-        "log" :
-        [
-          "${config.xdg.dataHome}/Steam/logs"
-        ],
-        "runtime" :
-        [
-          "${pkgs.opencomposite}/lib/opencomposite"
-        ],
-        "version" : 1
-      }
-    '';*/
+    /*
+      configFile."openxr/1/active_runtime.json".source =
+        "${pkgs.monado}/share/openxr/1/openxr_monado.json";
+      configFile."openvr/openvrpaths.vrpath".text = ''
+        {
+          "config" :
+          [
+            "${config.xdg.dataHome}/Steam/config"
+          ],
+          "external_drivers" : null,
+          "jsonid" : "vrpathreg",
+          "log" :
+          [
+            "${config.xdg.dataHome}/Steam/logs"
+          ],
+          "runtime" :
+          [
+            "${pkgs.opencomposite}/lib/opencomposite"
+          ],
+          "version" : 1
+        }
+      '';
+    */
     mimeApps = {
       enable = true;
 
