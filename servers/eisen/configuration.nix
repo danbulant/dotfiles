@@ -202,6 +202,16 @@ in
             }
           ];
         }
+        {
+          job_name = "uptime-kuma";
+          static_configs = [
+            {
+              targets = [ "localhost:${toString ports.status}" ];
+              # generated, only accessible through tailscale, not really sensitive
+              authorization = "uk1_SAAatRz9luyFXItVnbXyOdVuU2fkMhZITrnPY27z";
+            }
+          ];
+        }
       ];
     };
 

@@ -150,6 +150,7 @@ in
         '';
         models_dir = "\${env.HOME}/models";
       };
+      globalTTL = 3600;
       models = {
         # qwen3-embedding-8b = {
         # };
