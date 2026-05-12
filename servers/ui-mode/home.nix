@@ -13,6 +13,7 @@
   inputs,
   nix-monitor,
   rusic,
+  codexbar,
   config,
   #  paseo,
   ...
@@ -40,6 +41,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      codexbar.packages.${system}.default
       jellyfin-desktop
       (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
@@ -324,7 +326,7 @@ in
 
       liberation_ttf
       noto-fonts-color-emoji
-      rubik
+      # rubik
       nerd-fonts.jetbrains-mono
       google-fonts
     ];

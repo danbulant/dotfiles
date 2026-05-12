@@ -153,6 +153,7 @@ in
   fonts.enableDefaultPackages = true;
   # https://github.com/NixOS/nixpkgs/issues/409986
   environment.etc."xdg/menus/applications.menu".source = ./dolphin.menu;
+  environment.etc."pam_init".source = "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init";
 
   users.users.dan = {
     isNormalUser = true;
@@ -227,6 +228,12 @@ in
     enable = true;
     compositor.name = "hyprland"; # "niri" or "hyprland" or "sway"
     configHome = "/home/dan";
+  };
+  security.pam.services = {
+    greetd.kwallet = {
+      enable = true;
+      package = pkgs.kdePackages.kwallet-pam;
+    };
   };
 
   services.logind.settings.Login = {
@@ -356,7 +363,7 @@ in
     kdePackages.kirigami-addons
     kdePackages.kirigami-addons.dev
     #    libsForQt5.appstream-qt
-#    libsForQt5.kcoreaddons
+    #    libsForQt5.kcoreaddons
     #libsForQt5.kirigami2
     kdePackages.syntax-highlighting
 
