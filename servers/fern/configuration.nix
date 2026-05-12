@@ -58,6 +58,8 @@ let
 in
 {
   services.hardware.openrgb.enable = true;
+  # ssh -R (remote port forward) to this server should listen publicly
+  services.openssh.settings.GatewayPorts = "yes";
   boot = {
     kernelParams = [
       # attempt to fix nvidia perf
