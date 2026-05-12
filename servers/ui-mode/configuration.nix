@@ -356,8 +356,8 @@ in
     kdePackages.kirigami-addons
     kdePackages.kirigami-addons.dev
     #    libsForQt5.appstream-qt
-    libsForQt5.kcoreaddons
-    libsForQt5.kirigami2
+#    libsForQt5.kcoreaddons
+    #libsForQt5.kirigami2
     kdePackages.syntax-highlighting
 
     (python313.withPackages (
