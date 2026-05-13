@@ -200,6 +200,7 @@ in
       "https://rusic.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://cache.nixos-cuda.org"
+      "http://nix.fern.danbulant.cloud"
     ];
     trusted-public-keys = [
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
@@ -211,6 +212,7 @@ in
       "rusic.cachix.org-1:WXMpGpamblLUiJtcoxBxGGGGwIcWxGPJBUxarLiqWmw="
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      "fern:yuWzr5L8X9lNJhdBV1ksA97bm9S/F79ekodKXZSarig="
     ];
   };
 

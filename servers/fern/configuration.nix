@@ -188,6 +188,38 @@ in
       '';
     };
   };
+
+  services.nix-serve = {
+    enable = true;
+    secretKeyFile = "/var/secrets/cache-private-key.pem";
+  };
+
+  services.caddy = {
+    enable = true;
+
+    virtualHosts = {
+      "llama.fern.danbulant.cloud:80" = {
+        extraConfig = ''
+          reverse_proxy http://localhost:${toString config.services.llama-swap.port}
+        '';
+      };
+      "nix.fern.danbulant.cloud:80" = {
+        extraConfig = ''
+          reverse_proxy http://localhost:${toString config.services.nix-serve.port}
+        '';
+      };
+    };
+  };
+
+  nix.optimise = {
+    automatic = true;
+    persistent = true;
+  };
+  nix.gc = {
+    automatic = true;
+    persistent = true;
+  };
+
   hardware.nvidia = {
     open = true;
     modesetting.enable = true;
