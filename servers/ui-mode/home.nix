@@ -26,6 +26,22 @@ let
       allowUnfree = true;
     };
   };
+  codexbarWrapped = pkgs.writeShellApplication {
+    name = "codexbar";
+    runtimeInputs = [ pkgs.bubblewrap ];
+    text = ''
+      exec bwrap \
+        --die-with-parent \
+        --bind / / \
+        --dev-bind /dev /dev \
+        --proc /proc \
+        --tmpfs /usr \
+        --dir /usr/bin \
+        --ro-bind ${pkgs.which}/bin/which /usr/bin/which \
+        -- \
+        ${codexbar.packages.${pkgs.system}.default}/bin/codexbar "$@"
+    '';
+  };
   # system = stdenv.hostPlatform.system;
 in
 {
@@ -41,7 +57,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
-      codexbar.packages.${system}.default
+      codexbarWrapped
+      codex
       jellyfin-desktop
       (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
