@@ -410,8 +410,11 @@ in
         ]);
     };
 
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.cudaSupport = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    cudaSupport = true;
+    android_sdk.accept_license = true;
+  };
 
   hardware.graphics = {
     enable = true;
