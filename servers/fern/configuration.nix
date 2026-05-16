@@ -123,6 +123,7 @@ in
     ];
   };
   environment.systemPackages = with pkgs; [
+    android-studio-full
     nvitop
     # basalt-monado
     cudaPackages.cuda_nvcc
