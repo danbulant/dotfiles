@@ -4,6 +4,7 @@
       url = "github:getpaseo/paseo";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hypr-kdeconnect-fix.url = "github:danbulant/hypr-kdeconnect-fix";
     codexbar = {
       url = "github:0xferrous/CodexBar-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -79,6 +80,7 @@
       nix-index-database,
       dms,
       nix-monitor,
+      hypr-kdeconnect-fix,
       paseo,
       ...
     }@attrs:
@@ -95,10 +97,12 @@
         system = "x86_64-linux";
         specialArgs = attrs;
         modules = [
+          hypr-kdeconnect-fix.nixosModules.default
           paseo.nixosModules.paseo
           determinate.nixosModules.default
           home-manager.nixosModules.home-manager
           {
+            services.hypr-kdeconnect-fix.enable = true;
             home-manager.extraSpecialArgs = attrs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;

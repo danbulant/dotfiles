@@ -110,6 +110,8 @@ in
     openFirewall = true;
   };
 
+  programs.kdeconnect.enable = true;
+
   hardware.cpu.amd.updateMicrocode = true;
 
   hardware.graphics = {
