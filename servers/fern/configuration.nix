@@ -125,11 +125,13 @@ in
     ];
   };
   environment.systemPackages = with pkgs; [
+    blender
     android-studio-full
     nvitop
     # basalt-monado
     cudaPackages.cuda_nvcc
     llama-cpp
+    imgbrd-grabber
   ];
   services.llama-swap = {
     enable = true;

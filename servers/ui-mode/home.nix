@@ -64,6 +64,7 @@ in
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
         name = "qt6ct-kde";
       }))
+      exiftool
       kdePackages.qtstyleplugin-kvantum
       libsForQt5.qt5ct
       libsForQt5.qtstyleplugin-kvantum
