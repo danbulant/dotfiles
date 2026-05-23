@@ -26,6 +26,7 @@ in
     capSysAdmin = true;
     openFirewall = true;
   };
+  programs.steam.extraPackages = [ pkgs.hidapi ];
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"

@@ -275,7 +275,7 @@ in
       ripgrep
       iotop
       nethogs
-      john
+      # john
       iperf
       mold
       nheko
@@ -376,7 +376,7 @@ in
     #     hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
     # ];
   };
-  programs.dsearch.enable = true;
+  # programs.dsearch.enable = true;
   programs.dank-material-shell = {
     enable = true;
     systemd.enable = false;
