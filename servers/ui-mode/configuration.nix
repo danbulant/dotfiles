@@ -334,7 +334,7 @@ in
       options nvidia_drm modeset=1 fbdev=1
     '';
   };
-  boot.loader.timeout = 0;
+  boot.loader.timeout = 5;
 
   # App image support
   boot.binfmt.registrations.appimage = {
