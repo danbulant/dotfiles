@@ -30,6 +30,7 @@ let
             find "$out" -name .git -print0 | xargs -0 rm -rf
           '';
         };
+        npmRoot = "tools/server/webui";
         npmDepsHash = "sha256-k62LIbyY2DXvs7XXbX0lNPiYxuYzeJUyQtS4eA+68f8=";
         cmakeFlags = with pkgs.lib; [
           # -march=native is non-deterministic; override with platform-specific flags if needed
@@ -50,7 +51,7 @@ let
           # (cmakeBool "GGML_METAL" false)
           # (cmakeBool "GGML_RPC" false)
           # (cmakeBool "GGML_VULKAN" false)
-          (cmakeFeature "LLAMA_BUILD_NUMBER" "8667")
+          (cmakeFeature "LLAMA_BUILD_NUMBER" version)
           (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "120")
         ];
       })

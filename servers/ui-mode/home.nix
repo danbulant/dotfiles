@@ -26,6 +26,16 @@ let
       allowUnfree = true;
     };
   };
+  activitywatchPackages = pkgs.qt6Packages.callPackage "${pkgs.path}/pkgs/applications/office/activitywatch" { };
+  activitywatchFixed = pkgs.activitywatch.override {
+    aw-server-rust = pkgs.aw-server-rust.overrideAttrs (oldAttrs: {
+      env = (oldAttrs.env or { }) // {
+        AW_WEBUI_DIR = activitywatchPackages.aw-webui.overrideAttrs {
+          doCheck = false;
+        };
+      };
+    });
+  };
   codexbarWrapped = pkgs.writeShellApplication {
     name = "codexbar";
     runtimeInputs = [ pkgs.bubblewrap ];
@@ -204,7 +214,7 @@ in
       #dunst
       sccache
       swaybg
-      activitywatch
+      activitywatchFixed
       networkmanagerapplet
       kubectl
       duf
