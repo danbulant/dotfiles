@@ -26,7 +26,10 @@ in
     capSysAdmin = true;
     openFirewall = true;
   };
-  programs.steam.extraPackages = [ pkgs.hidapi ];
+  programs.steam.extraPackages = with pkgs; [
+    hidapi
+    pulseaudio
+  ];
 
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
@@ -94,6 +97,11 @@ in
 
   time.timeZone = lib.mkForce "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
+  i18n.supportedLocales = [
+    "cs_CZ.UTF-8/UTF-8"
+    "en_GB.UTF-8/UTF-8"
+    "en_US.UTF-8/UTF-8"
+  ];
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "cs_CZ.UTF-8";
     LC_IDENTIFICATION = "cs_CZ.UTF-8";

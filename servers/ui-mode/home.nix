@@ -260,6 +260,7 @@ in
       mpv
 
       heroic
+      gamescope
       heaptrack
       #cinny-desktop
       gping
