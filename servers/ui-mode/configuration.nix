@@ -247,13 +247,29 @@ in
         "hyprland"
         "gtk"
       ];
+      common."org.freedesktop.impl.portal.RemoteDesktop" = [ "hypr-kdeconnect" ];
       hyprland = {
         default = [
           "hyprland"
           "gtk"
         ];
         "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+        "org.freedesktop.impl.portal.RemoteDesktop" = [ "hypr-kdeconnect" ];
       };
+    };
+  };
+  systemd.user.services.plasma-xdg-desktop-portal-kde = {
+    unitConfig = {
+      Description = "Xdg Desktop Portal For KDE";
+      PartOf = "graphical-session.target";
+      After = "plasma-core.target";
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.kdePackages.xdg-desktop-portal-kde}/libexec/xdg-desktop-portal-kde";
+      BusName = "org.freedesktop.impl.portal.desktop.kde";
+      Slice = "session.slice";
+      Restart = "no";
     };
   };
   programs.dank-material-shell.greeter = {

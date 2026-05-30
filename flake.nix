@@ -107,6 +107,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.dan = import ./servers/ui-mode/home.nix;
+            home-manager.backupFileExtension = "backup";
             networking.hostName = "fern";
             imports = [ ./servers/fern/hardware-configuration.nix ];
           }
