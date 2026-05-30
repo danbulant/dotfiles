@@ -164,6 +164,7 @@
           #          };
           #        }
           ./servers/ui-mode/configuration.nix
+          ./servers/aura/configuration.nix
           # Import sysbox module
           ./modules/sysbox.nix
           nix-index-database.nixosModules.nix-index

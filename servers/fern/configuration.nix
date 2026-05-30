@@ -102,14 +102,14 @@ in
     };
   };
 
-  services.paseo = {
-    enable = true;
-    relay.enable = false;
-    user = "dan";
-    group = "users";
-    port = 5656;
-    openFirewall = true;
-  };
+  #services.paseo = {
+  #  enable = true;
+  #  relay.enable = false;
+  #  user = "dan";
+  #  group = "users";
+  #  port = 5656;
+  #  openFirewall = true;
+  #};
 
   programs.kdeconnect.enable = true;
 
@@ -133,6 +133,7 @@ in
     cudaPackages.cuda_nvcc
     llama-cpp
     imgbrd-grabber
+    protonplus
   ];
   services.llama-swap = {
     enable = true;
