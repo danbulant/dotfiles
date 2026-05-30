@@ -227,6 +227,26 @@ in
 
     # package = unstable-pkgs.hyprland;
   };
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
+    ];
+    config = {
+      common.default = [
+        "hyprland"
+        "gtk"
+      ];
+      hyprland = {
+        default = [
+          "hyprland"
+          "gtk"
+        ];
+        "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+      };
+    };
+  };
   programs.dank-material-shell.greeter = {
     enable = true;
     compositor.name = "hyprland"; # "niri" or "hyprland" or "sway"
@@ -421,19 +441,6 @@ in
     enable = true;
     # Steam support
     enable32Bit = true;
-    extraPackages = with pkgs; [
-      # Required for modern Intel GPUs (Xe iGPU and ARC)
-      intel-media-driver # VA-API (iHD) userspace
-      vpl-gpu-rt # oneVPL (QSV) runtime
-
-      # Optional (compute / tooling):
-      intel-compute-runtime # OpenCL (NEO) + Level Zero for Arc/Xe
-      #     libvdpau-va-gl
-      #     nvidia-vaapi-driver
-    ];
-  };
-  environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "iHD";
   };
   hardware.enableRedistributableFirmware = true;
 
