@@ -187,6 +187,7 @@ in
 
   # Other defaults are set in home.nix
   # environment.sessionVariables.DEFAULT_BROWSER = "firefox";
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   # programs.firefox.enable = true;
   nix.settings = {
