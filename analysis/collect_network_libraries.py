@@ -73,6 +73,131 @@ CONTAINER_ROOTS = [
 GITHUB_RE = re.compile(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/#?]+?)(?:\.git|/|#|\?|$)")
 STORE_HASH_PREFIX_RE = re.compile(r"^[0-9a-z]{32}-(?P<name>.+)$")
 
+COMMON_UPSTREAMS = {
+    "acl": ("https://git.savannah.nongnu.org/cgit/acl.git", "C"),
+    "attr": ("https://git.savannah.nongnu.org/cgit/attr.git", "C"),
+    "avahi": ("https://github.com/avahi/avahi", "C"),
+    "bluez": ("https://git.kernel.org/pub/scm/bluetooth/bluez.git", "C"),
+    "bzip2": ("https://sourceware.org/git/bzip2.git", "C"),
+    "curl": ("https://github.com/curl/curl", "C"),
+    "dbus": ("https://gitlab.freedesktop.org/dbus/dbus", "C"),
+    "double-conversion": ("https://github.com/google/double-conversion", "C++"),
+    "ffmpeg": ("https://git.ffmpeg.org/ffmpeg.git", "C"),
+    "fuse": ("https://github.com/libfuse/libfuse", "C"),
+    "glib": ("https://gitlab.gnome.org/GNOME/glib", "C"),
+    "glibc": ("https://sourceware.org/git/glibc.git", "C"),
+    "graphviz": ("https://gitlab.com/graphviz/graphviz", "C"),
+    "gtk+3": ("https://gitlab.gnome.org/GNOME/gtk", "C"),
+    "libarchive": ("https://github.com/libarchive/libarchive", "C"),
+    "libbpf": ("https://github.com/libbpf/libbpf", "C"),
+    "libbsd": ("https://gitlab.freedesktop.org/libbsd/libbsd", "C"),
+    "libcbor": ("https://github.com/PJK/libcbor", "C"),
+    "libedit": ("https://www.thrysoee.dk/editline/", "C"),
+    "libfido2": ("https://github.com/Yubico/libfido2", "C"),
+    "libmnl": ("https://git.netfilter.org/libmnl", "C"),
+    "libnftnl": ("https://git.netfilter.org/libnftnl", "C"),
+    "libpcap": ("https://github.com/the-tcpdump-group/libpcap", "C"),
+    "libuv": ("https://github.com/libuv/libuv", "C"),
+    "libxml2": ("https://gitlab.gnome.org/GNOME/libxml2", "C"),
+    "libxslt": ("https://gitlab.gnome.org/GNOME/libxslt", "C"),
+    "ncurses": ("https://invisible-island.net/ncurses/", "C"),
+    "oniguruma": ("https://github.com/kkos/oniguruma", "C"),
+    "openssl": ("https://github.com/openssl/openssl", "C"),
+    "pcre2": ("https://github.com/PCRE2Project/pcre2", "C"),
+    "pcsclite": ("https://pcsclite.apdu.fr/", "C"),
+    "rhash": ("https://github.com/rhash/RHash", "C"),
+    "sqlite": ("https://sqlite.org/src", "C"),
+    "systemd": ("https://github.com/systemd/systemd", "C"),
+    "xz": ("https://git.tukaani.org/xz.git", "C"),
+    "zlib": ("https://github.com/madler/zlib", "C"),
+}
+
+NUGET_NAME_PREFIXES = (
+    "AngleSharp",
+    "AspNetCore",
+    "Azure.",
+    "BouncyCastle",
+    "Castle.",
+    "Dapper",
+    "DryIoc",
+    "Fluent",
+    "HarfBuzzSharp",
+    "ICU4N",
+    "Jellyfin.",
+    "MailKit",
+    "MetaBrainz.",
+    "Microsoft.",
+    "Mono.",
+    "NETStandard.",
+    "Newtonsoft.",
+    "NLog",
+    "NodaTime",
+    "NuGet.",
+    "NUnit",
+    "RestSharp",
+    "Serilog",
+    "Servarr.",
+    "SkiaSharp",
+    "SQLitePCLRaw",
+    "StyleCop.",
+    "System.",
+    "runtime.",
+)
+
+NUGET_REPO_OVERRIDES = {
+    "AngleSharp": "https://github.com/AngleSharp/AngleSharp",
+    "AngleSharp.Xml": "https://github.com/AngleSharp/AngleSharp.Xml",
+    "BitFaster.Caching": "https://github.com/bitfaster/BitFaster.Caching",
+    "BlurHashSharp": "https://github.com/MarkusPalcer/BlurHashSharp",
+    "BlurHashSharp.SkiaSharp": "https://github.com/MarkusPalcer/BlurHashSharp",
+    "BouncyCastle.Cryptography": "https://github.com/bcgit/bc-csharp",
+    "Castle.Core": "https://github.com/castleproject/Core",
+    "Dapper": "https://github.com/DapperLib/Dapper",
+    "DryIoc.dll": "https://github.com/dadhi/DryIoc",
+    "DryIoc.Microsoft.DependencyInjection": "https://github.com/dadhi/DryIoc",
+    "FluentAssertions": "https://github.com/fluentassertions/fluentassertions",
+    "FluentMigrator": "https://github.com/fluentmigrator/fluentmigrator",
+    "FluentMigrator.Abstractions": "https://github.com/fluentmigrator/fluentmigrator",
+    "FluentMigrator.Extensions.Postgres": "https://github.com/fluentmigrator/fluentmigrator",
+    "FluentMigrator.Runner.Core": "https://github.com/fluentmigrator/fluentmigrator",
+    "FluentMigrator.Runner.Postgres": "https://github.com/fluentmigrator/fluentmigrator",
+    "FluentMigrator.Runner.SQLite": "https://github.com/fluentmigrator/fluentmigrator",
+    "FluentValidation": "https://github.com/FluentValidation/FluentValidation",
+    "HarfBuzzSharp": "https://github.com/mono/SkiaSharp",
+    "HarfBuzzSharp.NativeAssets.Linux": "https://github.com/mono/SkiaSharp",
+    "HarfBuzzSharp.NativeAssets.Win32": "https://github.com/mono/SkiaSharp",
+    "HarfBuzzSharp.NativeAssets.macOS": "https://github.com/mono/SkiaSharp",
+    "ICU4N": "https://github.com/NightOwl888/ICU4N",
+    "ICU4N.Transliterator": "https://github.com/NightOwl888/ICU4N",
+    "MailKit": "https://github.com/jstedfast/MailKit",
+    "MetaBrainz.Common": "https://github.com/Zastai/MetaBrainz.Common",
+    "MetaBrainz.Common.Json": "https://github.com/Zastai/MetaBrainz.Common.Json",
+    "MetaBrainz.MusicBrainz": "https://github.com/Zastai/MetaBrainz.MusicBrainz",
+    "Microsoft.Data.SqlClient": "https://github.com/dotnet/SqlClient",
+    "Microsoft.Data.SqlClient.SNI.runtime": "https://github.com/dotnet/SqlClient",
+    "Microsoft.Data.Sqlite": "https://github.com/dotnet/efcore",
+    "Microsoft.Data.Sqlite.Core": "https://github.com/dotnet/efcore",
+    "Newtonsoft.Json": "https://github.com/JamesNK/Newtonsoft.Json",
+    "NLog": "https://github.com/NLog/NLog",
+    "NodaTime": "https://github.com/nodatime/nodatime",
+    "NUnit": "https://github.com/nunit/nunit",
+    "NUnit3TestAdapter": "https://github.com/nunit/nunit3-vs-adapter",
+    "RestSharp": "https://github.com/restsharp/RestSharp",
+    "RestSharp.Serializers.SystemTextJson": "https://github.com/restsharp/RestSharp",
+    "Sentry": "https://github.com/getsentry/sentry-dotnet",
+    "Serilog": "https://github.com/serilog/serilog",
+    "SkiaSharp": "https://github.com/mono/SkiaSharp",
+    "SkiaSharp.HarfBuzz": "https://github.com/mono/SkiaSharp",
+    "SkiaSharp.NativeAssets.Linux": "https://github.com/mono/SkiaSharp",
+    "SkiaSharp.NativeAssets.Win32": "https://github.com/mono/SkiaSharp",
+    "SkiaSharp.NativeAssets.macOS": "https://github.com/mono/SkiaSharp",
+    "SQLitePCLRaw.bundle_e_sqlite3": "https://github.com/ericsink/SQLitePCL.raw",
+    "SQLitePCLRaw.core": "https://github.com/ericsink/SQLitePCL.raw",
+    "SQLitePCLRaw.lib.e_sqlite3": "https://github.com/ericsink/SQLitePCL.raw",
+    "SQLitePCLRaw.provider.e_sqlite3": "https://github.com/ericsink/SQLitePCL.raw",
+    "StyleCop.Analyzers": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers",
+}
+
 
 def run(cmd: list[str], *, timeout: int = 120) -> str:
     proc = subprocess.run(
@@ -225,6 +350,64 @@ def infer_language(name: str, env: dict[str, str]) -> str | None:
     return None
 
 
+def static_upstream(name: str) -> dict[str, str] | None:
+    base = re.sub(r"-\d+(?:\.\d+).*$", "", name)
+    if base in COMMON_UPSTREAMS:
+        source, language = COMMON_UPSTREAMS[base]
+        return {"source_link": source, "language": language}
+    if name.startswith("qt") or name in {"qca", "phonon", "poppler"}:
+        return {"source_link": f"https://code.qt.io/cgit/qt/{base}.git", "language": "C++"}
+    if name.startswith("gst-") or name == "gstreamer":
+        project = "gstreamer" if name == "gstreamer" else base
+        return {"source_link": f"https://gitlab.freedesktop.org/gstreamer/{project}", "language": "C"}
+    kde_prefixes = (
+        "karchive",
+        "kauth",
+        "kbookmarks",
+        "kcmutils",
+        "kcodecs",
+        "kcompletion",
+        "kconfig",
+        "kconfigwidgets",
+        "kcoreaddons",
+        "kcrash",
+        "kdbusaddons",
+        "kdeclarative",
+        "kded",
+        "kdnssd",
+        "kdoctools",
+        "kfilemetadata",
+        "kguiaddons",
+        "ki18n",
+        "kiconthemes",
+        "kidletime",
+        "kio",
+        "kirigami",
+        "kitemmodels",
+        "kitemviews",
+        "kjobwidgets",
+        "knotifications",
+        "kpackage",
+        "kparts",
+        "kpeople",
+        "kpty",
+        "kservice",
+        "kstatusnotifieritem",
+        "ksvg",
+        "ktextwidgets",
+        "kwallet",
+        "kwidgetsaddons",
+        "kwindowsystem",
+        "kxmlgui",
+        "solid",
+        "sonnet",
+        "syntax-highlighting",
+    )
+    if base.startswith(kde_prefixes):
+        return {"source_link": f"https://invent.kde.org/frameworks/{base}", "language": "C++"}
+    return None
+
+
 def github_repo(*values: str | None) -> str | None:
     for value in values:
         if not value:
@@ -318,7 +501,8 @@ def parse_ecosystem(row: dict[str, Any]) -> tuple[str | None, str | None, str | 
     name = row["library"]
     version = row.get("version_in_use") or None
     drv = row.get("drv_path", "")
-    if ".nupkg" in drv or row["root_name"].lower() in ("jellyfin", "sonarr", "radarr", "prowlarr"):
+    is_nuget_like = name.startswith(NUGET_NAME_PREFIXES)
+    if ".nupkg" in drv or is_nuget_like:
         # The derivation rows have clean name/version; the raw .nupkg rows are
         # filtered from review but can still be enriched in summary/deps.
         if not version and ".nupkg" in drv:
@@ -339,13 +523,33 @@ def parse_ecosystem(row: dict[str, Any]) -> tuple[str | None, str | None, str | 
     return None, None, None
 
 
+def apply_ecosystem_overrides(ecosystem: str, package: str, result: dict[str, Any]) -> dict[str, Any]:
+    if ecosystem == "nuget":
+        source = NUGET_REPO_OVERRIDES.get(package)
+        if not source and package.startswith("Microsoft.AspNetCore."):
+            source = "https://github.com/dotnet/aspnetcore"
+        if not source and package.startswith("Microsoft.EntityFrameworkCore"):
+            source = "https://github.com/dotnet/efcore"
+        if not source and package.startswith("Microsoft.Build"):
+            source = "https://github.com/dotnet/msbuild"
+        if not source and package.startswith("Microsoft.Identity.Client"):
+            source = "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet"
+        if not source and (package.startswith("Microsoft.") or package.startswith("System.") or package.startswith("runtime.")):
+            source = "https://github.com/dotnet/runtime"
+        if source:
+            result["source_link"] = source
+            result["github_repo"] = github_repo(source)
+            result.setdefault("language", "C#")
+    return result
+
+
 def release_date_from_pypi(files: list[dict[str, Any]]) -> str | None:
     dates = [f.get("upload_time_iso_8601") for f in files if f.get("upload_time_iso_8601")]
     return min(dates) if dates else None
 
 
 def enrich_ecosystem(ecosystem: str, package: str, version: str | None, cache: dict[str, Any]) -> dict[str, Any]:
-    key = f"{ecosystem}:{package}:{version or ''}"
+    key = ecosystem_cache_key(ecosystem, package, version)
     if key in cache:
         return cache[key]
     result: dict[str, Any] = {"ecosystem": ecosystem}
@@ -435,10 +639,17 @@ def enrich_ecosystem(ecosystem: str, package: str, version: str | None, cache: d
                 "latest_release_date": data.get("date"),
             }
         )
+        if str(data.get("version")) == str(version):
+            result["release_date"] = data.get("date")
 
     result["github_repo"] = github_repo(result.get("source_link"))
+    result = apply_ecosystem_overrides(ecosystem, package, result)
     cache[key] = result
     return result
+
+
+def ecosystem_cache_key(ecosystem: str | None, package: str | None, version: str | None) -> str:
+    return f"{ecosystem}:{package}:{version or ''}"
 
 
 def enrich_github(repo: str, cache: dict[str, Any], sleep: float) -> dict[str, Any]:
@@ -482,6 +693,9 @@ def walk_deps(root: dict[str, Any], all_drvs: dict[str, Any], max_depth: int) ->
                 continue
             seen.add(dep_key)
             meta = drv_meta(dep_key, all_drvs)
+            static = static_upstream(meta["name"]) or {}
+            source_link = meta["source_link"] or static.get("source_link")
+            language = meta["language"] or static.get("language")
             dep_path = path + [meta["name"]]
             rows.append(
                 {
@@ -495,9 +709,9 @@ def walk_deps(root: dict[str, Any], all_drvs: dict[str, Any], max_depth: int) ->
                     "dependency_path": " -> ".join([root["rootName"]] + dep_path),
                     "drv_path": dep_key,
                     "homepage": meta["homepage"],
-                    "source_link": meta["source_link"],
-                    "language": meta["language"],
-                    "github_repo": github_repo(meta["homepage"], meta["source_link"]),
+                    "source_link": source_link,
+                    "language": language,
+                    "github_repo": github_repo(meta["homepage"], source_link),
                     "github_stars": None,
                     "ecosystem": None,
                     "release_date": None,
@@ -514,6 +728,16 @@ def write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
+
+
+def ecosystem_priority(ecosystem: str | None) -> int:
+    return {
+        "cpan": 0,
+        "npm": 1,
+        "pypi": 2,
+        "crates": 3,
+        "nuget": 4,
+    }.get(ecosystem or "", 9)
 
 
 def main() -> int:
@@ -542,6 +766,7 @@ def main() -> int:
     ecosystem_cache_path = OUT / "ecosystem-cache.json"
     ecosystem_cache = json.loads(ecosystem_cache_path.read_text()) if ecosystem_cache_path.exists() else {}
     ecosystem_keys = []
+    ecosystem_key_scores: dict[tuple[str | None, str | None, str | None], tuple[int, int, str, str]] = {}
     ecosystem_rows: dict[tuple[str | None, str | None, str | None], list[dict[str, Any]]] = {}
     for row in dep_rows:
         ecosystem, package, version = parse_ecosystem(row)
@@ -550,14 +775,30 @@ def main() -> int:
             ecosystem_rows.setdefault(key, []).append(row)
             if key not in ecosystem_keys:
                 ecosystem_keys.append(key)
-    for idx, (ecosystem, package, version) in enumerate(ecosystem_keys[: args.ecosystem_limit], start=1):
+            review_score = 0 if not noisy_for_review(row) else 1
+            score = (review_score, ecosystem_priority(ecosystem), package.lower(), version or "")
+            if key not in ecosystem_key_scores or score < ecosystem_key_scores[key]:
+                ecosystem_key_scores[key] = score
+    ecosystem_keys.sort(key=lambda key: ecosystem_key_scores.get(key, (9, 9, "", "")))
+    selected_ecosystem_keys = ecosystem_keys if args.ecosystem_limit < 0 else ecosystem_keys[: args.ecosystem_limit]
+    for idx, (ecosystem, package, version) in enumerate(selected_ecosystem_keys, start=1):
         if idx % 25 == 1:
-            print(f"enriching ecosystem metadata {idx}/{min(len(ecosystem_keys), args.ecosystem_limit)}", file=sys.stderr)
+            print(f"enriching ecosystem metadata {idx}/{len(selected_ecosystem_keys)}", file=sys.stderr)
         meta = enrich_ecosystem(ecosystem, package, version, ecosystem_cache)
         for row in ecosystem_rows.get((ecosystem, package, version), []):
             row.update({k: v for k, v in meta.items() if v is not None and (not row.get(k) or k in {"ecosystem", "release_date"})})
         if idx % 25 == 0:
             write_json_atomic(ecosystem_cache_path, ecosystem_cache)
+    selected_ecosystem_key_set = set(selected_ecosystem_keys)
+    cached_only_keys = [
+        key
+        for key in ecosystem_keys
+        if ecosystem_cache_key(*key) in ecosystem_cache and key not in selected_ecosystem_key_set
+    ]
+    for ecosystem, package, version in cached_only_keys:
+        meta = ecosystem_cache[ecosystem_cache_key(ecosystem, package, version)]
+        for row in ecosystem_rows.get((ecosystem, package, version), []):
+            row.update({k: v for k, v in meta.items() if v is not None and (not row.get(k) or k in {"ecosystem", "release_date"})})
     write_json_atomic(ecosystem_cache_path, ecosystem_cache)
 
     cache_path = OUT / "github-cache.json"
