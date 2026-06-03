@@ -247,6 +247,7 @@ in
         "hyprland"
         "gtk"
       ];
+      common."org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
       common."org.freedesktop.impl.portal.RemoteDesktop" = [ "hypr-kdeconnect" ];
       hyprland = {
         default = [
@@ -254,6 +255,7 @@ in
           "gtk"
         ];
         "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
         "org.freedesktop.impl.portal.RemoteDesktop" = [ "hypr-kdeconnect" ];
       };
     };

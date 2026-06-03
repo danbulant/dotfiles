@@ -52,6 +52,15 @@ let
         ${codexbar.packages.${pkgs.system}.default}/bin/codexbar "$@"
     '';
   };
+  vesktopWrapped = pkgs.symlinkJoin {
+    name = "vesktop-pipewire";
+    paths = [ pkgs.vesktop ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/vesktop \
+        --add-flags "--enable-features=WebRTCPipeWireCapturer,WaylandWindowDecorations"
+    '';
+  };
   # system = stdenv.hostPlatform.system;
 in
 {
@@ -67,6 +76,9 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      firefox
+      unrar
+      wine
       codexbarWrapped
       codex
       jellyfin-desktop
@@ -205,7 +217,7 @@ in
       #rofi-wayland
       rofi
       discord
-      vesktop
+      vesktopWrapped
       spotify
       spicetify-cli
       meslo-lgs-nf
