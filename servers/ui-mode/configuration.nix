@@ -228,6 +228,8 @@ in
 
   programs.hyprland = {
     enable = true;
+    # Installs UWSM's user units required by the Hyprland (uwsm-managed) session.
+    withUWSM = true;
     #    package = hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
     #  {

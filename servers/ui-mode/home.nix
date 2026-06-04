@@ -26,7 +26,9 @@ let
       allowUnfree = true;
     };
   };
-  activitywatchPackages = pkgs.qt6Packages.callPackage "${pkgs.path}/pkgs/applications/office/activitywatch" { };
+  activitywatchPackages =
+    pkgs.qt6Packages.callPackage "${pkgs.path}/pkgs/applications/office/activitywatch"
+      { };
   activitywatchFixed = pkgs.activitywatch.override {
     aw-server-rust = pkgs.aw-server-rust.overrideAttrs (oldAttrs: {
       env = (oldAttrs.env or { }) // {
@@ -52,15 +54,15 @@ let
         ${codexbar.packages.${pkgs.system}.default}/bin/codexbar "$@"
     '';
   };
-  vesktopWrapped = pkgs.symlinkJoin {
-    name = "vesktop-pipewire";
-    paths = [ pkgs.vesktop ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
+  vesktopWrapped = pkgs.vesktop.overrideAttrs (oldAttrs: {
+    nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+    postFixup = (oldAttrs.postFixup or "") + ''
       wrapProgram $out/bin/vesktop \
-        --add-flags "--enable-features=WebRTCPipeWireCapturer,WaylandWindowDecorations"
+        --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.pipewire ]}" \
+        --add-flags "--ozone-platform=wayland --enable-features=WebRTCPipeWireCapturer,WaylandWindowDecorations"
     '';
-  };
+  });
+
   # system = stdenv.hostPlatform.system;
 in
 {
@@ -431,6 +433,9 @@ in
     ];
     zen-browser = {
       enable = true;
+      extraPrefs = ''
+        user_pref("media.webrtc.camera.allow-pipewire", true);
+      '';
       extraPrefsFiles = [
         # (builtins.fetchurl {
         #   url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
