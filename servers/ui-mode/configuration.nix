@@ -109,17 +109,13 @@
     LC_TIME = "en_GB.UTF-8";
   };
   services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
   services.desktopManager.plasma6 = {
     enable = true;
   };
   # services.desktopManager.gnome.enable = true;
-  services.xserver = {
-    enable = false;
-    xkb = {
-      layout = "us";
-      variant = "";
-    };
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "";
   };
 
   services.printing.enable = true;
@@ -223,8 +219,6 @@
 
   programs.hyprland = {
     enable = true;
-    # Installs UWSM's user units required by the Hyprland (uwsm-managed) session.
-    withUWSM = true;
     #    package = hyprland.packages.${pkgs.system}.hyprland;
     # portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
     #  {
@@ -257,45 +251,18 @@
       };
     };
   };
-  systemd.user.services = {
-    xdg-desktop-portal-hyprland = {
-      unitConfig = {
-        Description = "Portal service (Hyprland implementation)";
-        PartOf = "graphical-session.target";
-        After = [
-          "graphical-session.target"
-          "wayland-session-waitenv.service"
-          "wayland-wm@hyprland.desktop.service"
-        ];
-        Wants = [ "wayland-session-waitenv.service" ];
-        ConditionEnvironment = [
-          "WAYLAND_DISPLAY"
-          "HYPRLAND_INSTANCE_SIGNATURE"
-        ];
-      };
-      serviceConfig = {
-        Type = "dbus";
-        BusName = "org.freedesktop.impl.portal.desktop.hyprland";
-        ExecStart = "${pkgs.xdg-desktop-portal-hyprland}/libexec/xdg-desktop-portal-hyprland";
-        Restart = "on-failure";
-        RestartSec = "2s";
-        Slice = "session.slice";
-      };
+  systemd.user.services.plasma-xdg-desktop-portal-kde = {
+    unitConfig = {
+      Description = "Xdg Desktop Portal For KDE";
+      PartOf = "graphical-session.target";
+      After = "plasma-core.target";
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
     };
-
-    plasma-xdg-desktop-portal-kde = {
-      unitConfig = {
-        Description = "Xdg Desktop Portal For KDE";
-        PartOf = "graphical-session.target";
-        After = "plasma-core.target";
-        ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
-      };
-      serviceConfig = {
-        ExecStart = "${pkgs.kdePackages.xdg-desktop-portal-kde}/libexec/xdg-desktop-portal-kde";
-        BusName = "org.freedesktop.impl.portal.desktop.kde";
-        Slice = "session.slice";
-        Restart = "no";
-      };
+    serviceConfig = {
+      ExecStart = "${pkgs.kdePackages.xdg-desktop-portal-kde}/libexec/xdg-desktop-portal-kde";
+      BusName = "org.freedesktop.impl.portal.desktop.kde";
+      Slice = "session.slice";
+      Restart = "no";
     };
   };
   programs.dank-material-shell.greeter = {

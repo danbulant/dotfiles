@@ -38,22 +38,7 @@ let
       };
     });
   };
-  codexbarWrapped = pkgs.writeShellApplication {
-    name = "codexbar";
-    runtimeInputs = [ pkgs.bubblewrap ];
-    text = ''
-      exec bwrap \
-        --die-with-parent \
-        --bind / / \
-        --dev-bind /dev /dev \
-        --proc /proc \
-        --tmpfs /usr \
-        --dir /usr/bin \
-        --ro-bind ${pkgs.which}/bin/which /usr/bin/which \
-        -- \
-        ${codexbar.packages.${pkgs.system}.default}/bin/codexbar "$@"
-    '';
-  };
+
   vesktopWrapped = pkgs.vesktop.overrideAttrs (oldAttrs: {
     nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
     postFixup = (oldAttrs.postFixup or "") + ''
@@ -81,7 +66,7 @@ in
       firefox
       unrar
       wine
-      codexbarWrapped
+      codexbar.packages.${pkgs.system}.default
       codex
       jellyfin-desktop
       (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
