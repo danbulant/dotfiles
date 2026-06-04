@@ -6,15 +6,10 @@
   config,
   pkgs,
   options,
-  nixpkgs-unstable,
   lib,
   dms,
   ...
 }:
-let
-  unstable-pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux; # import nixpkgs-unstable.nixosModules.readOnlyPkgs {};
-  # unstable-pkgs = hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
-in
 {
   imports = [
     dms.nixosModules.greeter
@@ -262,18 +257,45 @@ in
       };
     };
   };
-  systemd.user.services.plasma-xdg-desktop-portal-kde = {
-    unitConfig = {
-      Description = "Xdg Desktop Portal For KDE";
-      PartOf = "graphical-session.target";
-      After = "plasma-core.target";
-      ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
+  systemd.user.services = {
+    xdg-desktop-portal-hyprland = {
+      unitConfig = {
+        Description = "Portal service (Hyprland implementation)";
+        PartOf = "graphical-session.target";
+        After = [
+          "graphical-session.target"
+          "wayland-session-waitenv.service"
+          "wayland-wm@hyprland.desktop.service"
+        ];
+        Wants = [ "wayland-session-waitenv.service" ];
+        ConditionEnvironment = [
+          "WAYLAND_DISPLAY"
+          "HYPRLAND_INSTANCE_SIGNATURE"
+        ];
+      };
+      serviceConfig = {
+        Type = "dbus";
+        BusName = "org.freedesktop.impl.portal.desktop.hyprland";
+        ExecStart = "${pkgs.xdg-desktop-portal-hyprland}/libexec/xdg-desktop-portal-hyprland";
+        Restart = "on-failure";
+        RestartSec = "2s";
+        Slice = "session.slice";
+      };
     };
-    serviceConfig = {
-      ExecStart = "${pkgs.kdePackages.xdg-desktop-portal-kde}/libexec/xdg-desktop-portal-kde";
-      BusName = "org.freedesktop.impl.portal.desktop.kde";
-      Slice = "session.slice";
-      Restart = "no";
+
+    plasma-xdg-desktop-portal-kde = {
+      unitConfig = {
+        Description = "Xdg Desktop Portal For KDE";
+        PartOf = "graphical-session.target";
+        After = "plasma-core.target";
+        ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
+      };
+      serviceConfig = {
+        ExecStart = "${pkgs.kdePackages.xdg-desktop-portal-kde}/libexec/xdg-desktop-portal-kde";
+        BusName = "org.freedesktop.impl.portal.desktop.kde";
+        Slice = "session.slice";
+        Restart = "no";
+      };
     };
   };
   programs.dank-material-shell.greeter = {
@@ -443,22 +465,6 @@ in
       ]
     ))
   ];
-
-  environment.variables =
-    let
-      qtVersions = with pkgs; [
-        qt5
-        qt6
-      ];
-    in
-    {
-      QT_PLUGIN_PATH = map (qt: "/${qt.qtbase.qtPluginPrefix}") qtVersions;
-      QML2_IMPORT_PATH =
-        map (qt: "/${qt.qtbase.qtQmlPrefix}") qtVersions
-        ++ (with unstable-pkgs; [
-          "${quickshell}/lib/qt-6/qml/"
-        ]);
-    };
 
   nixpkgs.config = {
     allowUnfree = true;
