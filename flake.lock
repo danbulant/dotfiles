@@ -250,6 +250,29 @@
         "url": "https://install.determinate.systems/determinate-nixd/tag/v3.21.0/x86_64-linux"
       }
     },
+    "dmm": {
+      "inputs": {
+        "flake-utils": "flake-utils_4",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1779928484,
+        "narHash": "sha256-tSOSjapAlAd63Xkc+MNFVKn1k4+AtW3w3GhicRTV9Pg=",
+        "owner": "deadlock-mod-manager",
+        "repo": "deadlock-mod-manager",
+        "rev": "077a096bffa5ba29cbb3a3e62a9a7b0b0215119c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deadlock-mod-manager",
+        "ref": "v1.0.0",
+        "repo": "deadlock-mod-manager",
+        "type": "github"
+      }
+    },
     "dms": {
       "inputs": {
         "nixpkgs": [
@@ -502,6 +525,24 @@
         "owner": "numtide",
         "repo": "flake-utils",
         "rev": "93a2b84fc4b70d9e089d029deacc3583435c2ed6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "flake-utils_4": {
+      "inputs": {
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
         "type": "github"
       },
       "original": {
@@ -803,7 +844,7 @@
         "hyprwire": "hyprwire",
         "nixpkgs": "nixpkgs_10",
         "pre-commit-hooks": "pre-commit-hooks",
-        "systems": "systems_3",
+        "systems": "systems_4",
         "xdph": "xdph"
       },
       "locked": {
@@ -1724,6 +1765,7 @@
         "copyparty": "copyparty",
         "danksearch": "danksearch",
         "determinate": "determinate",
+        "dmm": "dmm",
         "dms": "dms",
         "dolphin-overlay": "dolphin-overlay",
         "helium": "helium",
@@ -1746,7 +1788,7 @@
       "inputs": {
         "crane": "crane_2",
         "nixpkgs": "nixpkgs_14",
-        "rust-overlay": "rust-overlay"
+        "rust-overlay": "rust-overlay_2"
       },
       "locked": {
         "lastModified": 1780061474,
@@ -1780,6 +1822,27 @@
       }
     },
     "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "dmm",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1771384185,
+        "narHash": "sha256-KvmjUeA7uODwzbcQoN/B8DCZIbhT/Q/uErF1BBMcYnw=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "23dd7fa91602a68bd04847ac41bc10af1e6e2fd2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
       "inputs": {
         "nixpkgs": [
           "rusic",
@@ -1848,6 +1911,21 @@
     },
     "systems_3": {
       "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_4": {
+      "locked": {
         "lastModified": 1689347949,
         "narHash": "sha256-12tWmuL2zgBgZkdoB6qXZsgJEH9LR3oUgpaQq2RbI80=",
         "owner": "nix-systems",
@@ -1881,7 +1959,7 @@
     },
     "utils": {
       "inputs": {
-        "systems": "systems_2"
+        "systems": "systems_3"
       },
       "locked": {
         "lastModified": 1731533236,

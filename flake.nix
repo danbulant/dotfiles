@@ -4,6 +4,10 @@
       url = "github:getpaseo/paseo";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dmm = {
+      url = "github:deadlock-mod-manager/deadlock-mod-manager/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hypr-kdeconnect-fix.url = "github:danbulant/hypr-kdeconnect-fix";
     codexbar = {
       url = "github:0xferrous/CodexBar-flake";
@@ -70,16 +74,8 @@
       nixpkgs,
       determinate,
       colmena,
-      helium,
-      zen-browser,
-      dolphin-overlay,
-      hyprland-plugins,
       home-manager,
-      nixpkgs-unstable,
-      nix-gaming,
       nix-index-database,
-      dms,
-      nix-monitor,
       hypr-kdeconnect-fix,
       paseo,
       ...
