@@ -51,18 +51,18 @@ let
 
   deadlockModManager = dmm.packages.${pkgs.system}.nightly.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + ''
-      substituteInPlace apps/desktop/src-tauri/Cargo.toml \
-        --replace 'tauri-wry = ["tauri/wry"]' 'tauri-wry = ["tauri/wry"]
-cef = []'
+            substituteInPlace apps/desktop/src-tauri/Cargo.toml \
+              --replace 'tauri-wry = ["tauri/wry"]' 'tauri-wry = ["tauri/wry"]
+      cef = []'
 
-      substituteInPlace apps/desktop/src-tauri/src/mod_manager/steam_manager.rs \
-        --replace '    let steam_dir = steamlocate::SteamDir::from_dir(&path).map_err(|_| {' '    if !path.join("steamapps").join("libraryfolders.vdf").exists() {
-      return Err(Error::InvalidInput(
-        "Invalid Steam path: not a valid Steam installation directory".to_string(),
-      ));
-    }
+            substituteInPlace apps/desktop/src-tauri/src/mod_manager/steam_manager.rs \
+              --replace '    let steam_dir = steamlocate::SteamDir::from_dir(&path).map_err(|_| {' '    if !path.join("steamapps").join("libraryfolders.vdf").exists() {
+            return Err(Error::InvalidInput(
+              "Invalid Steam path: not a valid Steam installation directory".to_string(),
+            ));
+          }
 
-    let steam_dir = steamlocate::SteamDir::from_dir(&path).map_err(|_| {'
+          let steam_dir = steamlocate::SteamDir::from_dir(&path).map_err(|_| {'
     '';
   });
 
@@ -331,7 +331,7 @@ in
       scc
       aircrack-ng
       strace
-      ghidra
+      # ghidra
       ffuf
       sqlmap
       nmap

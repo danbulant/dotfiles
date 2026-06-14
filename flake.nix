@@ -33,6 +33,10 @@
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    reenv = {
+      url = "github:levigross/NixRevAI";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     # hyprland.url = "github:hyprwm/Hyprland/v0.48.1";
@@ -78,6 +82,7 @@
       nix-index-database,
       hypr-kdeconnect-fix,
       paseo,
+      reenv,
       ...
     }@attrs:
     {

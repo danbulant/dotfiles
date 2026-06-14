@@ -21,7 +21,7 @@ let
     grafana = 3002;
     tolgee = 8200;
     # ntfy = 3003;
-    llama-swap = 8080;
+    forgejo = 8300;
   };
   internalPorts = {
     prometheus-node = 9000;
@@ -112,6 +112,25 @@ in
       enable = true;
       url = "http://100.120.15.10:${toString ports.llama-swap}/api/metrics";
       port = internalPorts.prometheus-llama-swap;
+    };
+
+    forgejo = {
+      enable = true;
+      settings = {
+        server = {
+          DOMAIN = "git.badapple.cz";
+          ROOT_URL = "https://git.badapple.cz";
+          HTTP_PORT = ports.forgejo;
+        };
+        service.DISABLE_REGISTRATION = true;
+      };
+      actions = {
+        ENABLED = true;
+        DEFAULT_ACTIONS_URL = "github";
+      };
+      lfs.enable = true;
+      dump.enable = true;
+      dump.age = "5d";
     };
 
     dnsmasq = {

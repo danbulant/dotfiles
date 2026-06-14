@@ -2,10 +2,54 @@
   pkgs,
   lib,
   config,
+  reenv,
   ...
 }:
 
 let
+  system = pkgs.stdenv.hostPlatform.system;
+
+  ninfs = pkgs.python3Packages.buildPythonApplication {
+    pname = "ninfs";
+    version = "1.7b2";
+    format = "setuptools";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "ihaveamac";
+      repo = "ninfs";
+      rev = "v1.7b2";
+      hash = "sha256-x1BxY3YGfCPdqp44xLnbKimRoMPNqel/bP1mGdvx+98=";
+    };
+
+    postPatch = ''
+      sed -i '/#include <dlfcn.h>/a #include <string>' ninfs/hac/_crypto.cpp
+    '';
+
+    nativeBuildInputs = with pkgs.python3Packages; [
+      setuptools
+      wheel
+    ];
+
+    propagatedBuildInputs = with pkgs.python3Packages; [
+      pycryptodomex
+    ];
+
+    doCheck = false;
+  };
+
+  reverseEngineeringPython = pkgs.python3.withPackages (pythonPackages: [
+    pythonPackages.construct
+    pythonPackages.cryptography
+    pythonPackages.fusepy
+    pythonPackages.mcp
+    pythonPackages.pip
+    pythonPackages.pycryptodome
+    pythonPackages.pycryptodomex
+    pythonPackages.pyfatfs
+    pythonPackages.setuptools
+    pythonPackages.wheel
+  ]);
+
   llama-cpp = (
     (pkgs.llama-cpp.override {
       cudaSupport = true;
@@ -125,16 +169,55 @@ in
       nvidia-vaapi-driver
     ];
   };
-  environment.systemPackages = with pkgs; [
-    blender
-    android-studio-full
-    nvitop
-    # basalt-monado
-    cudaPackages.cuda_nvcc
-    llama-cpp
-    imgbrd-grabber
-    protonplus
-  ];
+  environment.systemPackages =
+    (with pkgs; [
+      blender
+      android-studio-full
+      nvitop
+      # basalt-monado
+      cudaPackages.cuda_nvcc
+      llama-cpp
+      imgbrd-grabber
+      protonplus
+
+      # Reverse engineering tooling
+      bintools
+      binwalk
+      ctrtool
+      fuse
+      fuse3
+      mtools
+      openssl
+      p7zip
+      sleuthkit
+      aircrack-ng
+      hostapd
+      iw
+      ninfs
+      tcpdump
+      wireshark-cli
+      reverseEngineeringPython
+    ])
+    ++ (with reenv.packages.${system}; [
+      bindiff
+      ghidra-with-extensions
+      retdec
+    ]);
+
+  environment.sessionVariables = {
+    GHIDRA_MCP_BRIDGE = "${
+      reenv.packages.${system}.ghidra-with-extensions
+    }/libexec/ghidra-mcp/bridge_mcp_ghidra.py";
+  };
+
+  environment.extraInit = ''
+    export LD_LIBRARY_PATH="${
+      pkgs.lib.makeLibraryPath [
+        pkgs.fuse
+        pkgs.fuse3
+      ]
+    }:''${LD_LIBRARY_PATH:-}"
+  '';
   services.llama-swap = {
     enable = true;
     openFirewall = true;
