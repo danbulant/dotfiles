@@ -429,6 +429,16 @@
         wheel
 
         pwntools
+        construct
+        cryptography
+        fusepy
+        mcp
+        pip
+        pycryptodome
+        pycryptodomex
+        pyfatfs
+        setuptools
+        wheel
       ]
     ))
   ];

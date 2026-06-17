@@ -37,19 +37,6 @@ let
     doCheck = false;
   };
 
-  reverseEngineeringPython = pkgs.python3.withPackages (pythonPackages: [
-    pythonPackages.construct
-    pythonPackages.cryptography
-    pythonPackages.fusepy
-    pythonPackages.mcp
-    pythonPackages.pip
-    pythonPackages.pycryptodome
-    pythonPackages.pycryptodomex
-    pythonPackages.pyfatfs
-    pythonPackages.setuptools
-    pythonPackages.wheel
-  ]);
-
   llama-cpp = (
     (pkgs.llama-cpp.override {
       cudaSupport = true;
@@ -196,7 +183,7 @@ in
       ninfs
       tcpdump
       wireshark-cli
-      reverseEngineeringPython
+      avalonia-ilspy
     ])
     ++ (with reenv.packages.${system}; [
       bindiff
