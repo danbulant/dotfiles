@@ -303,6 +303,7 @@
         libGL
         libva
         libelf
+        libpulseaudio
       ]);
   };
   services.openssh.enable = true;

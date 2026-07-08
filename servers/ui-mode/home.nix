@@ -82,7 +82,7 @@ in
 
     packages = with pkgs; [
       deadlockModManager
-      firefox
+      #firefox
       unrar
       wine
       codexbar.packages.${pkgs.system}.default
@@ -153,7 +153,7 @@ in
       typstwriter
       colmena.defaultPackage.${system}
       usbimager
-      bitwarden-desktop
+      #bitwarden-desktop
       #metasploit
       lenovo-legion
       burpsuite
