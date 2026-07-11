@@ -158,6 +158,7 @@ in
   };
   environment.systemPackages =
     (with pkgs; [
+      mtkclient
       blender
       android-studio-full
       nvitop

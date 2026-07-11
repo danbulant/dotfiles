@@ -20,6 +20,7 @@
   ...
 }:
 let
+  system = pkgs.stdenv.hostPlatform.system;
 
   unstable = import nixpkgs-unstable {
     system = pkgs.system;
@@ -66,6 +67,44 @@ let
     '';
   });
 
+  osuLazerBinNvidia = pkgs.symlinkJoin {
+    name = "osu-lazer-bin-glx-mesa";
+    paths = [ (nix-gaming.packages.${system}.osu-lazer-bin.override { gmrun_enable = false; }) ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/osu! \
+        --set SDL_VIDEODRIVER x11 \
+        --set __GLX_VENDOR_LIBRARY_NAME mesa \
+        --set DRI_PRIME 1 \
+        --unset MESA_VK_DEVICE_SELECT \
+        --unset __EGL_EXTERNAL_PLATFORM_CONFIG_DIRS \
+        --unset __EGL_VENDOR_LIBRARY_FILENAMES
+    '';
+  };
+
+  osuLazerBinDebug = pkgs.writeShellScriptBin "osu-debug" ''
+    set -eu
+
+    log="/tmp/osu-lazer-bin-debug.$(date +%s)"
+    resolved="$(${pkgs.coreutils}/bin/readlink -f "$(command -v osu!)")"
+
+    {
+      echo "PATH=$(command -v osu!)"
+      echo "RESOLVED=$resolved"
+      echo "ARGV=$*"
+      echo "--- wrapper ---"
+      ${pkgs.gnused}/bin/sed -n '1,80p' "$resolved" || true
+      echo "--- env ---"
+      env | ${pkgs.gnugrep}/bin/grep -E '^(SDL_|OSU_|__EGL|__GLX|EGL_|GLX_|LIBGL|MESA|DRI_|GBM|WLR|AQ_|DISPLAY|WAYLAND_DISPLAY|XDG_SESSION|XDG_CURRENT|PIPEWIRE|vblank)' | sort || true
+    } > "$log.env"
+
+    exec > >(${pkgs.coreutils}/bin/tee "$log.stdout")
+    exec 2> >(${pkgs.coreutils}/bin/tee "$log.stderr" >&2)
+
+    echo "Writing debug logs to $log.env, $log.stdout, and $log.stderr" >&2
+    exec osu! "$@"
+  '';
+
   # system = stdenv.hostPlatform.system;
 in
 {
@@ -81,6 +120,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      osuLazerBinNvidia
+      osuLazerBinDebug
       deadlockModManager
       #firefox
       unrar
@@ -324,7 +365,7 @@ in
 
       nixpkgs-unstable.legacyPackages.${system}.zed-editor
       nixpkgs-unstable.legacyPackages.${system}.pineflash
-      unstable.nosql-booster
+      #unstable.nosql-booster
 
       android-tools
       hyperfine
