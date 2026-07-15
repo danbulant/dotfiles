@@ -173,6 +173,21 @@
         "type": "github"
       }
     },
+    "crane_3": {
+      "locked": {
+        "lastModified": 1769737823,
+        "narHash": "sha256-DrBaNpZ+sJ4stXm+0nBX7zqZT9t9P22zbk6m5YhQxS4=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "b2f45c3830aa96b7456a4c4bc327d04d7a43e1ba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "danksearch": {
       "inputs": {
         "nixpkgs": [
@@ -513,6 +528,24 @@
         "owner": "hercules-ci",
         "repo": "flake-parts",
         "rev": "3107b77cd68437b9a76194f0f7f9c55f2329ca5b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_6": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib_5"
+      },
+      "locked": {
+        "lastModified": 1769996383,
+        "narHash": "sha256-AnYjnFWgS49RlqX7LrC4uA+sCCDBj0Ry/WOJ5XWAsa0=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "57928607ea566b5db3ad13af0e57e921e6b12381",
         "type": "github"
       },
       "original": {
@@ -1466,6 +1499,21 @@
         "type": "github"
       }
     },
+    "nixpkgs-lib_5": {
+      "locked": {
+        "lastModified": 1769909678,
+        "narHash": "sha256-cBEymOf4/o3FD5AZnzC3J9hLbiZ+QDT/KDuyHXVJOpM=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "72716169fe93074c333e8d0173151350670b824c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -1621,6 +1669,22 @@
       }
     },
     "nixpkgs_15": {
+      "locked": {
+        "lastModified": 1769789167,
+        "narHash": "sha256-kKB3bqYJU5nzYeIROI82Ef9VtTbu4uA3YydSk/Bioa8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_16": {
       "locked": {
         "lastModified": 1782723713,
         "narHash": "sha256-oPXCU/SSUokcGaJREHibG1CBX3+s/W7orDWQOZDsEeQ=",
@@ -1986,6 +2050,7 @@
         "paseo": "paseo",
         "reenv": "reenv",
         "rusic": "rusic",
+        "zed": "zed",
         "zen-browser": "zen-browser"
       }
     },
@@ -2082,6 +2147,27 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "8bceba21a1ebea535c27c4dc723a0d5a4db9e386",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_4": {
+      "inputs": {
+        "nixpkgs": [
+          "zed",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1777346187,
+        "narHash": "sha256-oVxyGjpiIsrXhWTJVUOs38fZQkLjd0nZGOY9K7Kfot8=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "146e7bf7569b8288f24d41d806b9f584f7cfd5b5",
         "type": "github"
       },
       "original": {
@@ -2324,10 +2410,31 @@
         "type": "github"
       }
     },
+    "zed": {
+      "inputs": {
+        "crane": "crane_3",
+        "flake-parts": "flake-parts_6",
+        "nixpkgs": "nixpkgs_15",
+        "rust-overlay": "rust-overlay_4"
+      },
+      "locked": {
+        "lastModified": 1783776978,
+        "narHash": "sha256-LHkUmvtaw+rGb5yb6AStY/WObRC29bOLLsP2sjFsR/4=",
+        "owner": "zed-industries",
+        "repo": "zed",
+        "rev": "65e1c5af258d4c80036467d583691f3f9ded0897",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zed-industries",
+        "repo": "zed",
+        "type": "github"
+      }
+    },
     "zen-browser": {
       "inputs": {
         "home-manager": "home-manager_2",
-        "nixpkgs": "nixpkgs_15"
+        "nixpkgs": "nixpkgs_16"
       },
       "locked": {
         "lastModified": 1783489920,

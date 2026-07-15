@@ -1,5 +1,6 @@
 {
   helium,
+  zed,
   colmena,
   dms,
   zen-browser,
@@ -133,6 +134,7 @@ in
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
         name = "qt6ct-kde";
       }))
+      bubblewrap
       exiftool
       kdePackages.qtstyleplugin-kvantum
       libsForQt5.qt5ct
@@ -363,7 +365,8 @@ in
       nixfmt
       qpwgraph
 
-      nixpkgs-unstable.legacyPackages.${system}.zed-editor
+      #nixpkgs-unstable.legacyPackages.${system}.zed-editor
+      zed.packages.${system}.default
       nixpkgs-unstable.legacyPackages.${system}.pineflash
       #unstable.nosql-booster
 

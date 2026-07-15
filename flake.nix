@@ -22,6 +22,7 @@
       url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    zed.url = "github:zed-industries/zed";
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
