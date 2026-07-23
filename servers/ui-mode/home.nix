@@ -121,6 +121,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      gh
       osuLazerBinNvidia
       osuLazerBinDebug
       deadlockModManager
