@@ -386,6 +386,8 @@
   };
 
   environment.systemPackages = with pkgs; [
+    exfat
+    exfatprogs
     git
     #    nvtopPackages.full
     btop

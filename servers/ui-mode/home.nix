@@ -122,6 +122,7 @@ in
 
     packages = with pkgs; [
       gh
+      inkscape
       osuLazerBinNvidia
       osuLazerBinDebug
       deadlockModManager
