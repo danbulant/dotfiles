@@ -136,6 +136,7 @@ in
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
         name = "qt6ct-kde";
       }))
+      moonlight-qt
       bubblewrap
       exiftool
       kdePackages.qtstyleplugin-kvantum
