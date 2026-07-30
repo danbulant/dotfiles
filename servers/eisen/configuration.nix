@@ -22,6 +22,7 @@ let
     tolgee = 8200;
     # ntfy = 3003;
     forgejo = 8300;
+    snaps = 8400;
   };
   internalPorts = {
     prometheus-node = 9000;
@@ -36,9 +37,11 @@ in
 {
   deployment = {
     # buildOnTarget = true;
-    targetHost = "192.168.1.114";
+    targetHost = "eisen";
   };
-
+  nixpkgs.config.permittedInsecurePackages = [
+    "pnpm-9.15.9"
+  ];
   programs.nix-index-database.comma.enable = true;
 
   imports = [
@@ -108,11 +111,11 @@ in
       environmentFile = "/etc/secrets/karakeep.env";
     };
 
-    llama-swap-exporter = {
-      enable = true;
-      url = "http://100.120.15.10:${toString ports.llama-swap}/api/metrics";
-      port = internalPorts.prometheus-llama-swap;
-    };
+    # llama-swap-exporter = {
+    #   enable = true;
+    #   url = "http://100.120.15.10:${toString ports.llama-swap}/api/metrics";
+    #   port = internalPorts.prometheus-llama-swap;
+    # };
 
     forgejo = {
       enable = true;
@@ -124,10 +127,10 @@ in
         };
         service.DISABLE_REGISTRATION = true;
       };
-      actions = {
-        ENABLED = true;
-        DEFAULT_ACTIONS_URL = "github";
-      };
+      # actions = {
+      #   ENABLED = true;
+      #   DEFAULT_ACTIONS_URL = "github";
+      # };
       lfs.enable = true;
       dump.enable = true;
       dump.age = "5d";
@@ -302,6 +305,11 @@ in
               reverse_proxy http://localhost:${toString ports.tolgee}
             '';
           };
+          "snaps.rpi1.danbulant.cloud" = {
+            extraConfig = ''
+              reverse_proxy http://localhost:${toString ports.snaps}
+            '';
+          };
         };
     };
     tailscale.permitCertUid = "caddy";
@@ -470,6 +478,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    bun
     jellyfin-ffmpeg
     intel-gpu-tools
     lsof
