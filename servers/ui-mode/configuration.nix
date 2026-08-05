@@ -197,7 +197,7 @@
       "https://nix-gaming.cachix.org"
       "https://colmena.cachix.org"
       "https://install.determinate.systems"
-      "https://cache.garnix.io"
+      # "https://cache.garnix.io"
       "https://rusic.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://cache.nixos-cuda.org"
@@ -208,7 +208,7 @@
       "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
-      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+      # "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "rusic.cachix.org-1:WXMpGpamblLUiJtcoxBxGGGGwIcWxGPJBUxarLiqWmw="
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
@@ -450,7 +450,10 @@
     allowUnfree = true;
     cudaSupport = true;
     android_sdk.accept_license = true;
+    problems.handlers.fs.broken = "warn";
   };
+
+  documentation.man.enable = false;
 
   hardware.graphics = {
     enable = true;
@@ -460,7 +463,7 @@
   hardware.enableRedistributableFirmware = true;
 
   hardware.enableAllFirmware = true;
-  services.cpupower-gui.enable = true;
+  #services.cpupower-gui.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = false;
   services.tlp = {

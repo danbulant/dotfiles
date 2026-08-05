@@ -52,6 +52,17 @@ let
   });
 
   deadlockModManager = dmm.packages.${pkgs.system}.nightly.overrideAttrs (oldAttrs: {
+    pnpmDeps = pkgs.fetchPnpmDeps {
+      inherit (oldAttrs)
+        pname
+        version
+        src
+        ;
+      pnpm = pkgs.pnpm_11;
+      fetcherVersion = 4;
+      sourceRoot = "source";
+      hash = "sha256-ZxlP6zOwY9Fxa4BCqnUoCmci3lviHn7H3HU5SnmdrSU=";
+    };
     postPatch = (oldAttrs.postPatch or "") + ''
             substituteInPlace apps/desktop/src-tauri/Cargo.toml \
               --replace 'tauri-wry = ["tauri/wry"]' 'tauri-wry = ["tauri/wry"]
@@ -121,6 +132,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      spacedrive-master
+      eden
       gh
       inkscape
       osuLazerBinNvidia
@@ -280,7 +293,7 @@ in
       swaybg
       activitywatchFixed
       networkmanagerapplet
-      kubectl
+      #kubectl
       duf
       dust
       #jetbrains.webstorm
@@ -434,14 +447,8 @@ in
   };
   gtk = {
     enable = true;
-
-    theme = {
-      package = pkgs.orchis-theme;
-      name = "Orchis";
-
-    };
-    gtk4.theme = config.gtk.theme;
   };
+  programs.man.enable = false;
   services.lorri.enable = true;
   wayland.windowManager.hyprland = {
     #        enable = true;

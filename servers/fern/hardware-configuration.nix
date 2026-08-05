@@ -21,7 +21,7 @@
   fileSystems."/media/large" =
     { device = "/dev/disk/by-uuid/30f7482a-34d9-408b-8ccc-318788ff6b8d";
       fsType = "btrfs";
-      options = [ "subvol=@" ];
+      # options = [ "subvol=@" ];
     };
 
   fileSystems."/boot" =

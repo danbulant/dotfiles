@@ -1,0 +1,35 @@
+diff --git a/apps/tauri/src-tauri/src/main.rs b/apps/tauri/src-tauri/src/main.rs
+index 7c2a17f..0d22a25 100644
+--- a/apps/tauri/src-tauri/src/main.rs
++++ b/apps/tauri/src-tauri/src/main.rs
+@@ -17,6 +17,6 @@ use tauri::menu::MenuItem;
+ use tauri::Emitter;
+ use tauri::{AppHandle, Manager};
+-use tauri_plugin_global_shortcut::ShortcutState;
++use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+ use tokio::sync::oneshot;
+ use tokio::sync::RwLock;
+ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+@@ -1928,8 +1928,6 @@ fn main() {
+ 		.plugin(tauri_plugin_updater::Builder::new().build())
+ 		.plugin(
+ 			tauri_plugin_global_shortcut::Builder::new()
+-				.with_shortcut("Alt+Space")
+-				.expect("failed to register Alt+Space global shortcut")
+ 				.with_handler(|app, _shortcut, event| {
+ 					if event.state() == ShortcutState::Pressed {
+ 						if let Err(error) = windows::toggle_voice_overlay_internal(app.clone()) {
+@@ -1987,6 +1985,13 @@ fn main() {
+ 			keybinds::get_registered_keybinds
+ 		])
+ 		.setup(|app| {
++			if let Err(error) = app.global_shortcut().register("Alt+Space") {
++				tracing::warn!(
++					?error,
++					"Alt+Space is already registered; voice overlay shortcut is disabled"
++				);
++			}
++
+ 			// Setup native menu
+ 			if let Err(e) = setup_menu(app.handle()) {
+ 				tracing::warn!("Failed to setup menu: {}", e);

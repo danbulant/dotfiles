@@ -23,6 +23,8 @@ let
     # ntfy = 3003;
     forgejo = 8300;
     snaps = 8400;
+    matrix = 6167;
+    livekit = 7880;
   };
   internalPorts = {
     prometheus-node = 9000;
@@ -32,7 +34,10 @@ let
     prometheus-prowlarr = 9103;
     prometheus-llama-swap = 9409;
     prometheus = 9090;
+    livekit-jwt = 8080;
   };
+  matrixServerName = "matrix.badapple.cz";
+  livekitKeyFile = "/etc/secrets/livekit.keys";
 in
 {
   deployment = {
@@ -86,6 +91,36 @@ in
 
     jellyfin = {
       enable = true;
+    };
+
+    matrix-tuwunel = {
+      enable = true;
+      settings.global = {
+        server_name = matrixServerName;
+        port = [ ports.matrix ];
+        allow_registration = false;
+      };
+    };
+
+    livekit = {
+      enable = true;
+      keyFile = livekitKeyFile;
+      openFirewall = true;
+      settings = {
+        port = ports.livekit;
+        room.auto_create = false;
+        rtc = {
+          tcp_port = 7881;
+          use_external_ip = true;
+        };
+      };
+    };
+
+    lk-jwt-service = {
+      enable = true;
+      keyFile = livekitKeyFile;
+      livekitUrl = "wss://${matrixServerName}/livekit/sfu";
+      port = internalPorts.livekit-jwt;
     };
 
     sonarr = {
@@ -300,6 +335,38 @@ in
           }) (builtins.attrNames ports)
         )
         // {
+          "${matrixServerName}" = {
+            extraConfig = ''
+              @matrixClientWellKnown path /.well-known/matrix/client
+              handle @matrixClientWellKnown {
+                header Access-Control-Allow-Origin "*"
+                header Content-Type application/json
+                respond `{\"m.homeserver\":{\"base_url\":\"https://${matrixServerName}\"},\"org.matrix.msc4143.rtc_foci\":[{\"type\":\"livekit\",\"livekit_service_url\":\"https://${matrixServerName}/livekit/jwt\"}]}` 200
+              }
+
+              @matrixServerWellKnown path /.well-known/matrix/server
+              handle @matrixServerWellKnown {
+                header Access-Control-Allow-Origin "*"
+                header Content-Type application/json
+                respond `{\"m.server\":\"${matrixServerName}:443\"}` 200
+              }
+
+              @jwtService path /livekit/jwt/sfu/get /livekit/jwt/healthz
+              handle @jwtService {
+                uri strip_prefix /livekit/jwt
+                reverse_proxy http://localhost:${toString internalPorts.livekit-jwt}
+              }
+
+              @livekit path /livekit/sfu*
+              handle @livekit {
+                reverse_proxy http://localhost:${toString ports.livekit}
+              }
+
+              handle {
+                reverse_proxy http://localhost:${toString ports.matrix}
+              }
+            '';
+          };
           "translations.danbulant.cloud:80, translations.rpi1.danbulant.cloud:80" = {
             extraConfig = ''
               reverse_proxy http://localhost:${toString ports.tolgee}
@@ -319,6 +386,10 @@ in
       group = "caddy";
     };
   };
+  systemd.services.lk-jwt-service.environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = matrixServerName;
+
+  # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
+  networking.firewall.allowedTCPPorts = [ 7881 ];
   # systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
   virtualisation = {

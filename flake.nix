@@ -4,6 +4,15 @@
       url = "github:getpaseo/paseo";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    bun2nix = {
+      url = "github:nix-community/bun2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    crane.url = "github:ipetkov/crane";
+    spacedrive-src = {
+      url = "github:spacedriveapp/spacedrive";
+      flake = false;
+    };
     dmm = {
       url = "github:deadlock-mod-manager/deadlock-mod-manager/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -84,6 +93,9 @@
       hypr-kdeconnect-fix,
       paseo,
       reenv,
+      bun2nix,
+      crane,
+      spacedrive-src,
       ...
     }@attrs:
     {
@@ -110,6 +122,83 @@
             home-manager.useUserPackages = true;
             home-manager.users.dan = import ./servers/ui-mode/home.nix;
             home-manager.backupFileExtension = "backup";
+            nixpkgs.overlays = [
+              bun2nix.overlays.default
+              (_: prev: {
+                # Hyprland 0.56.1 requires glaze >= 7 and < 8, while this
+                # nixpkgs revision provides glaze 8.0.0.
+                hyprland = prev.hyprland.override {
+                  glaze = prev.glaze.overrideAttrs (_: {
+                    version = "7.8.3";
+                    src = prev.fetchFromGitHub {
+                      owner = "stephenberry";
+                      repo = "glaze";
+                      tag = "v7.8.3";
+                      hash = "sha256-WqtaZ3AVDs1oIfAVQuU63eg+0753LoYfv/pRyG9OMnM=";
+                    };
+                  });
+                };
+
+                # ethnum 1.5.2 assumes TryFromIntError is zero-sized, which is
+                # no longer true with Rust 1.97. Apply its upstream safe fix to
+                # SpacetimeDB's writable Cargo vendor tree.
+                spacetimedb = prev.spacetimedb.overrideAttrs (old: {
+                  postPatch = (old.postPatch or "") + ''
+                    substituteInPlace "$cargoDepsCopy/source-registry-0/ethnum-1.5.2/src/error.rs" \
+                      --replace-fail 'pub const fn tfie() -> TryFromIntError {' 'pub fn tfie() -> TryFromIntError {' \
+                      --replace-fail 'unsafe { mem::transmute(()) }' 'u8::try_from(-1i8).unwrap_err()'
+                  '';
+                });
+
+                # pyfilesystem2 still uses pkg_resources at runtime, which was
+                # removed from setuptools 82. Keep setuptools 80 build-only for
+                # the upstream tests, but migrate the installed package to the
+                # standard-library entry-point API so Python environments don't
+                # contain two conflicting setuptools versions.
+                pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+                  (_: pythonPrev: {
+                    fs = pythonPrev.fs.overridePythonAttrs (old: {
+                      nativeCheckInputs = (old.nativeCheckInputs or [ ]) ++ [
+                        pythonPrev.setuptools_80
+                      ];
+                      postInstall = (old.postInstall or "") + ''
+                        fsPath="$out/${pythonPrev.python.sitePackages}/fs"
+                        substituteInPlace "$fsPath/__init__.py" "$fsPath/opener/__init__.py" \
+                          --replace-fail '__import__("pkg_resources").declare_namespace(__name__)  # type: ignore' ""
+                        substituteInPlace "$fsPath/opener/registry.py" \
+                          --replace-fail 'import pkg_resources' 'from importlib import metadata' \
+                          --replace-fail 'pkg_resources.iter_entry_points("fs.opener")' 'metadata.entry_points(group="fs.opener")' \
+                          --replace-fail 'pkg_resources.iter_entry_points("fs.opener", protocol)' 'iter(metadata.entry_points(group="fs.opener", name=protocol))'
+                      '';
+                      meta = old.meta // {
+                        broken = false;
+                      };
+                    });
+                  })
+                ];
+              })
+              (final: _: {
+                spacedrive-master =
+                  let
+                    sources = import ./pkgs/spacedrive/nix/sources.nix {
+                      inherit (final) lib;
+                      root = spacedrive-src;
+                    };
+                    packages = import ./pkgs/spacedrive/nix {
+                      pkgs = final;
+                      craneLib = crane.mkLib final;
+                      upstreamRoot = spacedrive-src;
+                      inherit (sources)
+                        frontendSrc
+                        daemonRustSrc
+                        desktopRustSrc
+                        cliRustSrc
+                        ;
+                    };
+                  in
+                  packages.spacedrive;
+              })
+            ];
             networking.hostName = "fern";
             imports = [ ./servers/fern/hardware-configuration.nix ];
           }
