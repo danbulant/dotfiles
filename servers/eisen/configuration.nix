@@ -37,7 +37,7 @@ let
     livekit-jwt = 8080;
   };
   matrixServerName = "matrix.badapple.cz";
-  livekitKeyFile = "/etc/secrets/livekit.keys";
+  livekitKeyFile = "/var/lib/livekit/keys";
 in
 {
   deployment = {
@@ -98,7 +98,15 @@ in
       settings.global = {
         server_name = matrixServerName;
         port = [ ports.matrix ];
-        allow_registration = false;
+        allow_registration = true;
+        oidc_native_auth = true;
+        ip_source = "rightmost_x_forwarded_for";
+        registration_token_file = "/etc/secrets/matrix-registration-token";
+
+        well_known = {
+          client = "https://${matrixServerName}";
+          livekit_url = "wss://${matrixServerName}/livekit/sfu";
+        };
       };
     };
 
@@ -335,7 +343,7 @@ in
           }) (builtins.attrNames ports)
         )
         // {
-          "${matrixServerName}" = {
+          "${matrixServerName}:80" = {
             extraConfig = ''
               @matrixClientWellKnown path /.well-known/matrix/client
               handle @matrixClientWellKnown {
@@ -387,6 +395,40 @@ in
     };
   };
   systemd.services.lk-jwt-service.environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = matrixServerName;
+
+  systemd.services.livekit-keys = {
+    description = "Generate the shared LiveKit API key";
+    before = [
+      "livekit.service"
+      "lk-jwt-service.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      StateDirectory = "livekit";
+      StateDirectoryMode = "0700";
+      UMask = "0077";
+    };
+    script = ''
+      if [[ ! -s "$STATE_DIRECTORY/keys" ]]; then
+        key="$(${lib.getExe pkgs.openssl} rand -base64 48)"
+        printf 'lk-jwt-service: %s\n' "$key" > "$STATE_DIRECTORY/keys"
+      fi
+    '';
+  };
+  systemd.services.livekit = {
+    requires = [ "livekit-keys.service" ];
+    after = [ "livekit-keys.service" ];
+  };
+  systemd.services.lk-jwt-service = {
+    requires = [ "livekit-keys.service" ];
+    after = [ "livekit-keys.service" ];
+  };
+
+  # The Karakeep module still emits this option, but Meilisearch 1.51 removed it.
+  systemd.services.meilisearch.serviceConfig.ExecStartPre = lib.mkAfter [
+    "${lib.getExe pkgs.gnused} -i '/^experimental_dumpless_upgrade =/d' \${RUNTIME_DIRECTORY}/config.toml"
+  ];
 
   # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
   networking.firewall.allowedTCPPorts = [ 7881 ];

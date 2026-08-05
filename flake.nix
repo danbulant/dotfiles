@@ -13,6 +13,10 @@
       url = "github:spacedriveapp/spacedrive";
       flake = false;
     };
+    spacebot-src = {
+      url = "github:spacedriveapp/spacebot";
+      flake = false;
+    };
     dmm = {
       url = "github:deadlock-mod-manager/deadlock-mod-manager/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -96,6 +100,7 @@
       bun2nix,
       crane,
       spacedrive-src,
+      spacebot-src,
       ...
     }@attrs:
     {
@@ -188,6 +193,7 @@
                       pkgs = final;
                       craneLib = crane.mkLib final;
                       upstreamRoot = spacedrive-src;
+                      spacebotRoot = spacebot-src;
                       inherit (sources)
                         frontendSrc
                         daemonRustSrc

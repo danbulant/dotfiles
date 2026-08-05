@@ -2122,6 +2122,7 @@
         "paseo": "paseo",
         "reenv": "reenv",
         "rusic": "rusic",
+        "spacebot-src": "spacebot-src",
         "spacedrive-src": "spacedrive-src",
         "zed": "zed",
         "zen-browser": "zen-browser"
@@ -2246,6 +2247,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "spacebot-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778363043,
+        "narHash": "sha256-Brc2PZP0CyQTpsWEY0G8hHfzALLvvITPAtHI7mh5a1k=",
+        "owner": "spacedriveapp",
+        "repo": "spacebot",
+        "rev": "ac52277404d3813045aa053b78c95810ab85e7c5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "spacedriveapp",
+        "repo": "spacebot",
         "type": "github"
       }
     },

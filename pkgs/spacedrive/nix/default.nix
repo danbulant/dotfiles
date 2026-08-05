@@ -2,6 +2,7 @@
   pkgs,
   craneLib,
   upstreamRoot,
+  spacebotRoot,
   frontendSrc,
   daemonRustSrc,
   desktopRustSrc,
@@ -91,6 +92,37 @@ let
 
     postPatch = ''
       cp ${../bun.lock} bun.lock
+      ln -s ${spacebotRoot} ../spacebot
+
+      substituteInPlace apps/tauri/src/contextMenu.ts \
+        --replace-fail \
+          "import { Menu, MenuItem, Submenu, PredefinedMenuItem } from '@tauri-apps/api/menu';" \
+          "import { LogicalPosition } from '@tauri-apps/api/dpi'; import { Menu, MenuItem, Submenu, PredefinedMenuItem } from '@tauri-apps/api/menu';" \
+        --replace-fail \
+          'await menu.popup();' \
+          'await menu.popup(new LogicalPosition(position.x, position.y));'
+
+      # The sidebar is z-[65]. Radix portals default to z-50, which puts the
+      # space switcher menu behind the translucent sidebar stacking context.
+      # Radix copies the content z-index to its popper wrapper, so raising the
+      # content also fixes the compositor order of the wrapper.
+      substituteInPlace packages/interface/src/components/SpacesSidebar/SpaceSwitcher.tsx \
+        --replace-fail \
+          'className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-1"' \
+          'className="z-[100] min-w-[var(--radix-dropdown-menu-trigger-width)] p-1"'
+
+      # The published primitives package uses these classes for its dialog
+      # overlay and content, but Tailwind does not scan the package through its
+      # node_modules symlink. Define the missing utilities explicitly.
+      substituteInPlace apps/tauri/src/index.css \
+        --replace-fail \
+          '@source "../../../../spaceui/packages/primitives/src";' \
+          '@source "../../../../spaceui/packages/primitives/src";
+
+/* Utilities referenced by @spacedrive/primitives but absent from this build. */
+.z-\[102\] { z-index: 102; }
+.z-\[103\] { z-index: 103; }'
+
     '';
 
     buildPhase = ''
@@ -197,7 +229,18 @@ let
       src = daemonRustSrc;
       cargoArtifacts = daemonCargoArtifacts;
       cargoExtraArgs = "--package sd-core --bin sd-daemon --features ffmpeg";
-      postPatch = rust197PostPatch;
+      postPatch = rust197PostPatch + ''
+        substituteInPlace core/src/volume/platform/linux.rs \
+          --replace-fail \
+            '.args(["-h", "-T"]) // -T shows filesystem type' \
+            '.args(["-B1", "-T"]) // Exact bytes; unlike -h, this is locale-independent'
+
+        substituteInPlace core/src/volume/utils.rs \
+          --replace-fail '"/" | "/usr"' '"/usr"' \
+          --replace-fail \
+            'assert!(should_hide_by_mount_path(Path::new("/")));' \
+            'assert!(!should_hide_by_mount_path(Path::new("/")));'
+      '';
       buildInputs = daemonBuildInputs;
       nativeBuildInputs = daemonNativeBuildInputs ++ [ pkgs.makeWrapper ];
       LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
@@ -241,8 +284,31 @@ let
       src = desktopRustSrc;
       cargoArtifacts = desktopCargoArtifacts;
       cargoExtraArgs = "--package spacedrive --bin Spacedrive";
-      patches = [ ../graceful-global-shortcut.patch ];
-      postPatch = rust197PostPatch;
+      patches = [
+        ../graceful-global-shortcut.patch
+      ];
+      postPatch = rust197PostPatch + ''
+        substituteInPlace apps/tauri/src-tauri/src/main.rs \
+          --replace-fail 'for i in 0..30 {' 'for i in 0..300 {' \
+          --replace-fail 'connection not available after 3 seconds' 'connection not available after 30 seconds'
+
+        substituteInPlace apps/tauri/src-tauri/tauri.conf.json \
+          --replace-fail '"decorations": true' '"decorations": false'
+
+        substituteInPlace apps/tauri/src-tauri/src/windows.rs \
+          --replace-fail 'true,  // decorations' 'false, // decorations'
+
+        substituteInPlace apps/tauri/src-tauri/src/main.rs \
+          --replace-fail \
+            '// Explicitly remove menu on Windows' \
+            '// Explicitly remove the native menu bar on Windows and Linux'
+        sed -i '/Explicitly remove the native menu bar/{
+          n
+          s/#\[cfg(target_os = "windows")\]/#[cfg(any(target_os = "windows", target_os = "linux"))]/
+        }' apps/tauri/src-tauri/src/main.rs
+        grep -Fq '#[cfg(any(target_os = "windows", target_os = "linux"))]' \
+          apps/tauri/src-tauri/src/main.rs
+      '';
 
       nativeBuildInputs = commonNativeBuildInputs ++ [
         pkgs.wrapGAppsHook4
@@ -261,14 +327,17 @@ let
       '';
 
       postInstall = ''
-        mkdir -p $out/share/icons/hicolor/128x128/apps
+        mkdir -p $out/bin $out/share/icons/hicolor/128x128/apps
+        ln -s ${sd-daemon}/bin/sd-daemon $out/bin/sd-daemon
+        ln -s ${sd-daemon}/bin/sd-daemon $out/bin/sd-daemon-${targetTriple}
         cp apps/tauri/src-tauri/icons/128x128.png $out/share/icons/hicolor/128x128/apps/spacedrive.png
       '';
 
       postFixup = ''
         wrapProgram $out/bin/Spacedrive \
           --set GST_PLUGIN_SYSTEM_PATH_1_0 ${gstreamerPluginPath} \
-          --set SPACEDRIVE_DAEMON_PATH ${sd-daemon}/bin/sd-daemon
+          --set WEBKIT_DMABUF_RENDERER_FORCE_SHM 1 \
+          --set WEBKIT_FORCE_COMPOSITING_MODE 1
       '';
 
       meta = with lib; {

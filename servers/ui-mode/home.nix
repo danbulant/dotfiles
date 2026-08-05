@@ -132,6 +132,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      cinny
       spacedrive-master
       eden
       gh
