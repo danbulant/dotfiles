@@ -107,10 +107,17 @@
       # Export sysbox package overlay for external use
       overlays.default = final: prev: {
         sysbox = final.callPackage ./pkgs/sysbox/package.nix { };
+        tuwunel-admin = final.callPackage ./pkgs/tuwunel-admin/package.nix { };
       };
 
       # Export sysbox NixOS module for external use
       nixosModules.sysbox = import ./modules/sysbox.nix;
+      nixosModules.tuwunel-admin = import ./modules/tuwunel-admin.nix;
+
+      packages.x86_64-linux = rec {
+        tuwunel-admin = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/tuwunel-admin/package.nix { };
+        default = tuwunel-admin;
+      };
 
       nixosConfigurations.fern = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";

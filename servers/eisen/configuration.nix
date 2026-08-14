@@ -35,8 +35,10 @@ let
     prometheus-llama-swap = 9409;
     prometheus = 9090;
     livekit-jwt = 8080;
+    tuwunel-admin = 8009;
   };
-  matrixServerName = "matrix.badapple.cz";
+  matrixServerName = "badapple.cz";
+  matrixHost = "matrix.badapple.cz";
   livekitKeyFile = "/var/lib/livekit/keys";
 in
 {
@@ -53,6 +55,7 @@ in
     nix-index-database.nixosModules.nix-index
     ./hardware-configuration.nix
     ../../modules/llama-swap-exporter.nix
+    ../../modules/tuwunel-admin.nix
   ];
 
   nix = {
@@ -104,8 +107,23 @@ in
         registration_token_file = "/etc/secrets/matrix-registration-token";
 
         well_known = {
-          client = "https://${matrixServerName}";
-          livekit_url = "wss://${matrixServerName}/livekit/sfu";
+          client = "https://${matrixHost}";
+          livekit_url = "https://${matrixHost}/livekit/jwt";
+        };
+      };
+    };
+
+    tuwunel-admin = {
+      enable = true;
+      settings = {
+        server.bind = "127.0.0.1:${toString internalPorts.tuwunel-admin}";
+        matrix = {
+          homeservers = [ "https://${matrixHost}" ];
+          allow_any_server = false;
+          admin_bot = "@tuwunel:${matrixServerName}";
+          admin_room_alias = "#admins:${matrixServerName}";
+          device_id = "tuwunel-admin";
+          device_display_name = "tuwunel-admin";
         };
       };
     };
@@ -120,6 +138,8 @@ in
         rtc = {
           tcp_port = 7881;
           use_external_ip = true;
+          port_range_start = 50100;
+          port_range_end = 50105;
         };
       };
     };
@@ -127,7 +147,7 @@ in
     lk-jwt-service = {
       enable = true;
       keyFile = livekitKeyFile;
-      livekitUrl = "wss://${matrixServerName}/livekit/sfu";
+      livekitUrl = "wss://${matrixHost}/livekit/sfu";
       port = internalPorts.livekit-jwt;
     };
 
@@ -343,23 +363,23 @@ in
           }) (builtins.attrNames ports)
         )
         // {
-          "${matrixServerName}:80" = {
+          "${matrixHost}:80" = {
             extraConfig = ''
               @matrixClientWellKnown path /.well-known/matrix/client
               handle @matrixClientWellKnown {
                 header Access-Control-Allow-Origin "*"
                 header Content-Type application/json
-                respond `{\"m.homeserver\":{\"base_url\":\"https://${matrixServerName}\"},\"org.matrix.msc4143.rtc_foci\":[{\"type\":\"livekit\",\"livekit_service_url\":\"https://${matrixServerName}/livekit/jwt\"}]}` 200
+                respond `{"m.homeserver":{"base_url":"https://${matrixHost}"},"org.matrix.msc4143.rtc_foci":[{"type":"livekit","livekit_service_url":"https://${matrixHost}/livekit/jwt"}]}` 200
               }
 
               @matrixServerWellKnown path /.well-known/matrix/server
               handle @matrixServerWellKnown {
                 header Access-Control-Allow-Origin "*"
                 header Content-Type application/json
-                respond `{\"m.server\":\"${matrixServerName}:443\"}` 200
+                respond `{"m.server":"${matrixHost}:443"}` 200
               }
 
-              @jwtService path /livekit/jwt/sfu/get /livekit/jwt/healthz
+              @jwtService path /livekit/jwt/sfu/get* /livekit/jwt/healthz* /livekit/jwt/get_token*
               handle @jwtService {
                 uri strip_prefix /livekit/jwt
                 reverse_proxy http://localhost:${toString internalPorts.livekit-jwt}
@@ -367,12 +387,18 @@ in
 
               @livekit path /livekit/sfu*
               handle @livekit {
+                uri strip_prefix /livekit/sfu
                 reverse_proxy http://localhost:${toString ports.livekit}
               }
 
               handle {
                 reverse_proxy http://localhost:${toString ports.matrix}
               }
+            '';
+          };
+          "admin.${matrixHost}:80" = {
+            extraConfig = ''
+              reverse_proxy http://localhost:${toString internalPorts.tuwunel-admin}
             '';
           };
           "translations.danbulant.cloud:80, translations.rpi1.danbulant.cloud:80" = {
