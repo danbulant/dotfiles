@@ -121,6 +121,7 @@ let
 in
 {
   imports = [
+    ./dotfiles.nix
     zen-browser.homeModules.beta
     dms.homeModules.dank-material-shell
     danksearch.homeModules.default

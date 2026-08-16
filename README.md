@@ -1,10 +1,8 @@
 # Dotfiles
 
-My dotfiles and nix setup incl. scripts for hyprland and some other goodies.
+My dotfiles and Nix setup for Hyprland and some other goodies.
 
 Please do edit configuration of at least hyprland and file systems - default configuration is very specific to my setup (involves monitor scaling).
-
-Quickshell config based on (end-4's config)[https://github.com/end-4/dots-hyprland], you'll have a better time configuring them (gui settings for non-nix users).
 
 ## Screenshots
 
@@ -16,7 +14,8 @@ This also includes configuration for some of my (home) servers. Those are manage
 
 ## Used software
 
-I'm using NixOS. A lot of packages are missing, for the full list see [`home.nix`](./home.nix).
+I'm using NixOS. For the full package list, see
+[`home.nix`](./servers/ui-mode/home.nix).
 
 - hyprland - wayland compositor and window manager (also adds blur and rounded corners). Really barebones, see below for shortcuts (read the config file for up to date shortcuts)
 - ~~fish - shell (friendly, interactive, doesn't implement POSIX, I recommend reading it's docs first)~~
@@ -26,10 +25,10 @@ I'm using NixOS. A lot of packages are missing, for the full list see [`home.nix
 - kitty - terminal emulator (GPU accelerated, supports ligatures, unicode, etc)
 - nano - simple text editor. I recommend editing duplicating the file to root's home directory and changing the colors there, so you always see when you're sudo editing something.
 - rofi - application launcher, general "chooser" (used for power menu, notification actions, etc)
-- waybar - the top status bar
+- Dank Material Shell - desktop shell, status bar, launcher, and notifications
 - hyprlock - Fancy lock screen
 - ~~spicetify - custom spotify theme~~
-- VSCode - code editor. Current theme/config is not in dotfiles here, but the theme used is Atom One Dark, and the font is Fira Code.
+- VSCode - code editor
 - dolphin - file browser
 - blueman - bluetooth app indicator
 - swaybg - for showing wallpaper
@@ -37,17 +36,16 @@ I'm using NixOS. A lot of packages are missing, for the full list see [`home.nix
 - nm-applet - network manager app indicator
 - swayidle - for automatic locking
 
-For base setup, only `hyprland`, `rofi`, `waybar` and `swaylock`/`swaylock-effects-git` is required.
-
 ## General notes
 
 ## Setting up
 
-Run `sync-nix.sh`, it will copy configurations and run nixos-rebuild.
+Run `sync-nix.sh` to switch the NixOS configuration. Home Manager installs the
+shared user configuration for both `aura` and `fern` as part of the switch, so
+no separate dotfile copy step is needed.
 If you don't want to build hyprland yourself and instead use cache, comment out programs.hyprland in configuration first, sync, then un-comment it and sync again.
 
 `upgrade-nix.sh` updates lockfile (`pacman -Syu` / `apt update && apt upgrade` equivalent) and syncs.  
-`fast-copy.sh` just copies configuration files without touching nix / system packages and configuration.  
 `remove-old-nix.sh` removes old generations and runs nix gc to save disk space.
 
 ### Lock screen
