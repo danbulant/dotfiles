@@ -1,6 +1,7 @@
 {
   helium,
   zed,
+  omp,
   colmena,
   dms,
   zen-browser,
@@ -122,6 +123,7 @@ in
 {
   imports = [
     ./dotfiles.nix
+    omp.homeManagerModules.default
     zen-browser.homeModules.beta
     dms.homeModules.dank-material-shell
     danksearch.homeModules.default
@@ -485,6 +487,17 @@ in
     };
   };
   programs = {
+    omp = {
+      enable = true;
+      package = omp.packages.${system}.default.overrideAttrs (oldAttrs: {
+        # The upstream smoke test otherwise inherits a build directory that
+        # Bun has already unlinked while creating the compiled executable.
+        preInstallCheck = (oldAttrs.preInstallCheck or "") + ''
+          mkdir -p "$TMPDIR/omp-install-check"
+          cd "$TMPDIR/omp-install-check"
+        '';
+      });
+    };
     nix-monitor.enable = true;
     nix-monitor.rebuildCommand = [
       "bash"

@@ -52,6 +52,10 @@
   };
 
   home.file = {
+    ".codex/skills/install-anti-slop" = {
+      source = ../../.codex/skills/install-anti-slop;
+      recursive = true;
+    };
     ".default-python-packages".source = ../../.default-python-packages;
     ".oh-my-posh.nu".source = ../../.oh-my-posh.nu;
     ".vscode/settings.json".source = ../../.vscode/settings.json;

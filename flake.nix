@@ -8,6 +8,11 @@
       url = "github:nix-community/bun2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    omp = {
+      url = "github:can1357/oh-my-pi";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.bun2nix.follows = "bun2nix";
+    };
     crane.url = "github:ipetkov/crane";
     spacedrive-src = {
       url = "github:spacedriveapp/spacedrive";
@@ -115,7 +120,9 @@
       nixosModules.tuwunel-admin = import ./modules/tuwunel-admin.nix;
 
       packages.x86_64-linux = rec {
-        tuwunel-admin = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/tuwunel-admin/package.nix { };
+        tuwunel-admin =
+          nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/tuwunel-admin/package.nix
+            { };
         default = tuwunel-admin;
       };
 

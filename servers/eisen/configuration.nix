@@ -24,6 +24,7 @@ let
     forgejo = 8300;
     snaps = 8400;
     matrix = 6167;
+    sable = 6200;
     livekit = 7880;
   };
   internalPorts = {
@@ -401,6 +402,11 @@ in
               reverse_proxy http://localhost:${toString internalPorts.tuwunel-admin}
             '';
           };
+          "sable.badapple.cz:80" = {
+            extraConfig = ''
+              reverse_proxy http://localhost:${toString ports.sable}
+            '';
+          };
           "translations.danbulant.cloud:80, translations.rpi1.danbulant.cloud:80" = {
             extraConfig = ''
               reverse_proxy http://localhost:${toString ports.tolgee}
@@ -532,6 +538,13 @@ in
           };
           extraOptions = [ "--network=host" ];
           # ports = [ "8000:${toString internalPorts.prometheus-qb}" ];
+        };
+
+        sable = {
+          image = "ghcr.io/sableclient/sable:latest";
+          ports = [
+            "127.0.0.1:${toString ports.sable}:8080"
+          ];
         };
 
         tolgee = {
