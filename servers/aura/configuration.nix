@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  services.openssh.settings.MaxSessions = 64;
+
   hardware.graphics.extraPackages = with pkgs; [
     # Required for modern Intel GPUs (Xe iGPU and ARC)
     intel-media-driver # VA-API (iHD) userspace

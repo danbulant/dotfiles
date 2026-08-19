@@ -87,6 +87,29 @@ let
 in
 {
   services.hardware.openrgb.enable = true;
+
+  # Hyprland's FALLBACK output has no capturable framebuffer. Keep a real
+  # headless output available so Sunshine can stream when no monitor is attached.
+  # systemd.user.services.sunshine-headless-output = {
+  #   description = "Create a headless Hyprland output for Sunshine";
+  #   before = [ "sunshine.service" ];
+  #   partOf = [ "graphical-session.target" ];
+  #   serviceConfig = {
+  #     Type = "oneshot";
+  #     RemainAfterExit = true;
+  #     ExecStart = pkgs.writeShellScript "sunshine-headless-output" ''
+  #       ${lib.getExe' pkgs.hyprland "hyprctl"} output create headless sunshine
+  #       ${lib.getExe' pkgs.hyprland "hyprctl"} keyword monitor sunshine,1920x1080@60,0x0,1
+  #     '';
+  #     ExecStop = pkgs.writeShellScript "remove-sunshine-headless-output" ''
+  #       ${lib.getExe' pkgs.hyprland "hyprctl"} output remove sunshine
+  #     '';
+  #   };
+  # };
+  # systemd.user.services.sunshine = {
+  #   requires = [ "sunshine-headless-output.service" ];
+  #   after = [ "sunshine-headless-output.service" ];
+  # };
   # ssh -R (remote port forward) to this server should listen publicly
   services.openssh.settings.GatewayPorts = "yes";
   boot = {

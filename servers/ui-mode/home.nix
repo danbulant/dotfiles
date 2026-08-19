@@ -135,6 +135,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      waypipe
       cinny
       spacedrive-master
       eden
