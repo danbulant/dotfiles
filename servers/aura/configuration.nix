@@ -15,4 +15,6 @@
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "iHD";
   };
+  services.thermald.enable = true;
+
 }

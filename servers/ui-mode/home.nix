@@ -135,9 +135,10 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      protontricks
       waypipe
       cinny
-      spacedrive-master
+      #spacedrive-master
       eden
       gh
       inkscape
@@ -161,10 +162,10 @@ in
       libsForQt5.qt5ct
       libsForQt5.qtstyleplugin-kvantum
       ddcutil
-      unstable.gearlever
+      gearlever
       linux-wallpaperengine
       lmstudio
-      spacetimedb
+      #spacetimedb
       nixd
       buck2
       (rusic.packages.${system}.default)
@@ -386,8 +387,9 @@ in
       nixfmt
       qpwgraph
 
+      zed-editor
       #nixpkgs-unstable.legacyPackages.${system}.zed-editor
-      zed.packages.${system}.default
+      # zed.packages.${system}.default
       nixpkgs-unstable.legacyPackages.${system}.pineflash
       #unstable.nosql-booster
 

@@ -63,15 +63,15 @@ hl.config({
         disable_splash_rendering = true,
         mouse_move_enables_dpms = true,
     },
-    plugin = {
-        hyprtrails = { color = "rgba(ffaa00ff)" },
-        hyprexpo = {
-            columns = 3,
-            gap_size = 5,
-            bg_col = "rgb(111111)",
-            workspace_method = "center current",
-        },
-    },
+    -- plugin = {
+    --     hyprtrails = { color = "rgba(ffaa00ff)" },
+    --     hyprexpo = {
+    --         columns = 3,
+    --         gap_size = 5,
+    --         bg_col = "rgb(111111)",
+    --         workspace_method = "center current",
+    --     },
+    -- },
 })
 
 hl.curve("wind", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
@@ -214,10 +214,13 @@ hl.exec_cmd("gsettings set org.gnome.desktop.interface font-antialiasing 'rgba'"
 hl.exec_cmd("gsettings set org.gnome.desktop.interface font-hinting 'full'")
 
 -- DMS 1.5+ owns these fragments. In particular, Display Settings rewrites outputs.lua.
-require("dms.colors")
-require("dms.outputs")
-require("dms.layout")
-require("dms.cursor")
-require("dms.binds")
-require("dms.binds-user")
-require("dms.windowrules")
+-- require("dms.colors")
+-- require("dms.outputs")
+-- require("dms.layout")
+-- require("dms.cursor")
+-- require("dms.binds")
+-- require("dms.binds-user")
+-- require("dms.windowrules")
+require("dms/layout")
+require("dms/binds-user")
+require("dms/windowrules")

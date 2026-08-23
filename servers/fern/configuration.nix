@@ -113,6 +113,9 @@ in
   # ssh -R (remote port forward) to this server should listen publicly
   services.openssh.settings.GatewayPorts = "yes";
   boot = {
+    # Steam client bug #13186: xpad conflicts with Steam Controller emulation
+    # and crashes Steam while a game is starting.
+    blacklistedKernelModules = [ "xpad" ];
     kernelParams = [
       # attempt to fix nvidia perf
       "nvidia_drm.fbdev=1"
@@ -260,7 +263,7 @@ in
           cmd = "\${llama} -m /home/dan/.lmstudio/models/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
         };
         "qwen3.8-27B-Q2" = {
-          cmd = "\${llama} -m /home/dan/models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q2_K_XL.gguf --ctx-size 16384 --fit-ctx 16384";
+          cmd = "\${llama} -m /home/dan/models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q2_K_XL.gguf --ctx-size 100000 --fit-ctx 100000";
         };
         "qwen3.8-27B-Q4" = {
           cmd = "\${llama} -m /home/dan/models/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-Q4_0.gguf --ctx-size 100000 --fit-ctx 100000 -ctk q4_0 -ctv q4_0 --ubatch-size 128 --spec-type draft-mtp --spec-draft-n-max 3";

@@ -174,6 +174,20 @@
           });
         };
 
+        # DwarFS 0.14.0 bundles Folly and fbthrift snapshots that relied on
+        # transitive C string declarations and fmt's pre-12 core header.
+        dwarfs = prev.dwarfs.overrideAttrs (old: {
+          postPatch = (old.postPatch or "") + ''
+            sed -i '/#include <exception>/i#include <cstring>' folly/folly/lang/Exception.h
+            sed -i '/#include <array>/i#include <cstring>' \
+              fbthrift/thrift/compiler/ast/t_type.cc
+            sed -i '/#include <cinttypes>/i#include <cstring>' \
+              fbthrift/thrift/compiler/generate/t_concat_generator.cc
+            find fbthrift -type f \( -name '*.h' -o -name '*.cc' \) \
+              -exec sed -i 's|<fmt/core\.h>|<fmt/format.h>|g' {} +
+          '';
+        });
+
         # ethnum 1.5.2 assumes TryFromIntError is zero-sized, which is
         # no longer true with Rust 1.97. Apply its upstream safe fix to
         # SpacetimeDB's writable Cargo vendor tree.

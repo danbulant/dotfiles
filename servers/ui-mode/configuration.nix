@@ -477,7 +477,7 @@
   powerManagement.enable = true;
   #powerManagement.powertop.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil";
-  services.thermald.enable = true;
+  # services.thermald.enable = true;
   hardware.cpu.intel.updateMicrocode = true;
 
   security.polkit.enable = true;
