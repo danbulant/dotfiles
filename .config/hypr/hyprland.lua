@@ -215,7 +215,7 @@ hl.exec_cmd("gsettings set org.gnome.desktop.interface font-hinting 'full'")
 
 -- DMS 1.5+ owns these fragments. In particular, Display Settings rewrites outputs.lua.
 -- require("dms.colors")
--- require("dms.outputs")
+require("dms/outputs")
 -- require("dms.layout")
 -- require("dms.cursor")
 -- require("dms.binds")

@@ -454,6 +454,7 @@ in
   };
   gtk = {
     enable = true;
+    colorScheme = "dark";
   };
   programs.man.enable = false;
   services.lorri.enable = true;
