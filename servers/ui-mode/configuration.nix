@@ -375,6 +375,10 @@
   };
   boot.loader.timeout = 5;
 
+  services.udev.extraRules = ''
+  SUBSYSTEM=="usb", ATTR{idVendor}=="054c", GROUP="users", MODE="0660"
+  '';
+
   # App image support
   boot.binfmt.registrations.appimage = {
     wrapInterpreterInShell = false;
