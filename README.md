@@ -2,15 +2,20 @@
 
 My dotfiles and Nix setup for Hyprland and some other goodies.
 
-Please do edit configuration of at least hyprland and file systems - default configuration is very specific to my setup (involves monitor scaling).
-
 ## Screenshots
 
 ![](./screenshots/kitty.png)
 
-## Servers
+## Systems
 
-This also includes configuration for some of my (home) servers. Those are managed by colmena, but can also be instantiated locally using flakes.
+- Fern, as the main PC
+  - Gaming, backups, AMD CPU, nvidia GPU, AI models
+  - Most used, most stable
+- Eisen
+  - Intel laptop
+  - Home server
+- Aura, as my main laptop
+  - Intel laptop
 
 ## Used software
 
@@ -23,30 +28,18 @@ I'm using NixOS. For the full package list, see
 - fastfetch - everyone needs a fetch program
 - onefetch - fetch for git repos (fish is configured to show repo details when you cd into a repo)
 - kitty - terminal emulator (GPU accelerated, supports ligatures, unicode, etc)
-- nano - simple text editor. I recommend editing duplicating the file to root's home directory and changing the colors there, so you always see when you're sudo editing something.
-- rofi - application launcher, general "chooser" (used for power menu, notification actions, etc)
 - Dank Material Shell - desktop shell, status bar, launcher, and notifications
 - hyprlock - Fancy lock screen
 - ~~spicetify - custom spotify theme~~
-- VSCode - code editor
+- Zed - code editor
+- Zen - browser
 - dolphin - file browser
 - blueman - bluetooth app indicator
 - swaybg - for showing wallpaper
 - activity-watch and awatcher - for program usage statistics
 - nm-applet - network manager app indicator
-- swayidle - for automatic locking
 
 ## General notes
-
-## Setting up
-
-Run `sync-nix.sh` to switch the NixOS configuration. Home Manager installs the
-shared user configuration for both `aura` and `fern` as part of the switch, so
-no separate dotfile copy step is needed.
-If you don't want to build hyprland yourself and instead use cache, comment out programs.hyprland in configuration first, sync, then un-comment it and sync again.
-
-`upgrade-nix.sh` updates lockfile (`pacman -Syu` / `apt update && apt upgrade` equivalent) and syncs.  
-`remove-old-nix.sh` removes old generations and runs nix gc to save disk space.
 
 ### Lock screen
 
@@ -60,21 +53,12 @@ See kitty under shortcuts for shortcuts. Note that even though it supports scrol
 
 ### Hyprland
 
-Is a barebones wayland compositor and window manager. It's main features are blur and rounded corners.
-
-By default, it can't do much, but it's very configurable. See the config file for more info.
-
 For mouse controls, press super key and drag with left click to move the window. Use right click to resize. Super key and scroll switches desktops.  
 Hovered window has support, switching active window also moves the cursor.
 
 Supports touchpad gestures (mainly swiping with 3 fingers to switch desktops).
 
 Each monitor has it's own desktop and switches desktop independently.
-
-Hyprland has groups - multiple programs can be grouped together and are then tabbed. The tabs are yellow as I couldn't find relevant working config :(.  
-super+g toggles group, super+shift+left/right switches tabs (also loops over).
-
-Hyprland has hyprctl for viewing data about `monitors` and `clients` (windows). You can use it to find relevant IDs and classes.
 
 ## Shortcuts
 
@@ -84,11 +68,11 @@ Set to roughly mirror KDE/Windows when possible, unless I either didn't know the
 
 | Shortcut | Action |
 | --- | --- |
-| super + t | Open terminal (kitty) |
-| super + r | Open application launcher (rofi) |
+| super + t/super + k | Open terminal (kitty) |
+| super + r | Open application launcher (dms) |
 | super + e | Open file browser (dolphin) |
-| super + p | Power menu (rofi) |
-| super + b | Open browser (vivaldi) |
+| super + p | Power menu (dms) |
+| super + b | Open browser (zen) |
 
 My current setup is set that power button turns off the computer without prompting, so maybe beware of that ;)
 
@@ -104,7 +88,7 @@ My current setup is set that power button turns off the computer without prompti
 | super + alt + arrows | Switch focus between windows (arrows indicate direction) |
 | super + 1-9/0 | Switch to workspace 1-10 (workspaces are numbered from 1, 0 = workspace 10) |
 | super + left/right | Move window between monitors (and their workspaces) |
-| super + m | Swaps master window, i.e. the window on the left, with the current window |
+| super + alt + m | Swaps master window, i.e. the window on the left, with the current window |
 
 ### Other
 

@@ -27,10 +27,6 @@
       source = ../../.config/mpv;
       recursive = true;
     };
-    "nano" = {
-      source = ../../.config/nano;
-      recursive = true;
-    };
     "nushell" = {
       source = ../../.config/nushell;
       recursive = true;
@@ -44,7 +40,6 @@
       source = ../../.config/rofi;
       recursive = true;
     };
-    "vivaldi-stable.conf".source = ../../.config/vivaldi-stable.conf;
     "zed" = {
       source = ../../.config/zed;
       recursive = true;
@@ -52,12 +47,6 @@
   };
 
   home.file = {
-    ".codex/skills/install-anti-slop" = {
-      source = ../../.codex/skills/install-anti-slop;
-      recursive = true;
-    };
-    ".default-python-packages".source = ../../.default-python-packages;
     ".oh-my-posh.nu".source = ../../.oh-my-posh.nu;
-    ".vscode/settings.json".source = ../../.vscode/settings.json;
   };
 }
