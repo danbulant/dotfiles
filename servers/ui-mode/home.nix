@@ -470,7 +470,7 @@ in
   # programs.dsearch.enable = true;
   programs.dank-material-shell = {
     enable = true;
-    systemd.enable = false;
+    systemd.enable = true;
     # niri = {
     #   enableKeybinds = false; # Sets static preset keybinds
     #   # enableSpawn = true; # Auto-start DMS with niri, if enabled

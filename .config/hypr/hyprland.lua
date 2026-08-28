@@ -91,15 +91,12 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 hl.gesture({ fingers = 3, direction = "up", action = "fullscreen" })
 hl.gesture({ fingers = 3, direction = "down", action = "fullscreen", mode = "maximize" })
 
--- Import the completed session environment before launching long-lived helpers.
+-- UWSM imports the session environment before Hyprland starts.
 hl.on("hyprland.start", function()
     local commands = {
-        "dbus-update-activation-environment --systemd --all",
-        "systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE WLR_DRM_DEVICES LIBVA_DRIVER_NAME __GLX_VENDOR_LIBRARY_NAME QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME GDK_BACKEND MOZ_ENABLE_WAYLAND PATH XDG_DATA_DIRS XDG_CONFIG_DIRS DBUS_SESSION_BUS_ADDRESS",
         "systemctl --user start hyprpolkitagent",
         "otd-daemon",
         "lorri daemon",
-        "/etc/pam_init",
         "blueman-applet",
         "udev-block-notify",
         "echo us > /tmp/kb_layout",
@@ -112,7 +109,6 @@ hl.on("hyprland.start", function()
         "easyeffects --gapplication-service",
         "voxtype daemon",
         "openrgb --startminimized",
-        "dms run",
     }
     for _, command in ipairs(commands) do hl.exec_cmd(command) end
 end)

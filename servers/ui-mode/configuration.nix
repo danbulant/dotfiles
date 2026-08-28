@@ -109,6 +109,7 @@
     LC_TIME = "en_GB.UTF-8";
   };
   services.displayManager.sddm.enable = true;
+  services.displayManager.defaultSession = "hyprland-uwsm";
   services.desktopManager.plasma6 = {
     enable = true;
   };
@@ -227,6 +228,7 @@
 
     # package = unstable-pkgs.hyprland;
   };
+  programs.uwsm.enable = true;
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
@@ -269,6 +271,29 @@
     enable = true;
     compositor.name = "hyprland"; # "niri" or "hyprland" or "sway"
     configHome = "/home/dan";
+  };
+  # DMS otherwise falls back to whichever session desktop file finishes loading
+  # first. Seed its per-boot memory so the UWSM-managed session is deterministic.
+  systemd.tmpfiles.settings."20-dms-greeter-default-session" = {
+    "/var/lib/dms-greeter/.local".d = {
+      user = "greeter";
+      group = "greeter";
+      mode = "0750";
+    };
+    "/var/lib/dms-greeter/.local/state".d = {
+      user = "greeter";
+      group = "greeter";
+      mode = "0750";
+    };
+    "/var/lib/dms-greeter/.local/state/memory.json"."f+" = {
+      user = "greeter";
+      group = "greeter";
+      mode = "0640";
+      argument = builtins.toJSON {
+        lastSessionDesktopId = "hyprland-uwsm";
+        lastSuccessfulUser = "dan";
+      };
+    };
   };
   security.pam.services = {
     greetd.kwallet = {
