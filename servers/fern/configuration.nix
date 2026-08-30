@@ -3,11 +3,34 @@
   lib,
   config,
   reenv,
+  waydroid-script,
+  waydroid-nvidia-nix,
   ...
 }:
 
 let
   system = pkgs.stdenv.hostPlatform.system;
+  waydroidNvidia =
+    (waydroid-nvidia-nix.packages.${system}.waydroid-nvidia-full).overrideAttrs
+      (_: {
+        postFixup = ''
+          wrapProgram $out/bin/waydroid \
+            --prefix PATH : ${lib.makeBinPath [ pkgs.lxc pkgs.kmod pkgs.util-linux ]}
+          wrapProgram $out/lib/waydroid/data/scripts/waydroid-net.sh \
+            --prefix PATH : ${
+              lib.makeBinPath [
+                pkgs.lxc
+                pkgs.kmod
+                pkgs.iptables
+                pkgs.nftables
+                pkgs.iproute2
+                pkgs.dnsmasq
+                pkgs.gawk
+                pkgs.getent
+              ]
+            }
+        '';
+      });
 
   ninfs = pkgs.python3Packages.buildPythonApplication {
     pname = "ninfs";
@@ -86,7 +109,16 @@ let
   );
 in
 {
+  imports = [
+    waydroid-nvidia-nix.nixosModules.waydroid-nvidia
+  ];
+
   services.hardware.openrgb.enable = true;
+  # The split RemoteDesktop/ScreenCast portal session emits malformed D-Bus
+  # traffic with XDPH 1.4.1. Override capture without replacing Sunshine's
+  # mutable web-UI configuration.
+  systemd.user.services.sunshine.serviceConfig.ExecStart =
+    lib.mkForce ''"/run/wrappers/bin/sunshine" "capture=wlr"'';
 
   # Hyprland's FALLBACK output has no capturable framebuffer. Keep a real
   # headless output available so Sunshine can stream when no monitor is attached.
@@ -181,6 +213,7 @@ in
   };
   environment.systemPackages =
     (with pkgs; [
+      wl-clipboard
       mtkclient
       blender
       android-studio-full
@@ -209,6 +242,7 @@ in
       wireshark-cli
       avalonia-ilspy
     ])
+    ++ [ waydroid-script.packages.${system}.default ]
     ++ (with reenv.packages.${system}; [
       bindiff
       ghidra-with-extensions
@@ -336,7 +370,41 @@ in
     nvidiaSettings = true;
   };
   services.xserver.videoDrivers = [ "nvidia" ];
+  # Stable device names for Hyprland's AMD-primary multi-GPU renderer.
+  services.udev.extraRules = ''
+    SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="0000:11:00.0", SYMLINK+="dri/amd-igpu"
+    SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="0000:01:00.0", SYMLINK+="dri/nvidia-dgpu"
+  '';
   # powerManagement.enable = true;
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.docker.daemon.settings.features.cdi = true;
+  
+  # Keep the host resolver off Waydroid's 192.168.240.1:53 listener.
+  services.dnsmasq.settings = {
+    listen-address = "127.0.0.1";
+    bind-interfaces = true;
+  };
+
+  services.waydroid-nvidia = {
+    enable = true;
+    package = waydroidNvidia;
+    refreshRate = 200;
+  };
+
+  virtualisation.waydroid = {
+    enable = true;
+    package = waydroidNvidia;
+  };
+
+  # Native-bridge installers reuse these global binfmt names. Container
+  # restarts do not clear them, so switching libndk/libhoudini otherwise leaves
+  # stale interpreters pointing at files removed from the Android overlay.
+  systemd.services.waydroid-container.preStart = ''
+    for handler in arm_exe arm_dyn arm64_exe arm64_dyn; do
+      handlerPath="/proc/sys/fs/binfmt_misc/$handler"
+      if [[ -e "$handlerPath" ]]; then
+        echo -1 > "$handlerPath"
+      fi
+    done
+  '';
 }

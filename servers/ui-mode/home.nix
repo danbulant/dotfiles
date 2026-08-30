@@ -23,6 +23,13 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  dmsShell = dms.packages.${system}.dms-shell.overrideAttrs (oldAttrs: {
+    postPatch = (oldAttrs.postPatch or "") + ''
+      if [[ -f quickshell/Services/PopoutService.qml ]]; then
+        patch -p1 < ${../../pkgs/dms-settings-reopen.patch}
+      fi
+    '';
+  });
 
   unstable = import nixpkgs-unstable {
     system = pkgs.system;
@@ -470,6 +477,7 @@ in
   # programs.dsearch.enable = true;
   programs.dank-material-shell = {
     enable = true;
+    package = dmsShell;
     systemd.enable = true;
     # niri = {
     #   enableKeybinds = false; # Sets static preset keybinds

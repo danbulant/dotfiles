@@ -154,7 +154,6 @@
   fonts.enableDefaultPackages = true;
   # https://github.com/NixOS/nixpkgs/issues/409986
   environment.etc."xdg/menus/applications.menu".source = ./dolphin.menu;
-  environment.etc."pam_init".source = "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init";
 
   users.users.dan = {
     isNormalUser = true;
@@ -301,6 +300,20 @@
       package = pkgs.kdePackages.kwallet-pam;
     };
   };
+  # pam_kwallet starts ksecretd before the UWSM session is ready. Complete its
+  # handshake once graphical-session.target has the imported session environment.
+  systemd.user.services.plasma-kwallet-pam = {
+    description = "Unlock KWallet from PAM credentials";
+    wantedBy = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init";
+      Type = "simple";
+      Slice = "background.slice";
+      Restart = "no";
+    };
+  };
+
 
   services.logind.settings.Login = {
     HandlePowerKey = "suspend";

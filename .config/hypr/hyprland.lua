@@ -12,7 +12,9 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("LIBVA_DRIVER_NAME", "nvidia")
 hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
-hl.env("WLR_DRM_DEVICES", "/dev/dri/card1:/dev/dri/card0")
+-- NVIDIA renders the desktop and owns the physical display. AMD remains a
+-- fallback device; Waydroid uses NVIDIA through its Venus transport.
+hl.env("AQ_DRM_DEVICES", "/dev/dri/nvidia-dgpu:/dev/dri/amd-igpu")
 hl.env("GDK_SCALE", "1")
 hl.env("GDK_BACKEND", "wayland,x11")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
@@ -210,13 +212,10 @@ hl.exec_cmd("gsettings set org.gnome.desktop.interface font-antialiasing 'rgba'"
 hl.exec_cmd("gsettings set org.gnome.desktop.interface font-hinting 'full'")
 
 -- DMS 1.5+ owns these fragments. In particular, Display Settings rewrites outputs.lua.
--- require("dms.colors")
+require("dms/colors")
 require("dms/outputs")
--- require("dms.layout")
 -- require("dms.cursor")
 -- require("dms.binds")
--- require("dms.binds-user")
--- require("dms.windowrules")
 require("dms/layout")
 require("dms/binds-user")
 require("dms/windowrules")

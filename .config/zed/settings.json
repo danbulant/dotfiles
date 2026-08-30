@@ -20,9 +20,9 @@
     "light": "One Light",
     "dark": "One Dark",
   },
-  "minimap": {
-    "show": "auto"
-  },
+//  "minimap": {
+//    "show": "auto"
+//  },
   "format_on_save": "modifications",
   "diagnostics": {
     "inline": {
