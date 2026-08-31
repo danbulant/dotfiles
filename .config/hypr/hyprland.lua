@@ -109,7 +109,7 @@ hl.on("hyprland.start", function()
         "wl-paste --type image --watch cliphist store",
         "fcitx5",
         "easyeffects --gapplication-service",
-        "voxtype daemon",
+        --"voxtype daemon",
         "openrgb --startminimized",
     }
     for _, command in ipairs(commands) do hl.exec_cmd(command) end
