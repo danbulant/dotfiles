@@ -108,11 +108,11 @@
     LC_TELEPHONE = "cs_CZ.UTF-8";
     LC_TIME = "en_GB.UTF-8";
   };
-  services.displayManager.sddm.enable = true;
+  #services.displayManager.sddm.enable = true;
   services.displayManager.defaultSession = "hyprland-uwsm";
-  services.desktopManager.plasma6 = {
-    enable = true;
-  };
+#  services.desktopManager.plasma6 = {
+#    enable = true;
+#  };
   # services.desktopManager.gnome.enable = true;
   services.xserver.xkb = {
     layout = "us";
