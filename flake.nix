@@ -220,7 +220,7 @@
       # Export sysbox NixOS module for external use
       nixosModules.sysbox = import ./modules/sysbox.nix;
       nixosModules.tuwunel-admin = import ./modules/tuwunel-admin.nix;
-      #nixosModules.budkyber = import ./modules/budkyber.nix;
+      #nixosModules.adctf = import ./modules/adctf.nix;
 
       packages.x86_64-linux = rec {
         tuwunel-admin =
@@ -237,10 +237,10 @@
           paseo.nixosModules.paseo
           determinate.nixosModules.default
           home-manager.nixosModules.home-manager
-          #./modules/budkyber.nix
+          #./modules/adctf.nix
           {
             services.hypr-kdeconnect-fix.enable = true;
-            #services.budkyber.enable = true;
+            #services.adctf.enable = true;
             home-manager.extraSpecialArgs = attrs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
