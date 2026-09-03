@@ -349,7 +349,7 @@
     enable = true;
     useRoutingFeatures = "both";
     openFirewall = true;
-    extraUpFlags = [ "--advertise-exit-node" ];
+    extraUpFlags = lib.mkDefault [ "--advertise-exit-node" ];
   };
   hardware.opentabletdriver.enable = true;
   virtualisation.docker = {

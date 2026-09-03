@@ -10,27 +10,31 @@
 
 let
   system = pkgs.stdenv.hostPlatform.system;
-  waydroidNvidia =
-    (waydroid-nvidia-nix.packages.${system}.waydroid-nvidia-full).overrideAttrs
-      (_: {
-        postFixup = ''
-          wrapProgram $out/bin/waydroid \
-            --prefix PATH : ${lib.makeBinPath [ pkgs.lxc pkgs.kmod pkgs.util-linux ]}
-          wrapProgram $out/lib/waydroid/data/scripts/waydroid-net.sh \
-            --prefix PATH : ${
-              lib.makeBinPath [
-                pkgs.lxc
-                pkgs.kmod
-                pkgs.iptables
-                pkgs.nftables
-                pkgs.iproute2
-                pkgs.dnsmasq
-                pkgs.gawk
-                pkgs.getent
-              ]
-            }
-        '';
-      });
+  waydroidNvidia = (waydroid-nvidia-nix.packages.${system}.waydroid-nvidia-full).overrideAttrs (_: {
+    postFixup = ''
+      wrapProgram $out/bin/waydroid \
+        --prefix PATH : ${
+          lib.makeBinPath [
+            pkgs.lxc
+            pkgs.kmod
+            pkgs.util-linux
+          ]
+        }
+      wrapProgram $out/lib/waydroid/data/scripts/waydroid-net.sh \
+        --prefix PATH : ${
+          lib.makeBinPath [
+            pkgs.lxc
+            pkgs.kmod
+            pkgs.iptables
+            pkgs.nftables
+            pkgs.iproute2
+            pkgs.dnsmasq
+            pkgs.gawk
+            pkgs.getent
+          ]
+        }
+    '';
+  });
 
   ninfs = pkgs.python3Packages.buildPythonApplication {
     pname = "ninfs";
@@ -144,6 +148,19 @@ in
   # };
   # ssh -R (remote port forward) to this server should listen publicly
   services.openssh.settings.GatewayPorts = "yes";
+  services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
+
+  users.groups.restic-eisen = { };
+  users.users.restic-eisen = {
+    isSystemUser = true;
+    group = "restic-eisen";
+    home = "/";
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /media/large/restic 0755 root root -"
+    "d /media/large/restic/eisen 0700 restic-eisen restic-eisen -"
+  ];
   boot = {
     # Steam client bug #13186: xpad conflicts with Steam Controller emulation
     # and crashes Steam while a game is starting.
@@ -354,6 +371,11 @@ in
     };
   };
 
+  services.tailscale.extraSetFlags = lib.mkForce [
+    "--advertise-exit-node"
+    "--ssh"
+  ];
+
   nix.optimise = {
     automatic = true;
     persistent = true;
@@ -378,7 +400,7 @@ in
   # powerManagement.enable = true;
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.docker.daemon.settings.features.cdi = true;
-  
+
   # Keep the host resolver off Waydroid's 192.168.240.1:53 listener.
   services.dnsmasq.settings = {
     listen-address = "127.0.0.1";

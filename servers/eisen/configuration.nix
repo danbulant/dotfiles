@@ -106,6 +106,9 @@ in
         oidc_native_auth = true;
         ip_source = "rightmost_x_forwarded_for";
         registration_token_file = "/etc/secrets/matrix-registration-token";
+        database_backup_path = "/var/lib/tuwunel/database-backups";
+        database_backups_to_keep = 2;
+        admin_signal_execute = [ "server backup-database" ];
 
         well_known = {
           client = "https://${matrixHost}";
@@ -455,6 +458,62 @@ in
   systemd.services.lk-jwt-service = {
     requires = [ "livekit-keys.service" ];
     after = [ "livekit-keys.service" ];
+  };
+
+  services.restic.backups.matrix = {
+    repository = "sftp:restic-eisen@fern:/media/large/restic/eisen";
+    passwordFile = "/etc/secrets/restic-password";
+    initialize = true;
+    paths = [
+      "/var/lib/tuwunel/database-backups"
+      "/var/lib/tuwunel/media"
+      "/var/lib/livekit/keys"
+      "/etc/secrets/matrix-registration-token"
+    ];
+    extraOptions = [
+      "sftp.command='${lib.getExe pkgs.tailscale} ssh restic-eisen@fern -s sftp'"
+    ];
+    extraBackupArgs = [ "--tag=matrix" ];
+    pruneOpts = [
+      "--keep-hourly=24"
+      "--keep-daily=14"
+      "--keep-weekly=8"
+      "--keep-monthly=12"
+    ];
+    timerConfig = {
+      OnCalendar = "*-*-* 09,12,15,18,21:00:00";
+      Persistent = true;
+      RandomizedDelaySec = "20m";
+    };
+    backupPrepareCommand = ''
+      #!${pkgs.runtimeShell}
+      set -eu
+
+      backup_meta=/var/lib/tuwunel/database-backups/meta
+      before="$(${pkgs.findutils}/bin/find "$backup_meta" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | ${pkgs.coreutils}/bin/sort || true)"
+
+      ${lib.getExe' pkgs.systemd "systemctl"} kill --kill-whom=main --signal=SIGUSR2 tuwunel.service
+
+      # RocksDB writes the metadata file only after an online backup is complete.
+      for ((attempt = 0; attempt < 120; attempt++)); do
+        after="$(${pkgs.findutils}/bin/find "$backup_meta" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | ${pkgs.coreutils}/bin/sort || true)"
+        if [[ -n "$after" && "$after" != "$before" ]]; then
+          exit 0
+        fi
+        ${pkgs.coreutils}/bin/sleep 5
+      done
+
+      echo "Timed out waiting for Tuwunel's online database backup" >&2
+      exit 1
+    '';
+  };
+
+  # A sleeping Fern is normal. Keep retrying without overlapping timer runs,
+  # and promptly abandon dead SSH connections if it sleeps during a backup.
+  systemd.services.restic-backups-matrix.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "30m";
+    TimeoutStartSec = "12h";
   };
 
   # The Karakeep module still emits this option, but Meilisearch 1.51 removed it.
