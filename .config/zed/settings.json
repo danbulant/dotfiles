@@ -41,6 +41,7 @@
   ],
   "semantic_tokens": "combined",
   "cli_default_open_behavior": "existing_window",
+  "file_scan_exclusions": ["**/node_modules", "..."],
   "languages": {
     "JavaScript": {
       "formatter": { "language_server": { "name": "biome" } },

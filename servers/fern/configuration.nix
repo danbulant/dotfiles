@@ -118,6 +118,19 @@ in
   ];
 
   services.hardware.openrgb.enable = true;
+
+  # OpenRGB's GUI shutdown action runs too late during session teardown. Blank
+  # the controllers while udev and the Nix store are still available instead.
+  systemd.services.openrgb-shutdown = {
+    description = "Turn off RGB lighting before shutdown";
+    wantedBy = [ "shutdown.target" ];
+    before = [ "shutdown.target" ];
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${lib.getExe pkgs.openrgb-with-all-plugins} --device B850 --mode static --color 000000 --device Wooting --color 000000";
+    };
+  };
   # The split RemoteDesktop/ScreenCast portal session emits malformed D-Bus
   # traffic with XDPH 1.4.1. Override capture without replacing Sunshine's
   # mutable web-UI configuration.
