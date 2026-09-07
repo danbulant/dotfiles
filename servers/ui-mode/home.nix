@@ -23,6 +23,7 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  delta-bin = pkgs.callPackage ../../pkgs/delta-bin/package.nix { };
   dmsShell = dms.packages.${system}.dms-shell.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + ''
       if [[ -f quickshell/Services/PopoutService.qml ]]; then
@@ -142,6 +143,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      delta-bin
+      kicad
       protontricks
       waypipe
       cinny
@@ -157,7 +160,7 @@ in
       wine
       codexbar.packages.${pkgs.system}.default
       codex
-      jellyfin-desktop
+      #jellyfin-desktop
       (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
         name = "qt6ct-kde";
@@ -176,12 +179,12 @@ in
       nixd
       buck2
       (rusic.packages.${system}.default)
-      affine
+      #affine
       voxtype-vulkan
       #affinity-nix.packages.x86_64-linux.v3
       biome
       bun
-      lenovo-legion
+      #lenovo-legion
       itch
       filezilla
       nicotine-plus
@@ -203,11 +206,11 @@ in
       libxkbfile
 
       #            dioxus-cli
-      cosmic-files
-      cosmic-player
-      cosmic-screenshot
-      cosmic-applibrary
-      cosmic-ext-calculator
+      #cosmic-files
+      #cosmic-player
+      #cosmic-screenshot
+      #cosmic-applibrary
+      #cosmic-ext-calculator
       cosmic-icons
       examine
 
@@ -227,7 +230,7 @@ in
       usbimager
       #bitwarden-desktop
       #metasploit
-      lenovo-legion
+      #lenovo-legion
       burpsuite
       zap
       kubernetes-helm
@@ -268,17 +271,16 @@ in
       lf
       rawtherapee
       syncthingtray
-      anki-bin
+      #anki-bin
       xournalpp
       simple-scan
       godot_4
       #rar
-      wootility
+      #wootility
       #surrealdb
       pico-sdk
       elf2uf2-rs
       obsidian
-      betaflight-configurator
       home-manager
       #glxinfo
       pciutils
@@ -318,8 +320,8 @@ in
       datovka
       nwg-displays
       wireguard-tools
-      mongodb-compass
-      unstable.mongodb-tools
+      #mongodb-compass
+      #unstable.mongodb-tools
       #hashcat
       tldr
       #dunst
@@ -430,7 +432,7 @@ in
       graphviz
 
       #blender
-      warpinator
+      #warpinator
 
       awatcher
       tigervnc

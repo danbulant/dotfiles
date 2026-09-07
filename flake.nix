@@ -168,6 +168,26 @@
         ];
       };
       desktopCompatibilityOverlay = _: prev: {
+        codex =
+          let
+            version = "0.153.4";
+            src = prev.fetchFromGitHub {
+              owner = "openai";
+              repo = "codex";
+              tag = "rust-v${version}";
+              hash = "sha256-lHiDj5SodaM3mh8goMm6esfejeAT+Y3JJWrRnyj6sJo=";
+            };
+            sourceRoot = "${src.name}/codex-rs";
+          in
+          prev.codex.overrideAttrs (_: {
+            inherit version src sourceRoot;
+            cargoHash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
+            cargoDeps = prev.rustPlatform.fetchCargoVendor {
+              inherit src sourceRoot;
+              hash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
+            };
+          });
+
         # Hyprland 0.56.1 requires glaze >= 7 and < 8, while this
         # nixpkgs revision provides glaze 8.0.0.
         hyprland = prev.hyprland.override {
