@@ -174,7 +174,7 @@ in
       ddcutil
       gearlever
       linux-wallpaperengine
-      lmstudio
+      #lmstudio
       #spacetimedb
       nixd
       buck2
