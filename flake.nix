@@ -167,6 +167,11 @@
           })
         ];
       };
+      photoprismOverlay = final: prev: {
+        photoprism = final.callPackage ./pkgs/photoprism/package.nix {
+          photoprism = prev.photoprism;
+        };
+      };
       desktopCompatibilityOverlay = _: prev: {
         codex =
           let
@@ -271,6 +276,7 @@
               desktopCompatibilityOverlay
               pyfilesystemOverlay
               spacedriveOverlay
+              photoprismOverlay
             ];
             networking.hostName = "fern";
             imports = [ ./servers/fern/hardware-configuration.nix ];

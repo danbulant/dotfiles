@@ -336,6 +336,7 @@
         mesa
         libxkbcommon
         openssl
+        icu
         libGL
         libva
         libelf
