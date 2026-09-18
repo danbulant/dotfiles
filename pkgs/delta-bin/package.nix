@@ -18,12 +18,12 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "delta-bin";
-  version = "0.6.1";
+  version = "0.16.1";
 
   src = requireFile {
     name = "delta-linux-x86_64.tar.gz";
     url = "https://delta.dev/download";
-    hash = "sha256-Q/CSFKlIDd47DwQk/QatfBs8AtM/ObTA3TFOTvggcsE=";
+    hash = "sha256-+G91zPV+3UYF7OxVEhJcQgd6HHA67c7/WQNxSp6oB4Y=";
     message = ''
       Delta is beta-gated and cannot be downloaded without a Zed account.
       Download the Linux x86_64 archive from https://delta.dev/download, then run:

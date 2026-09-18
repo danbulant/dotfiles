@@ -19,13 +19,12 @@ let
     prowlarr = 9696;
     keep = 8100;
     grafana = 3002;
-    tolgee = 8200;
-    # ntfy = 3003;
     forgejo = 8300;
-    snaps = 8400;
     matrix = 6167;
     sable = 6200;
     livekit = 7880;
+    hedgedoc = 7900;
+    vaultwarden = 8222; # default vw port
   };
   internalPorts = {
     prometheus-node = 9000;
@@ -205,6 +204,26 @@ in
 
     dnsmasq = {
       enable = true;
+    };
+
+    hedgedoc = {
+      enable = true;
+      settings = {
+        domain = "doc.danbulant.cloud";
+        port = ports.hedgedoc;
+        protocolUseSSL = true;
+      };
+    };
+
+    vaultwarden = {
+      enable = true;
+      domain = "pw.danbulant.cloud";
+
+      config = {
+        ROCKET_ADDRESS = "::1";
+        ROCKET_PORT = 8222;
+        # SIGNUPS_ALLOWED = false;
+      };
     };
 
     uptime-kuma = {
@@ -410,14 +429,18 @@ in
               reverse_proxy http://localhost:${toString ports.sable}
             '';
           };
-          "translations.danbulant.cloud:80, translations.rpi1.danbulant.cloud:80" = {
+          "doc.danbulant.cloud:80" = {
             extraConfig = ''
-              reverse_proxy http://localhost:${toString ports.tolgee}
+              reverse_proxy http://localhost:${toString ports.hedgedoc} {
+                # TLS terminates at the upstream Cloudflare/Traefik proxies;
+                # HedgeDoc still needs the public scheme for secure cookies.
+                header_up X-Forwarded-Proto https
+              }
             '';
           };
-          "snaps.rpi1.danbulant.cloud" = {
+          "pw.danbulant.cloud:80" = {
             extraConfig = ''
-              reverse_proxy http://localhost:${toString ports.snaps}
+              reverse_proxy http://localhost:${toString ports.vaultwarden}
             '';
           };
         };
@@ -517,9 +540,9 @@ in
   };
 
   # The Karakeep module still emits this option, but Meilisearch 1.51 removed it.
-  systemd.services.meilisearch.serviceConfig.ExecStartPre = lib.mkAfter [
-    "${lib.getExe pkgs.gnused} -i '/^experimental_dumpless_upgrade =/d' \${RUNTIME_DIRECTORY}/config.toml"
-  ];
+  # systemd.services.meilisearch.serviceConfig.ExecStartPre = lib.mkAfter [
+  #   "${lib.getExe pkgs.gnused} -i '/^experimental_dumpless_upgrade =/d' \${RUNTIME_DIRECTORY}/config.toml"
+  # ];
 
   # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
   networking.firewall.allowedTCPPorts = [ 7881 ];
@@ -604,19 +627,6 @@ in
           ports = [
             "127.0.0.1:${toString ports.sable}:8080"
           ];
-        };
-
-        tolgee = {
-          image = "tolgee/tolgee";
-          volumes = [
-            "data:/data"
-          ];
-          ports = [
-            "${toString ports.tolgee}:8080"
-          ];
-          environment = {
-            TOLGEE_AUTHENTICATION_ENABLED = "true";
-          };
         };
       };
     };

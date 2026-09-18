@@ -119,18 +119,12 @@ in
 
   services.hardware.openrgb.enable = true;
 
-  # OpenRGB's GUI shutdown action runs too late during session teardown. Blank
-  # the controllers while udev and the Nix store are still available instead.
-  systemd.services.openrgb-shutdown = {
-    description = "Turn off RGB lighting before shutdown";
-    wantedBy = [ "shutdown.target" ];
-    before = [ "shutdown.target" ];
-    unitConfig.DefaultDependencies = false;
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${lib.getExe pkgs.openrgb-with-all-plugins} --device B850 --mode static --color 000000 --device Wooting --color 000000";
-    };
-  };
+  # Match the GUI's "Lights Off" action: Direct mode writes black to every
+  # addressable LED, while Static only changes the controller's built-in effect.
+  # Run this as the SDK server's stop command so it cannot race the server being
+  # torn down during shutdown.
+  systemd.services.openrgb.serviceConfig.ExecStop =
+    "${lib.getExe config.services.hardware.openrgb.package} --device B850 --mode direct --color 000000 --device Wooting --mode direct --color 000000";
   # The split RemoteDesktop/ScreenCast portal session emits malformed D-Bus
   # traffic with XDPH 1.4.1. Override capture without replacing Sunshine's
   # mutable web-UI configuration.
@@ -243,6 +237,7 @@ in
   };
   environment.systemPackages =
     (with pkgs; [
+      photoprism
       wl-clipboard
       mtkclient
       blender
@@ -361,6 +356,58 @@ in
       '';
     };
   };
+  services.photoprism = {
+    enable = true;
+    originalsPath = "/media/large/photos";
+    importPath = "/var/lib/photoprism/import";
+    passwordFile = "/etc/secrets/photoprism";
+    settings = {
+      PHOTOPRISM_DETECT_NSFW = "true";
+      PHOTOPRISM_SITE_URL = "https://photos.badapple.cz";
+      PHOTOPRISM_SITE_TITLE = "BA Photos";
+    };
+  };
+
+  programs.ssh.knownHosts.storagebox = {
+    hostNames = [ "[u669849.your-storagebox.de]:23" ];
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs";
+  };
+
+  systemd.services.photos-storagebox-sync = {
+    description = "Sync photos to Hetzner Storage Box";
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+    unitConfig.ConditionPathIsDirectory = "/media/large/photos";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "dan";
+      Group = "users";
+      Nice = 10;
+      IOSchedulingClass = "idle";
+      ProtectSystem = "strict";
+      ProtectHome = "read-only";
+      PrivateTmp = true;
+    };
+    script = ''
+      exec ${lib.getExe pkgs.rsync} \
+        --archive \
+        --human-readable \
+        --partial \
+        --rsh="${lib.getExe pkgs.openssh} -p 23 -i /home/dan/.ssh/id_ed25519 -o BatchMode=yes" \
+        /media/large/photos/ \
+        u669849@u669849.your-storagebox.de:photos/
+    '';
+  };
+
+  systemd.timers.photos-storagebox-sync = {
+    description = "Sync photos to Hetzner Storage Box every four hours";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 00/4:00:00";
+      Persistent = true;
+      RandomizedDelaySec = "15m";
+    };
+  };
 
   services.nix-serve = {
     enable = true;
@@ -379,6 +426,11 @@ in
       "nix.fern.danbulant.cloud:80" = {
         extraConfig = ''
           reverse_proxy http://localhost:${toString config.services.nix-serve.port}
+        '';
+      };
+      "photos.badapple.cz:80" = {
+        extraConfig = ''
+          reverse_proxy http://localhost:${toString config.services.photoprism.port}
         '';
       };
     };

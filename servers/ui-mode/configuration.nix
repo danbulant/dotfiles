@@ -110,9 +110,9 @@
   };
   #services.displayManager.sddm.enable = true;
   services.displayManager.defaultSession = "hyprland-uwsm";
-#  services.desktopManager.plasma6 = {
-#    enable = true;
-#  };
+  #  services.desktopManager.plasma6 = {
+  #    enable = true;
+  #  };
   # services.desktopManager.gnome.enable = true;
   services.xserver.xkb = {
     layout = "us";
@@ -294,14 +294,13 @@
       };
     };
   };
-  security.pam.services = {
-    greetd.kwallet = {
-      enable = true;
-      package = pkgs.kdePackages.kwallet-pam;
-    };
+  security.pam.services.login.kwallet = {
+    enable = true;
+    forceRun = true;
+    package = pkgs.kdePackages.kwallet-pam;
   };
-  # pam_kwallet starts ksecretd before the UWSM session is ready. Complete its
-  # handshake once graphical-session.target has the imported session environment.
+  # greetd delegates authentication to the login PAM stack. pam_kwallet must run
+  # there so UWSM can import its handshake before the graphical session starts.
   systemd.user.services.plasma-kwallet-pam = {
     description = "Unlock KWallet from PAM credentials";
     wantedBy = [ "graphical-session.target" ];
@@ -313,7 +312,6 @@
       Restart = "no";
     };
   };
-
 
   services.logind.settings.Login = {
     HandlePowerKey = "suspend";
@@ -414,7 +412,7 @@
   boot.loader.timeout = 5;
 
   services.udev.extraRules = ''
-  SUBSYSTEM=="usb", ATTR{idVendor}=="054c", GROUP="users", MODE="0660"
+    SUBSYSTEM=="usb", ATTR{idVendor}=="054c", GROUP="users", MODE="0660"
   '';
 
   # App image support

@@ -143,6 +143,8 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      art
+      darktable
       delta-bin
       kicad
       protontricks
