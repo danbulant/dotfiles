@@ -5,7 +5,6 @@
   colmena,
   dms,
   zen-browser,
-  nix-gaming,
   nixpkgs-unstable, # suyu,
   hyprland-plugins, # , hyprland
   pkgs,
@@ -88,42 +87,20 @@ let
     '';
   });
 
-  osuLazerBinNvidia = pkgs.symlinkJoin {
-    name = "osu-lazer-bin-glx-mesa";
-    paths = [ (nix-gaming.packages.${system}.osu-lazer-bin.override { gmrun_enable = false; }) ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/osu! \
-        --set SDL_VIDEODRIVER x11 \
-        --set __GLX_VENDOR_LIBRARY_NAME mesa \
-        --set DRI_PRIME 1 \
-        --unset MESA_VK_DEVICE_SELECT \
-        --unset __EGL_EXTERNAL_PLATFORM_CONFIG_DIRS \
-        --unset __EGL_VENDOR_LIBRARY_FILENAMES
-    '';
-  };
-
-  osuLazerBinDebug = pkgs.writeShellScriptBin "osu-debug" ''
+  osuAppImageNvidia = pkgs.writeShellScriptBin "osu!" ''
     set -eu
 
-    log="/tmp/osu-lazer-bin-debug.$(date +%s)"
-    resolved="$(${pkgs.coreutils}/bin/readlink -f "$(command -v osu!)")"
+    appimage="''${OSU_APPIMAGE:-$HOME/Downloads/osu.AppImage}"
+    if [ ! -f "$appimage" ]; then
+      echo "osu! AppImage not found: $appimage" >&2
+      exit 1
+    fi
 
-    {
-      echo "PATH=$(command -v osu!)"
-      echo "RESOLVED=$resolved"
-      echo "ARGV=$*"
-      echo "--- wrapper ---"
-      ${pkgs.gnused}/bin/sed -n '1,80p' "$resolved" || true
-      echo "--- env ---"
-      env | ${pkgs.gnugrep}/bin/grep -E '^(SDL_|OSU_|__EGL|__GLX|EGL_|GLX_|LIBGL|MESA|DRI_|GBM|WLR|AQ_|DISPLAY|WAYLAND_DISPLAY|XDG_SESSION|XDG_CURRENT|PIPEWIRE|vblank)' | sort || true
-    } > "$log.env"
+    export LD_LIBRARY_PATH="${pkgs.icu}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export __EGL_VENDOR_LIBRARY_FILENAMES="/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json"
+    export __GLX_VENDOR_LIBRARY_NAME="nvidia"
 
-    exec > >(${pkgs.coreutils}/bin/tee "$log.stdout")
-    exec 2> >(${pkgs.coreutils}/bin/tee "$log.stderr" >&2)
-
-    echo "Writing debug logs to $log.env, $log.stdout, and $log.stderr" >&2
-    exec osu! "$@"
+    exec ${pkgs.appimage-run}/bin/appimage-run "$appimage" "$@"
   '';
 
   # system = stdenv.hostPlatform.system;
@@ -154,8 +131,7 @@ in
       eden
       gh
       inkscape
-      osuLazerBinNvidia
-      osuLazerBinDebug
+      osuAppImageNvidia
       deadlockModManager
       #firefox
       unrar

@@ -299,10 +299,12 @@
     forceRun = true;
     package = pkgs.kdePackages.kwallet-pam;
   };
-  # greetd delegates authentication to the login PAM stack. pam_kwallet must run
-  # there so UWSM can import its handshake before the graphical session starts.
+  # UWSM imports PAM_KWALLET5_LOGIN while preparing the graphical session.
+  # Run the handoff only after that import; starting it concurrently loses the
+  # one-shot PAM socket and leaves org.freedesktop.secrets unavailable.
   systemd.user.services.plasma-kwallet-pam = {
     description = "Unlock KWallet from PAM credentials";
+    after = [ "graphical-session-pre.target" ];
     wantedBy = [ "graphical-session.target" ];
     partOf = [ "graphical-session.target" ];
     serviceConfig = {
