@@ -299,12 +299,12 @@
     forceRun = true;
     package = pkgs.kdePackages.kwallet-pam;
   };
-  # UWSM imports PAM_KWALLET5_LOGIN while preparing the graphical session.
-  # Run the handoff only after that import; starting it concurrently loses the
-  # one-shot PAM socket and leaves org.freedesktop.secrets unavailable.
+  # UWSM imports PAM_KWALLET5_LOGIN during environment preparation, but
+  # ksecretd also needs the compositor environment to initialize Qt. Wait for
+  # UWSM to publish WAYLAND_DISPLAY before handing over the PAM credentials.
   systemd.user.services.plasma-kwallet-pam = {
     description = "Unlock KWallet from PAM credentials";
-    after = [ "graphical-session-pre.target" ];
+    after = [ "wayland-session-waitenv.service" ];
     wantedBy = [ "graphical-session.target" ];
     partOf = [ "graphical-session.target" ];
     serviceConfig = {
