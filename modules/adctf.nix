@@ -21,6 +21,9 @@ let
     ;
 
   compose = lib.getExe pkgs.docker-compose;
+  qemuExe = lib.getExe' pkgs.qemu "qemu-system-x86_64";
+  openvpn = lib.getExe pkgs.openvpn;
+
   portOverlays = {
     collector = pkgs.writeText "adctf-collector-ports.yml" ''
       services:
@@ -51,7 +54,6 @@ let
     '';
   };
 
-
   statekOverlay = pkgs.writeText "adctf-statek-overlay.yml" ''
     services:
       db:
@@ -75,6 +77,7 @@ let
           cct: { aliases: [ statek_submitter ] }
           cct6: { aliases: [ statek_submitter ] }
       api:
+        ports: !override [ "127.0.0.1:8081:8080" ]
         networks:
           statek:
             aliases: [ api ]
@@ -98,7 +101,7 @@ let
           cct: { aliases: [ tulip_timescale ] }
           cct6: { aliases: [ tulip_timescale ] }
       frontend:
-        ports: !override [ "127.0.0.1:3000:3000" ]
+        ports: !override [ "127.0.0.1:3001:3000" ]
         networks:
           internal:
           cct: { aliases: [ tulip_frontend ] }
@@ -132,34 +135,34 @@ let
     collector = {
       directory = "${cfg.infrastructureRoot}/collector";
       files = [
-        "${cfg.infrastructureRoot}/collector/docker-compose.yml"
+        "${cfg.infrastructureRoot}/collector/compose.yml"
         portOverlays.collector
       ];
     };
     grafana = {
       directory = "${cfg.infrastructureRoot}/grafana";
       files = [
-        "${cfg.infrastructureRoot}/grafana/docker-compose.yml"
+        "${cfg.infrastructureRoot}/grafana/compose.yml"
         portOverlays.grafana
       ];
     };
     loki = {
-      directory = "${cfg.infrastructureRoot}/loki-adctf";
+      directory = "${cfg.infrastructureRoot}/loki-budkyber";
       files = [
-        "${cfg.infrastructureRoot}/loki-adctf/docker-compose.yml"
+        "${cfg.infrastructureRoot}/loki-budkyber/compose.yml"
         portOverlays.loki
       ];
     };
     prometheus = {
       directory = "${cfg.infrastructureRoot}/prometheus";
       files = [
-        "${cfg.infrastructureRoot}/prometheus/docker-compose.yml"
+        "${cfg.infrastructureRoot}/prometheus/compose.yml"
         portOverlays.prometheus
       ];
     };
     suricata = {
       directory = "${cfg.infrastructureRoot}/suricata";
-      files = [ "${cfg.infrastructureRoot}/suricata/docker-compose.yml" ];
+      files = [ "${cfg.infrastructureRoot}/suricata/compose.yml" ];
     };
   };
 
@@ -188,16 +191,14 @@ let
     cloudbeaver = {
       directory = "${cfg.infrastructureRoot}/other/cloudbeaver";
       files = [
-        "${cfg.infrastructureRoot}/other/cloudbeaver/docker-compose.yml"
+        "${cfg.infrastructureRoot}/other/cloudbeaver/compose.yml"
         portOverlays.cloudbeaver
       ];
     };
   };
 
   stacks =
-    infrastructureStacks
-    // applicationStacks
-    // optionalAttrs cfg.cloudbeaver.enable cloudbeaverStack;
+    infrastructureStacks // applicationStacks // optionalAttrs cfg.cloudbeaver.enable cloudbeaverStack;
 
   proxyPorts = {
     collector = 6256;
@@ -206,8 +207,8 @@ let
     alloy = 6005;
     prometheus = 9090;
     statek = 5173;
-    statek-api = 8080;
-    tulip = 3000;
+    statek-api = 8081;
+    tulip = 3001;
   }
   // optionalAttrs cfg.cloudbeaver.enable { cloudbeaver = 8978; };
 
@@ -218,11 +219,13 @@ let
     }
   ) proxyPorts;
 
-  composeCommand = name: stack:
+  composeCommand =
+    name: stack:
     "${compose} --project-name ${escapeShellArg "adctf-${name}"} "
     + concatMapStringsSep " " (file: "-f ${escapeShellArg file}") stack.files;
 
-  mkComposeService = name: stack:
+  mkComposeService =
+    name: stack:
     nameValuePair "adctf-${name}" {
       description = "adctf ${name} containers";
       wantedBy = [ "multi-user.target" ];
@@ -237,7 +240,11 @@ let
       ];
       wants = [ "network-online.target" ];
       path = [ pkgs.coreutils ];
-      environment = stack.environment or { };
+      environment = {
+        DOCKER_BUILDKIT = "1";
+        DOCKER_CLI_PLUGIN_DIRS = "${pkgs.docker-buildx}/libexec/docker/cli-plugins";
+      }
+      // (stack.environment or { });
       script = ''
         test -f ${escapeShellArg (builtins.head stack.files)}
         ${composeCommand name stack} up --detach --build --remove-orphans
@@ -262,6 +269,12 @@ in
       type = types.str;
       default = "dan";
       description = "Local user allowed to manage the container and VM runtimes.";
+    };
+
+    containerStacks.enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable the Docker-based attack-defense infrastructure stacks.";
     };
 
     infrastructureRoot = mkOption {
@@ -329,16 +342,65 @@ in
         description = "Enable libvirt/QEMU management for a qcow vulnbox image.";
       };
 
-      virtualbox.enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable VirtualBox as a fallback for VirtualBox-formatted vulnbox images.";
+      faust = {
+        enable = mkEnableOption "FAUST CTF Vulnbox";
+
+        imagePath = mkOption {
+          type = types.str;
+          description = "Absolute path to the mutable Vulnbox qcow2 image.";
+        };
+
+        memoryMiB = mkOption {
+          type = types.ints.positive;
+          default = 8192;
+          description = "Guest RAM in MiB.";
+        };
+
+        vcpus = mkOption {
+          type = types.ints.positive;
+          default = 4;
+          description = "Guest virtual CPU count and host CPU quota.";
+        };
+
+        hostSshPort = mkOption {
+          type = types.port;
+          default = 2222;
+          description = "Loopback TCP port forwarded to the guest SSH service.";
+        };
+
+        vncDisplay = mkOption {
+          type = types.ints.between 0 99;
+          default = 0;
+          description = "Loopback VNC display number used for the guest console.";
+        };
+
+        autoStart = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Start the Vulnbox at boot.";
+        };
+
+        playerVpn = {
+          enable = mkEnableOption "the host-side FAUST CTF player VPN";
+
+          configPath = mkOption {
+            type = types.str;
+            default = "/var/lib/faustctf/player-faustctf.conf";
+            description = "Runtime OpenVPN configuration path; its contents never enter the Nix store.";
+          };
+
+          autoStart = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Start the player VPN at boot when its configuration exists.";
+          };
+        };
       };
     };
   };
 
   config = mkIf cfg.enable (mkMerge [
-    {
+    (mkIf cfg.containerStacks.enable {
       assertions = [
         {
           assertion = lib.hasPrefix "/" cfg.infrastructureRoot;
@@ -356,15 +418,20 @@ in
 
       virtualisation.docker = {
         enable = true;
-        daemon.settings."cgroup-parent" = "docker.slice";
+        daemon.settings = {
+          "cgroup-parent" = "docker.slice";
+          features.buildkit = true;
+        };
       };
 
       environment.systemPackages = [
+        pkgs.docker-buildx
         pkgs.docker-compose
       ];
 
       systemd.tmpfiles.rules = [
         "d ${cfg.infrastructureRoot}/traffic 0775 ${cfg.user} users -"
+        "d ${cfg.infrastructureRoot}/traffic/pcaps 0775 ${cfg.user} users -"
       ];
 
       users.users.${cfg.user}.extraGroups = [ "docker" ];
@@ -464,7 +531,7 @@ in
         enable = true;
         virtualHosts = proxyHosts;
       };
-    }
+    })
 
     (mkIf cfg.virtualMachines.enable {
       virtualisation.libvirtd.enable = true;
@@ -480,13 +547,128 @@ in
       ];
     })
 
-    (mkIf cfg.virtualMachines.virtualbox.enable {
-      virtualisation.virtualbox.host = {
-        enable = true;
-        enableKvm = true;
-        addNetworkInterface = false;
+    (mkIf cfg.virtualMachines.faust.enable {
+      assertions = [
+        {
+          assertion = lib.hasPrefix "/" cfg.virtualMachines.faust.imagePath;
+          message = "services.adctf.virtualMachines.faust.imagePath must be an absolute path";
+        }
+        {
+          assertion = lib.hasPrefix "/" cfg.virtualMachines.faust.playerVpn.configPath;
+          message = "services.adctf.virtualMachines.faust.playerVpn.configPath must be an absolute path";
+        }
+      ];
+
+      environment.systemPackages = [
+        pkgs.openvpn
+        pkgs.qemu
+        pkgs.socat
+        pkgs.virt-viewer
+      ];
+      users.users.${cfg.user}.extraGroups = [ "kvm" ];
+
+      systemd.tmpfiles.rules = [
+        "d /var/lib/faustctf 0700 root root -"
+      ];
+
+      systemd.services.faust-vulnbox = {
+        description = "FAUST CTF Vulnbox";
+        wantedBy = lib.optional cfg.virtualMachines.faust.autoStart "multi-user.target";
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        unitConfig.ConditionPathExists = cfg.virtualMachines.faust.imagePath;
+        path = [
+          pkgs.coreutils
+          pkgs.socat
+        ];
+        script = ''
+          exec ${qemuExe} \
+            -name faust-vulnbox \
+            -machine q35,accel=kvm \
+            -cpu host \
+            -smp ${toString cfg.virtualMachines.faust.vcpus} \
+            -m ${toString cfg.virtualMachines.faust.memoryMiB} \
+            -drive ${escapeShellArg "file=${cfg.virtualMachines.faust.imagePath},if=virtio,format=qcow2,cache=none,discard=unmap"} \
+            -nic ${escapeShellArg "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:${toString cfg.virtualMachines.faust.hostSshPort}-:22"} \
+            -device virtio-rng-pci \
+            -display ${escapeShellArg "vnc=127.0.0.1:${toString cfg.virtualMachines.faust.vncDisplay}"} \
+            -monitor unix:"$RUNTIME_DIRECTORY/monitor.sock",server=on,wait=off \
+            -boot order=c \
+            -rtc base=utc,clock=host
+        '';
+        preStop = ''
+          if [[ -S "$RUNTIME_DIRECTORY/monitor.sock" ]]; then
+            printf 'system_powerdown\n' | socat - UNIX-CONNECT:"$RUNTIME_DIRECTORY/monitor.sock" || true
+          fi
+
+          for _ in $(seq 1 60); do
+            kill -0 "$MAINPID" 2>/dev/null || exit 0
+            sleep 1
+          done
+        '';
+        serviceConfig = {
+          User = cfg.user;
+          Group = "users";
+          RuntimeDirectory = "faust-vulnbox";
+          UMask = "0077";
+          CPUQuota = "${toString (cfg.virtualMachines.faust.vcpus * 100)}%";
+          MemoryAccounting = true;
+          MemoryMax = "${toString (cfg.virtualMachines.faust.memoryMiB + 1024)}M";
+          TasksMax = 512;
+          LimitNOFILE = 4096;
+          Nice = 5;
+          OOMPolicy = "stop";
+          Restart = "on-failure";
+          RestartSec = "5s";
+          TimeoutStopSec = "75s";
+          KillSignal = "SIGTERM";
+          PrivateTmp = true;
+          ProtectSystem = "strict";
+          ProtectHome = "read-only";
+          ReadWritePaths = [ cfg.virtualMachines.faust.imagePath ];
+          NoNewPrivileges = true;
+          RestrictSUIDSGID = true;
+        };
       };
-      users.users.${cfg.user}.extraGroups = [ "vboxusers" ];
+    })
+
+    (mkIf (cfg.virtualMachines.faust.enable && cfg.virtualMachines.faust.playerVpn.enable) {
+      networking.nftables = {
+        enable = true;
+        tables."faust-player" = {
+          family = "inet";
+          content = ''
+            chain input {
+              type filter hook input priority -10; policy accept;
+              iifname "tun-faustctf" ct state established,related accept
+              iifname "tun-faustctf" drop
+            }
+          '';
+        };
+      };
+
+      systemd.services.faust-player-vpn = {
+        description = "FAUST CTF player VPN";
+        wantedBy = lib.optional cfg.virtualMachines.faust.playerVpn.autoStart "multi-user.target";
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        unitConfig.ConditionPathExists = cfg.virtualMachines.faust.playerVpn.configPath;
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${openvpn} --config ${escapeShellArg cfg.virtualMachines.faust.playerVpn.configPath} --data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-128-CBC";
+          WorkingDirectory = builtins.dirOf cfg.virtualMachines.faust.playerVpn.configPath;
+          Restart = "on-failure";
+          RestartSec = "5s";
+          UMask = "0077";
+          PrivateTmp = true;
+          ProtectSystem = "strict";
+          ProtectHome = "read-only";
+          ReadOnlyPaths = [ cfg.virtualMachines.faust.playerVpn.configPath ];
+          ProtectControlGroups = true;
+          ProtectKernelModules = true;
+          ProtectKernelTunables = true;
+        };
+      };
     })
   ]);
 }

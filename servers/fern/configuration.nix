@@ -157,6 +157,30 @@ in
   services.openssh.settings.GatewayPorts = "yes";
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
 
+  services.adctf = {
+    enable = false;
+    containerStacks.enable = true;
+    proxy = {
+      baseDomain = "fern.badapple.cz";
+    };
+    virtualMachines = {
+      enable = true;
+      faust = {
+        enable = true;
+        imagePath = "/home/dan/Downloads/testbox.qcow2";
+        memoryMiB = 8192;
+        vcpus = 4;
+        hostSshPort = 2222;
+        vncDisplay = 0;
+        autoStart = false;
+        playerVpn = {
+          enable = true;
+          configPath = "/home/dan/Downloads/player-faustctf.conf";
+        };
+      };
+    };
+  };
+
   users.groups.restic-eisen = { };
   users.users.restic-eisen = {
     isSystemUser = true;
