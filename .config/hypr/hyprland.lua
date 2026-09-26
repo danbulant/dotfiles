@@ -37,7 +37,7 @@ hl.config({
         follow_mouse = 1,
         float_switch_override_focus = true,
         sensitivity = 0,
-        touchpad = { natural_scroll = true },
+        touchpad = { natural_scroll = true, disable_while_typing = false },
         touchdevice = { output = "HDMI-A-1", transform = 2 },
     },
     general = {
@@ -52,7 +52,7 @@ hl.config({
         dim_special = 0.3,
         blur = {
             enabled = true,
-            size = 2,
+            size = 4,
             passes = 4,
             new_optimizations = true,
             ignore_opacity = true,

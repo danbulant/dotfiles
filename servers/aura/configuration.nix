@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 {
+  programs.steam.enable = true;
   services.openssh.settings.MaxSessions = 64;
 
   hardware.graphics.extraPackages = with pkgs; [
