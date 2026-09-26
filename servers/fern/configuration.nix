@@ -158,7 +158,7 @@ in
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
 
   services.adctf = {
-    enable = false;
+    enable = true;
     containerStacks.enable = true;
     proxy = {
       baseDomain = "fern.badapple.cz";
@@ -167,7 +167,7 @@ in
       enable = true;
       faust = {
         enable = true;
-        imagePath = "/home/dan/Downloads/testbox.qcow2";
+        imagePath = "/home/dan/Downloads/vulnbox.qcow2";
         memoryMiB = 8192;
         vcpus = 4;
         hostSshPort = 2222;

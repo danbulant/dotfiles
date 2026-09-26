@@ -479,17 +479,7 @@ in
     };
   };
   programs = {
-    omp = {
-      enable = true;
-      package = omp.packages.${system}.default.overrideAttrs (oldAttrs: {
-        # The upstream smoke test otherwise inherits a build directory that
-        # Bun has already unlinked while creating the compiled executable.
-        preInstallCheck = (oldAttrs.preInstallCheck or "") + ''
-          mkdir -p "$TMPDIR/omp-install-check"
-          cd "$TMPDIR/omp-install-check"
-        '';
-      });
-    };
+    omp.enable = true;
     nix-monitor.enable = true;
     nix-monitor.rebuildCommand = [
       "bash"
