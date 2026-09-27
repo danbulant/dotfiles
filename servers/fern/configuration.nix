@@ -158,7 +158,7 @@ in
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
 
   services.adctf = {
-    enable = true;
+    enable = false;
     containerStacks.enable = true;
     proxy = {
       baseDomain = "fern.badapple.cz";
@@ -169,7 +169,7 @@ in
         enable = true;
         imagePath = "/home/dan/Downloads/vulnbox.qcow2";
         memoryMiB = 8192;
-        vcpus = 4;
+        vcpus = 8;
         hostSshPort = 2222;
         vncDisplay = 0;
         autoStart = false;
