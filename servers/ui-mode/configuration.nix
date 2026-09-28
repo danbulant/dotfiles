@@ -7,12 +7,12 @@
   pkgs,
   options,
   lib,
-  dms,
+  dank-greeter,
   ...
 }:
 {
   imports = [
-    dms.nixosModules.greeter
+    dank-greeter.nixosModules.default
   ];
   hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
   services.sunshine = {
@@ -199,7 +199,6 @@
       "https://install.determinate.systems"
       # "https://cache.garnix.io"
       "https://rusic.cachix.org"
-      "https://cuda-maintainers.cachix.org"
       "https://cache.nixos-cuda.org"
       "http://nix.fern.danbulant.cloud"
     ];
@@ -211,7 +210,6 @@
       # "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "rusic.cachix.org-1:WXMpGpamblLUiJtcoxBxGGGGwIcWxGPJBUxarLiqWmw="
-      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
       "fern:yuWzr5L8X9lNJhdBV1ksA97bm9S/F79ekodKXZSarig="
     ];
@@ -266,7 +264,7 @@
       Restart = "no";
     };
   };
-  programs.dank-material-shell.greeter = {
+  programs.dms-greeter = {
     enable = true;
     compositor.name = "hyprland"; # "niri" or "hyprland" or "sway"
     configHome = "/home/dan";
@@ -493,7 +491,6 @@
     allowUnfree = true;
     cudaSupport = true;
     android_sdk.accept_license = true;
-    problems.handlers.fs.broken = "warn";
   };
 
   documentation.man.enable = false;

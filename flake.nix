@@ -43,12 +43,20 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dank-greeter = {
+      url = "git+https://github.com/AvengeMedia/dank-greeter.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     rusic.url = "github:temidaradev/rusic";
     danksearch = {
       url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zed.url = "github:zed-industries/zed";
+    delta = {
+      url = "github:zed-industries/delta-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -139,34 +147,6 @@
           in
           packages.spacedrive;
       };
-      pyfilesystemOverlay = _: prev: {
-        # pyfilesystem2 still uses pkg_resources at runtime, which was
-        # removed from setuptools 82. Keep setuptools 80 build-only for
-        # the upstream tests, but migrate the installed package to the
-        # standard-library entry-point API so Python environments don't
-        # contain two conflicting setuptools versions.
-        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-          (_: pythonPrev: {
-            fs = pythonPrev.fs.overridePythonAttrs (old: {
-              nativeCheckInputs = (old.nativeCheckInputs or [ ]) ++ [
-                pythonPrev.setuptools_80
-              ];
-              postInstall = (old.postInstall or "") + ''
-                fsPath="$out/${pythonPrev.python.sitePackages}/fs"
-                substituteInPlace "$fsPath/__init__.py" "$fsPath/opener/__init__.py" \
-                  --replace-fail '__import__("pkg_resources").declare_namespace(__name__)  # type: ignore' ""
-                substituteInPlace "$fsPath/opener/registry.py" \
-                  --replace-fail 'import pkg_resources' 'from importlib import metadata' \
-                  --replace-fail 'pkg_resources.iter_entry_points("fs.opener")' 'metadata.entry_points(group="fs.opener")' \
-                  --replace-fail 'pkg_resources.iter_entry_points("fs.opener", protocol)' 'iter(metadata.entry_points(group="fs.opener", name=protocol))'
-              '';
-              meta = old.meta // {
-                broken = false;
-              };
-            });
-          })
-        ];
-      };
       photoprismOverlay = final: prev: {
         photoprism = final.callPackage ./pkgs/photoprism/package.nix {
           photoprism = prev.photoprism;
@@ -192,20 +172,6 @@
               hash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
             };
           });
-
-        # Hyprland 0.56.1 requires glaze >= 7 and < 8, while this
-        # nixpkgs revision provides glaze 8.0.0.
-        hyprland = prev.hyprland.override {
-          glaze = prev.glaze.overrideAttrs (_: {
-            version = "7.8.3";
-            src = prev.fetchFromGitHub {
-              owner = "stephenberry";
-              repo = "glaze";
-              tag = "v7.8.3";
-              hash = "sha256-WqtaZ3AVDs1oIfAVQuU63eg+0753LoYfv/pRyG9OMnM=";
-            };
-          });
-        };
 
         # DwarFS 0.14.0 bundles Folly and fbthrift snapshots that relied on
         # transitive C string declarations and fmt's pre-12 core header.
@@ -273,7 +239,6 @@
             nixpkgs.overlays = [
               bun2nix.overlays.default
               desktopCompatibilityOverlay
-              pyfilesystemOverlay
               spacedriveOverlay
               photoprismOverlay
             ];
@@ -309,7 +274,6 @@
               })
               bun2nix.overlays.default
               desktopCompatibilityOverlay
-              pyfilesystemOverlay
               spacedriveOverlay
             ];
           }

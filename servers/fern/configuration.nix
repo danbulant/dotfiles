@@ -265,7 +265,16 @@ in
       wl-clipboard
       mtkclient
       blender
-      android-studio-full
+      (android-studio.withSdk (
+        androidenv.composeAndroidPackages {
+          platformVersions = [ "35" ];
+          includeEmulator = true;
+          includeSystemImages = true;
+          systemImageTypes = [ "google_apis" ];
+          abiVersions = [ "x86_64" ];
+          includeNDK = "if-supported";
+        }
+      ).androidsdk)
       nvitop
       # basalt-monado
       cudaPackages.cuda_nvcc
@@ -478,7 +487,7 @@ in
     open = true;
     modesetting.enable = true;
     # powerManagement.enable = true;
-    nvidiaSettings = true;
+    nvidiaSettings = false;
   };
   services.xserver.videoDrivers = [ "nvidia" ];
   # Stable device names for Hyprland's AMD-primary multi-GPU renderer.

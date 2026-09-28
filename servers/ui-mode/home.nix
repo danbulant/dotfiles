@@ -2,6 +2,7 @@
   helium,
   zed,
   omp,
+  delta,
   colmena,
   dms,
   zen-browser,
@@ -22,7 +23,6 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
-  delta-bin = pkgs.callPackage ../../pkgs/delta-bin/package.nix { };
   dmsShell = dms.packages.${system}.dms-shell.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + ''
       if [[ -f quickshell/Services/PopoutService.qml ]]; then
@@ -122,7 +122,7 @@ in
     packages = with pkgs; [
       art
       darktable
-      delta-bin
+      delta.packages.${system}.delta
       kicad
       protontricks
       waypipe
@@ -132,7 +132,7 @@ in
       gh
       inkscape
       osuAppImageNvidia
-      deadlockModManager
+      #deadlockModManager
       #firefox
       unrar
       wine
@@ -156,7 +156,7 @@ in
       #spacetimedb
       nixd
       buck2
-      (rusic.packages.${system}.default)
+      #(rusic.packages.${system}.default)
       #affine
       voxtype-vulkan
       #affinity-nix.packages.x86_64-linux.v3
@@ -168,7 +168,7 @@ in
       nicotine-plus
       proton-vpn
       dgop
-      mysql-workbench
+      #mysql-workbench
       i2c-tools
       kdePackages.kimageformats
       power-profiles-daemon
@@ -204,7 +204,7 @@ in
       typst
       typstyle
       typstwriter
-      colmena.defaultPackage.${system}
+      colmena.packages.${system}.colmena
       usbimager
       #bitwarden-desktop
       #metasploit
@@ -480,6 +480,21 @@ in
   };
   programs = {
     omp.enable = true;
+    omp.package = omp.packages.${system}.default.overrideAttrs (old: {
+      # The Nix build copies the Cargo addon directly, bypassing the upstream
+      # build script that stamps its release version before embedding.
+      buildPhase =
+        assert pkgs.lib.assertMsg (pkgs.lib.hasInfix ''echo "Compiling OMP"'' old.buildPhase) "OMP build phase changed; update the native addon stamp";
+        builtins.replaceStrings
+          [ ''echo "Compiling OMP"'' ]
+          [
+            ''
+              bun scripts/stamp-native-version.ts "packages/natives/native/pi_natives.linux-x64-baseline.node"
+              echo "Compiling OMP"
+            ''
+          ]
+          old.buildPhase;
+    });
     nix-monitor.enable = true;
     nix-monitor.rebuildCommand = [
       "bash"

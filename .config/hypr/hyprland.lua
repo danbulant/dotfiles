@@ -110,7 +110,7 @@ hl.on("hyprland.start", function()
         "fcitx5",
         "easyeffects --gapplication-service",
         --"voxtype daemon",
-        "openrgb --startminimized",
+        --"openrgb --startminimized",
     }
     for _, command in ipairs(commands) do hl.exec_cmd(command) end
 end)
