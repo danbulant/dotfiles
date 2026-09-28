@@ -22,10 +22,10 @@
       inputs.bun2nix.follows = "bun2nix";
     };
     crane.url = "github:ipetkov/crane";
-    spacedrive-src = {
-      url = "github:spacedriveapp/spacedrive";
-      flake = false;
-    };
+    #spacedrive-src = {
+    #  url = "github:spacedriveapp/spacedrive";
+    #  flake = false;
+    #};
     spacebot-src = {
       url = "github:spacedriveapp/spacebot";
       flake = false;
