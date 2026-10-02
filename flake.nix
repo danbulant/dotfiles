@@ -26,10 +26,10 @@
     #  url = "github:spacedriveapp/spacedrive";
     #  flake = false;
     #};
-    spacebot-src = {
-      url = "github:spacedriveapp/spacebot";
-      flake = false;
-    };
+    #spacebot-src = {
+    #  url = "github:spacedriveapp/spacebot";
+    #  flake = false;
+    #};
     dmm = {
       url = "github:deadlock-mod-manager/deadlock-mod-manager/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -120,33 +120,33 @@
       reenv,
       bun2nix,
       crane,
-      spacedrive-src,
-      spacebot-src,
+      #spacedrive-src,
+      #spacebot-src,
       ...
     }@attrs:
     let
-      spacedriveOverlay = final: _: {
-        spacedrive-master =
-          let
-            sources = import ./pkgs/spacedrive/nix/sources.nix {
-              inherit (final) lib;
-              root = spacedrive-src;
-            };
-            packages = import ./pkgs/spacedrive/nix {
-              pkgs = final;
-              craneLib = crane.mkLib final;
-              upstreamRoot = spacedrive-src;
-              spacebotRoot = spacebot-src;
-              inherit (sources)
-                frontendSrc
-                daemonRustSrc
-                desktopRustSrc
-                cliRustSrc
-                ;
-            };
-          in
-          packages.spacedrive;
-      };
+      #spacedriveOverlay = final: _: {
+      #  spacedrive-master =
+      #    let
+      #      sources = import ./pkgs/spacedrive/nix/sources.nix {
+      #        inherit (final) lib;
+      #        root = spacedrive-src;
+      #      };
+      #      packages = import ./pkgs/spacedrive/nix {
+      #        pkgs = final;
+      #        craneLib = crane.mkLib final;
+      #        upstreamRoot = spacedrive-src;
+      #        spacebotRoot = spacebot-src;
+      #        inherit (sources)
+      #          frontendSrc
+      #          daemonRustSrc
+      #          desktopRustSrc
+      #          cliRustSrc
+      #          ;
+      #      };
+      #    in
+      #    packages.spacedrive;
+      #};
       photoprismOverlay = final: prev: {
         photoprism = final.callPackage ./pkgs/photoprism/package.nix {
           photoprism = prev.photoprism;
@@ -239,7 +239,7 @@
             nixpkgs.overlays = [
               bun2nix.overlays.default
               desktopCompatibilityOverlay
-              spacedriveOverlay
+              #spacedriveOverlay
               photoprismOverlay
             ];
             networking.hostName = "fern";
@@ -274,7 +274,7 @@
               })
               bun2nix.overlays.default
               desktopCompatibilityOverlay
-              spacedriveOverlay
+              #spacedriveOverlay
             ];
           }
           determinate.nixosModules.default

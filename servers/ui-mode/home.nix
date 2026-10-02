@@ -150,7 +150,7 @@ in
       libsForQt5.qt5ct
       libsForQt5.qtstyleplugin-kvantum
       ddcutil
-      gearlever
+      #gearlever
       linux-wallpaperengine
       #lmstudio
       #spacetimedb
@@ -198,8 +198,8 @@ in
       usbutils
       killall
       powertop
-      pgadmin4-desktopmode
-      thunderbird-bin
+      #pgadmin4-desktopmode
+      #thunderbird-bin
       logisim-evolution
       typst
       typstyle
@@ -340,9 +340,9 @@ in
       jq
       htmlq
       fzf
-      gleam
-      erlang
-      terraform
+      #gleam
+      #erlang
+      #terraform
       nodejs
       #corepack
       ansible
