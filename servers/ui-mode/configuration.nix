@@ -48,7 +48,12 @@
 
   services.dnsmasq = {
     enable = true;
+    resolveLocalQueries = false;
     settings = {
+      # resolved owns resolv.conf; never forward back to its stub.
+      no-resolv = true;
+      listen-address = "127.0.0.1";
+      bind-interfaces = true;
       server = [
         "/ts.net/100.100.100.100"
         "127.0.0.1#5053"
@@ -56,9 +61,48 @@
     };
   };
 
-  networking.networkmanager.enable = true;
-  networking.networkmanager.plugins = with pkgs; [ networkmanager-openconnect ];
-  networking.networkmanager.dns = "none";
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      DNS = [ "127.0.0.1" ];
+      # No global ~. domain: a VPN's ~. must override the normal upstream.
+      Domains = [ ];
+      FallbackDNS = [ ];
+    };
+  };
+
+  networking.networkmanager = {
+    enable = true;
+    dns = "systemd-resolved";
+    plugins = with pkgs; [
+      networkmanager-openconnect
+      networkmanager-openvpn
+    ];
+    dispatcherScripts = [
+      {
+        # Keep DHCP DNS out of resolved without rewriting runtime profiles.
+        # VPN and Tailscale links retain their own DNS and routing domains.
+        source = pkgs.writeShellScript "dnscrypt-uplinks" ''
+          set -euo pipefail
+          export LC_ALL=C
+          case "$2" in
+            up|dhcp4-change|dhcp6-change|reapply|dns-change) ;;
+            *) exit 0 ;;
+          esac
+          ${pkgs.networkmanager}/bin/nmcli -t -f DEVICE,TYPE,STATE device status |
+            while IFS=: read -r device type state; do
+              case "$type:$state" in
+                ethernet:connected*|wifi:connected*)
+                  ${config.systemd.package}/bin/resolvectl dns "$device" ""
+                  ${config.systemd.package}/bin/resolvectl domain "$device" ""
+                  ${config.systemd.package}/bin/resolvectl default-route "$device" no
+                  ;;
+              esac
+            done
+        '';
+      }
+    ];
+  };
 
   services.dnscrypt-proxy = {
     enable = true;

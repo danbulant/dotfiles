@@ -131,7 +131,7 @@ in
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
 
   services.adctf = {
-    enable = false;
+    enable = true;
     containerStacks.enable = true;
     proxy = {
       baseDomain = "fern.badapple.cz";
@@ -441,12 +441,6 @@ in
   '';
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.docker.daemon.settings.features.cdi = true;
-
-  # Keep the host resolver off Waydroid's 192.168.240.1:53 listener.
-  services.dnsmasq.settings = {
-    listen-address = "127.0.0.1";
-    bind-interfaces = true;
-  };
 
   services.waydroid-nvidia = {
     enable = true;
