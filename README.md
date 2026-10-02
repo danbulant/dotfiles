@@ -33,6 +33,7 @@ I'm using NixOS. For the full package list, see
 - ~~spicetify - custom spotify theme~~
 - Zed - code editor
 - Zen - browser
+- Vesktop - Discord client (the standalone Discord package is not installed)
 - dolphin - file browser
 - blueman - bluetooth app indicator
 - swaybg - for showing wallpaper

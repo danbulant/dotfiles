@@ -31,8 +31,6 @@
     "cinny-unwrapped-4.2.3"
     "cinny-4.2.3"
     "libsoup-2.74.3"
-    # "qbittorrent-4.6.4"
-    # "cinny-3.2.0"
     "dotnet-sdk-wrapped-7.0.410"
     "dotnet-sdk-7.0.410"
     "dotnet-runtime-6.0.36"
@@ -48,7 +46,6 @@
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
-  # networking.nameservers = ["1.1.1.1"];
   services.dnsmasq = {
     enable = true;
     settings = {
@@ -83,10 +80,6 @@
       require_dnssec = true;
       require_nolog = false;
       require_nofilter = true;
-      # aarhus university dns
-      # bootstrap_resolvers = ["10.192.232.113:53"];
-
-      # server_names = [ ... ];
     };
   };
 
@@ -108,12 +101,6 @@
     LC_TELEPHONE = "cs_CZ.UTF-8";
     LC_TIME = "en_GB.UTF-8";
   };
-  #services.displayManager.sddm.enable = true;
-  services.displayManager.defaultSession = "hyprland-uwsm";
-  #  services.desktopManager.plasma6 = {
-  #    enable = true;
-  #  };
-  # services.desktopManager.gnome.enable = true;
   services.xserver.xkb = {
     layout = "us";
     variant = "";
@@ -146,7 +133,6 @@
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   programs.wireshark.enable = true;
-  #programs.adb.enable = true;
   programs.partition-manager.enable = true;
   time.hardwareClockInLocalTime = true;
 
@@ -184,11 +170,8 @@
     "dan"
   ];
 
-  # Other defaults are set in home.nix
-  # environment.sessionVariables.DEFAULT_BROWSER = "firefox";
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-  # programs.firefox.enable = true;
   nix.settings = {
     substituters = [
       "https://cache.nixos.org"
@@ -197,7 +180,6 @@
       "https://nix-gaming.cachix.org"
       "https://colmena.cachix.org"
       "https://install.determinate.systems"
-      # "https://cache.garnix.io"
       "https://rusic.cachix.org"
       "https://cache.nixos-cuda.org"
       "http://nix.fern.danbulant.cloud"
@@ -207,7 +189,6 @@
       "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
-      # "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "rusic.cachix.org-1:WXMpGpamblLUiJtcoxBxGGGGwIcWxGPJBUxarLiqWmw="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
@@ -217,13 +198,6 @@
 
   programs.hyprland = {
     enable = true;
-    #    package = hyprland.packages.${pkgs.system}.hyprland;
-    # portalPackage = hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland.override
-    #  {
-    #     inherit (pkgs) mesa;
-    #   };
-
-    # package = unstable-pkgs.hyprland;
   };
   programs.uwsm.enable = true;
   xdg.portal = {
@@ -266,7 +240,7 @@
   };
   programs.dms-greeter = {
     enable = true;
-    compositor.name = "hyprland"; # "niri" or "hyprland" or "sway"
+    compositor.name = "hyprland";
     configHome = "/home/dan";
   };
   # DMS otherwise falls back to whichever session desktop file finishes loading
@@ -317,11 +291,9 @@
     HandlePowerKey = "suspend";
   };
 
-  #xdg.configFile."menus/applications.menu".text = builtins.readFile ./applications.menu;
   environment.etc."/xdg/menus/plasma-applications.menu".text =
     builtins.readFile "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
 
-  # programs.hyprland.enable = true;
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
   programs.gamemode.enable = true;
@@ -354,12 +326,7 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = false;
-    #    enableNvidia = true;
   };
-  # hardware.nvidia-container-toolkit.enable = true;
-
-  # Enable sysbox for system containers
-  #virtualisation.sysbox.enable = true;
 
   services.avahi.enable = true;
 
@@ -374,23 +341,9 @@
     # b: Reboot the system.
     kernel.sysctl."kernel.sysrq" = 1;
 
-    # Visuals
-    #plymouth = {
-    #  enable = false;
-    #  theme = "deus_ex"; # motion is also cool
-    #  themePackages = with pkgs; [
-    #    (adi1090x-plymouth-themes.override {
-    #      selected_themes = [ "deus_ex" ];
-    #    })
-    #  ];
-    #};
     kernelParams = [
-      # attempt to fix nvidia perf
-      #"nvidia_drm.fbdev=1" "nvidia_drm.modeset=1" "module_blacklist=i915"
       "delayacct"
       "initcall_blacklist=sysfb_init"
-      #"quiet"
-      #"splash"
       "boot.shell_on_fail"
       "loglevel=3"
       "rd.systemd.show_status=false"
@@ -503,7 +456,6 @@
   hardware.enableRedistributableFirmware = true;
 
   hardware.enableAllFirmware = true;
-  #services.cpupower-gui.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = false;
   services.tlp = {
@@ -515,9 +467,7 @@
     };
   };
   powerManagement.enable = true;
-  #powerManagement.powertop.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil";
-  # services.thermald.enable = true;
   hardware.cpu.intel.updateMicrocode = true;
 
   security.polkit.enable = true;

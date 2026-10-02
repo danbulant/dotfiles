@@ -1,7 +1,4 @@
 {
-  # Link individual files instead of whole directories.  This leaves room for
-  # applications such as DMS to generate additional files next to the managed
-  # Hyprland and Kitty configuration.
   xdg.configFile = {
     "activitywatch" = {
       source = ../../.config/activitywatch;

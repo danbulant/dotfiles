@@ -96,16 +96,11 @@ let
           (cmakeBool "LLAMA_BUILD_TESTS" false)
           (cmakeBool "LLAMA_OPENSSL" true)
           (cmakeBool "BUILD_SHARED_LIBS" true)
-          # (cmakeBool "GGML_BLAS" false)
           (cmakeBool "GGML_LTO" true)
           (cmakeBool "GGML_CUDA" true)
           (cmakeBool "GGML_CUDA_GRAPHS" true)
           (cmakeBool "GGML_CUDA_F16" true)
           (cmakeBool "GGML_CUDA_FA_ALL_QUANTS" true)
-          # (cmakeBool "GGML_HIP" false)
-          # (cmakeBool "GGML_METAL" false)
-          # (cmakeBool "GGML_RPC" false)
-          # (cmakeBool "GGML_VULKAN" false)
           (cmakeFeature "LLAMA_BUILD_NUMBER" version)
           (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "120")
         ];
@@ -131,28 +126,6 @@ in
   systemd.user.services.sunshine.serviceConfig.ExecStart =
     lib.mkForce ''"/run/wrappers/bin/sunshine" "capture=wlr"'';
 
-  # Hyprland's FALLBACK output has no capturable framebuffer. Keep a real
-  # headless output available so Sunshine can stream when no monitor is attached.
-  # systemd.user.services.sunshine-headless-output = {
-  #   description = "Create a headless Hyprland output for Sunshine";
-  #   before = [ "sunshine.service" ];
-  #   partOf = [ "graphical-session.target" ];
-  #   serviceConfig = {
-  #     Type = "oneshot";
-  #     RemainAfterExit = true;
-  #     ExecStart = pkgs.writeShellScript "sunshine-headless-output" ''
-  #       ${lib.getExe' pkgs.hyprland "hyprctl"} output create headless sunshine
-  #       ${lib.getExe' pkgs.hyprland "hyprctl"} keyword monitor sunshine,1920x1080@60,0x0,1
-  #     '';
-  #     ExecStop = pkgs.writeShellScript "remove-sunshine-headless-output" ''
-  #       ${lib.getExe' pkgs.hyprland "hyprctl"} output remove sunshine
-  #     '';
-  #   };
-  # };
-  # systemd.user.services.sunshine = {
-  #   requires = [ "sunshine-headless-output.service" ];
-  #   after = [ "sunshine-headless-output.service" ];
-  # };
   # ssh -R (remote port forward) to this server should listen publicly
   services.openssh.settings.GatewayPorts = "yes";
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
@@ -203,8 +176,6 @@ in
       "module_blacklist=i915"
       "delayacct"
       "initcall_blacklist=sysfb_init"
-      #"quiet"
-      #"splash"
       "boot.shell_on_fail"
       "loglevel=3"
       "rd.systemd.show_status=false"
@@ -213,17 +184,6 @@ in
     ];
   };
 
-  # vr
-  # services.monado = {
-  #   enable = false;
-  #   defaultRuntime = true; # Register as default OpenXR runtime
-  # };
-  # systemd.user.services.monado.environment = {
-  #   STEAMVR_LH_ENABLE = "1";
-  #   XRT_COMPOSITOR_COMPUTE = "1";
-  #   WMR_HANDTRACKING = "0";
-  #   VIT_SYSTEM_LIBRARY_PATH = "${pkgs.basalt-monado}/lib/libbasalt.so";
-  # };
   programs.steam = {
     enable = true;
     package = pkgs.steam.override {
@@ -236,14 +196,6 @@ in
     };
   };
 
-  #services.paseo = {
-  #  enable = true;
-  #  relay.enable = false;
-  #  user = "dan";
-  #  group = "users";
-  #  port = 5656;
-  #  openFirewall = true;
-  #};
 
   programs.kdeconnect.enable = true;
 
@@ -251,10 +203,8 @@ in
 
   hardware.graphics = {
     enable = true;
-    # package = unstable-pkgs.mesa.drivers;
     # Steam support
     enable32Bit = true;
-    # package32 = unstable-pkgs.pkgsi686Linux.mesa.drivers;
     extraPackages = with pkgs; [
       nvidia-vaapi-driver
     ];
@@ -276,7 +226,6 @@ in
         }
       ).androidsdk)
       nvitop
-      # basalt-monado
       cudaPackages.cuda_nvcc
       llama-cpp
       imgbrd-grabber
@@ -325,7 +274,6 @@ in
     enable = true;
     openFirewall = true;
     settings = {
-      #      listen = "0.0.0.0:8080";
       macros = {
         llama = ''
           ${pkgs.lib.getExe' llama-cpp "llama-server"} \
@@ -348,9 +296,6 @@ in
       };
       globalTTL = 3600;
       models = {
-        # qwen3-embedding-8b = {
-        # };
-        # "qwen3-embedding-0.6" = { };
         "qwen3.6-35B-A3B" = {
           cmd = "\${llama} -m /home/dan/.lmstudio/models/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
         };
@@ -486,7 +431,6 @@ in
   hardware.nvidia = {
     open = true;
     modesetting.enable = true;
-    # powerManagement.enable = true;
     nvidiaSettings = false;
   };
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -495,7 +439,6 @@ in
     SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="0000:11:00.0", SYMLINK+="dri/amd-igpu"
     SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="0000:01:00.0", SYMLINK+="dri/nvidia-dgpu"
   '';
-  # powerManagement.enable = true;
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.docker.daemon.settings.features.cdi = true;
 

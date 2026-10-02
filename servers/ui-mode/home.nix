@@ -1,24 +1,14 @@
 {
   helium,
-  zed,
   omp,
   delta,
   colmena,
   dms,
   zen-browser,
-  nixpkgs-unstable, # suyu,
-  hyprland-plugins, # , hyprland
   pkgs,
   danksearch,
-  niri,
-  affinity-nix,
-  inputs,
   nix-monitor,
-  rusic,
   codexbar,
-  config,
-  dmm,
-  #  paseo,
   ...
 }:
 let
@@ -31,12 +21,6 @@ let
     '';
   });
 
-  unstable = import nixpkgs-unstable {
-    system = pkgs.system;
-    config = {
-      allowUnfree = true;
-    };
-  };
   activitywatchPackages =
     pkgs.qt6Packages.callPackage "${pkgs.path}/pkgs/applications/office/activitywatch"
       { };
@@ -59,33 +43,6 @@ let
     '';
   });
 
-  deadlockModManager = dmm.packages.${pkgs.system}.nightly.overrideAttrs (oldAttrs: {
-    pnpmDeps = pkgs.fetchPnpmDeps {
-      inherit (oldAttrs)
-        pname
-        version
-        src
-        ;
-      pnpm = pkgs.pnpm_11;
-      fetcherVersion = 4;
-      sourceRoot = "source";
-      hash = "sha256-ZxlP6zOwY9Fxa4BCqnUoCmci3lviHn7H3HU5SnmdrSU=";
-    };
-    postPatch = (oldAttrs.postPatch or "") + ''
-            substituteInPlace apps/desktop/src-tauri/Cargo.toml \
-              --replace 'tauri-wry = ["tauri/wry"]' 'tauri-wry = ["tauri/wry"]
-      cef = []'
-
-            substituteInPlace apps/desktop/src-tauri/src/mod_manager/steam_manager.rs \
-              --replace '    let steam_dir = steamlocate::SteamDir::from_dir(&path).map_err(|_| {' '    if !path.join("steamapps").join("libraryfolders.vdf").exists() {
-            return Err(Error::InvalidInput(
-              "Invalid Steam path: not a valid Steam installation directory".to_string(),
-            ));
-          }
-
-          let steam_dir = steamlocate::SteamDir::from_dir(&path).map_err(|_| {'
-    '';
-  });
 
   osuAppImageNvidia = pkgs.writeShellScriptBin "osu!" ''
     set -eu
@@ -103,7 +60,6 @@ let
     exec ${pkgs.appimage-run}/bin/appimage-run "$appimage" "$@"
   '';
 
-  # system = stdenv.hostPlatform.system;
 in
 {
   imports = [
@@ -113,8 +69,6 @@ in
     dms.homeModules.dank-material-shell
     danksearch.homeModules.default
     nix-monitor.homeManagerModules.default
-    # niri.homeManagerModules.default
-    # dms.homeModules.niri
   ];
   home = {
     stateVersion = "25.11";
@@ -127,18 +81,14 @@ in
       protontricks
       waypipe
       cinny
-      #spacedrive-master
       eden
       gh
       inkscape
       osuAppImageNvidia
-      #deadlockModManager
-      #firefox
       unrar
       wine
       codexbar.packages.${pkgs.system}.default
       codex
-      #jellyfin-desktop
       (kdePackages.qt6ct.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or [ ]) ++ [ ../../pkgs/qt6ct-0.11.patch ];
         name = "qt6ct-kde";
@@ -150,47 +100,30 @@ in
       libsForQt5.qt5ct
       libsForQt5.qtstyleplugin-kvantum
       ddcutil
-      #gearlever
       linux-wallpaperengine
-      #lmstudio
-      #spacetimedb
       nixd
       buck2
-      #(rusic.packages.${system}.default)
-      #affine
       voxtype-vulkan
-      #affinity-nix.packages.x86_64-linux.v3
       biome
       bun
-      #lenovo-legion
       itch
       filezilla
       nicotine-plus
       proton-vpn
       dgop
-      #mysql-workbench
       i2c-tools
       kdePackages.kimageformats
       power-profiles-daemon
-      #tail-tray
       helium
       opencode
       perf
-      #obs-studio
       flamegraph
       samply
       font-awesome
       arduino-ide
       libxkbfile
 
-      #            dioxus-cli
-      #cosmic-files
-      #cosmic-player
-      #cosmic-screenshot
-      #cosmic-applibrary
-      #cosmic-ext-calculator
       cosmic-icons
-      examine
 
       flix
       postgresql
@@ -198,23 +131,14 @@ in
       usbutils
       killall
       powertop
-      #pgadmin4-desktopmode
-      #thunderbird-bin
       logisim-evolution
       typst
       typstyle
       typstwriter
       colmena.packages.${system}.colmena
-      usbimager
-      #bitwarden-desktop
-      #metasploit
-      #lenovo-legion
-      burpsuite
       zap
       kubernetes-helm
 
-      # required by quickshell config
-      # unstable.quickshell
       wlogout
       fuzzel
       translate-shell
@@ -227,7 +151,6 @@ in
       cava
       cliphist
       matugen
-      #awww
       kdePackages.fcitx5-with-addons
       easyeffects
       mpvpaper
@@ -239,70 +162,44 @@ in
       brightnessctl
       libqalculate
 
-      # cloud things
-      minikube
-      #nebula
-      #nixpkgs-unstable.legacyPackages.${system}.jet-pilot
       k9s
 
       prismlauncher
       lf
       rawtherapee
       syncthingtray
-      #anki-bin
       xournalpp
-      simple-scan
       godot_4
-      #rar
-      #wootility
-      #surrealdb
       pico-sdk
       elf2uf2-rs
       obsidian
       home-manager
-      #glxinfo
       pciutils
       nix-top
       grc
       onefetch
       inter
-      #fira
-      #fira-code
-      # fira-code-nerdfont
       nerd-fonts.fira-code
       iosevka
       kitty
-      #rofi-wayland
       rofi
-      discord
       vesktopWrapped
       spotify
       spicetify-cli
       meslo-lgs-nf
       waybar
       chromium
-      #dunst
       sccache
       swaybg
       activitywatchFixed
       networkmanagerapplet
-      #kubectl
       duf
       dust
-      #jetbrains.webstorm
-      #jetbrains.clion
-      #jetbrains.datagrip
-      # jetbrains.rider
-      #jetbrains.idea-ultimate
       jre_minimal
       datovka
       nwg-displays
       wireguard-tools
-      #mongodb-compass
-      #unstable.mongodb-tools
-      #hashcat
       tldr
-      #dunst
       grim
       slurp
       wl-clipboard
@@ -318,7 +215,6 @@ in
       cachix
       playerctl
       libcanberra-gtk3 # sound events
-      #qt6ct
       nil # nix language server
       nix-output-monitor
       expect
@@ -332,7 +228,6 @@ in
       heroic
       gamescope
       heaptrack
-      #cinny-desktop
       gping
       gparted
       valgrind
@@ -340,11 +235,7 @@ in
       jq
       htmlq
       fzf
-      #gleam
-      #erlang
-      #terraform
       nodejs
-      #corepack
       ansible
       aria2
       qbittorrent
@@ -352,20 +243,16 @@ in
       bettercap
       duperemove
       ffmpeg
-      flameshot
       ripgrep
       iotop
       nethogs
-      # john
       iperf
       mold
-      nheko
       quickemu
       qemu
       socat
       websocat
       whois
-      #wifite2
       dig
       httpie
       inxi
@@ -375,17 +262,12 @@ in
       qpwgraph
 
       zed-editor
-      #nixpkgs-unstable.legacyPackages.${system}.zed-editor
-      # zed.packages.${system}.default
-      nixpkgs-unstable.legacyPackages.${system}.pineflash
-      #unstable.nosql-booster
 
       android-tools
       hyperfine
       scc
       aircrack-ng
       strace
-      # ghidra
       ffuf
       sqlmap
       nmap
@@ -400,7 +282,6 @@ in
       python312Packages.pypykatz
       screen
       openvpn
-      #ghostty
       nvtopPackages.full
       openrgb-with-all-plugins
 
@@ -409,8 +290,6 @@ in
       nix-du
       graphviz
 
-      #blender
-      #warpinator
 
       awatcher
       tigervnc
@@ -427,7 +306,6 @@ in
 
       liberation_ttf
       noto-fonts-color-emoji
-      # rubik
       nerd-fonts.jetbrains-mono
       google-fonts
     ];
@@ -445,26 +323,11 @@ in
   };
   programs.man.enable = false;
   services.lorri.enable = true;
-  wayland.windowManager.hyprland = {
-    #        enable = true;
-    # package = hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-    # portalPackage = hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-    # plugins = [
-    #     hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
-    #     hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprtrails
-    # ];
-  };
-  # programs.dsearch.enable = true;
   programs.dank-material-shell = {
     enable = true;
     package = dmsShell;
     systemd.enable = true;
-    # niri = {
-    #   enableKeybinds = false; # Sets static preset keybinds
-    #   # enableSpawn = true; # Auto-start DMS with niri, if enabled
-    # };
   };
-  # programs.niri.enable = true;
   fonts.fontconfig = {
     enable = true;
     defaultFonts = {
@@ -507,11 +370,6 @@ in
         user_pref("media.webrtc.camera.allow-pipewire", true);
       '';
       extraPrefsFiles = [
-        # (builtins.fetchurl {
-        #   url = "https://raw.githubusercontent.com/MrOtherGuy/fx-autoconfig/master/program/config.js";
-        #   sha256 = "1mx679fbc4d9x4bnqajqx5a95y1lfasvf90pbqkh9sm3ch945p40";
-        # })
-        # (builtins.toFile (builtins.readFile ./uc.js))
         (builtins.path {
           path = ./uc.js;
           name = "config.js";
@@ -537,27 +395,10 @@ in
     nushell = {
       enable = true;
 
-      # unstable, perhaps 25.05
-      # plugins = with pkgs.nushellPlugins; [
-      #     query
-      #     skim
-      #     net
-      #     highlight
-      #     gstat
-      #     formats
-      #     dbus
-      #     units
-      # ];
-      # configFile.source = ./.config/nushell/base-config.nu;
       configFile.text = "source base-config.nu";
     };
     vscode = {
       enable = true;
-      # package = nixpkgs-unstable.packages.${pkgs.system}.vscode;
-      # package = unstable.pkgs.vscode;
-      # extensions = with pkgs.vscode-extensions; [
-
-      # ];
     };
     difftastic.enable = true;
     difftastic.git.enable = true;
@@ -590,29 +431,6 @@ in
   services.blueman-applet.enable = true;
   services.mpris-proxy.enable = true;
   xdg = {
-    /*
-      configFile."openxr/1/active_runtime.json".source =
-        "${pkgs.monado}/share/openxr/1/openxr_monado.json";
-      configFile."openvr/openvrpaths.vrpath".text = ''
-        {
-          "config" :
-          [
-            "${config.xdg.dataHome}/Steam/config"
-          ],
-          "external_drivers" : null,
-          "jsonid" : "vrpathreg",
-          "log" :
-          [
-            "${config.xdg.dataHome}/Steam/logs"
-          ],
-          "runtime" :
-          [
-            "${pkgs.opencomposite}/lib/opencomposite"
-          ],
-          "version" : 1
-        }
-      '';
-    */
     mimeApps = {
       enable = true;
 

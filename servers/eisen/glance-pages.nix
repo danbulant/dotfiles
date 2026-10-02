@@ -8,7 +8,6 @@ let
     {
       inherit title;
       type = "custom-api";
-      # url = "http://jellyfin.eisen.danbulant.cloud";
       frameless = true;
       cache = "5m";
       options = {
@@ -45,16 +44,8 @@ in
           }
           {
 
-            # - type: custom-api
-            #   title: "Jellyfin/Emby Stats"
-            #   base-url: ${JELLYFIN_URL}
-            #   options:
-            #     url: ${JELLYFIN_URL}
-            #     key: ${JELLYFIN_API_KEY}
-            #
             type = "custom-api";
             title = "Jellyfin Stats";
-            # url = "http://jellyfin.eisen.danbulant.cloud";
             options = {
               url = "http://jellyfin.eisen.danbulant.cloud";
               key = "\${JELLYFIN_KEY}";
@@ -83,12 +74,6 @@ in
               Authorization = "Bearer \${TAILSCALE_API_KEY}";
             };
             cache = "10m";
-            options = {
-              # collapseAfter: 4
-              # disableOfflineIndicator: true
-              # disableUpdateIndicator: true
-              # prioritiseTags: true
-            };
             template = builtins.readFile ./glance/tailscale;
           }
         ];
@@ -175,9 +160,6 @@ in
               })
             ];
           }
-          # {
-          #   type = "docker-containers";
-          # }
         ];
       }
       {
@@ -189,18 +171,6 @@ in
             units = "metric";
             "hour-format" = "24h";
           }
-          # {
-          #   type = "releases";
-          #   cache = "1d";
-          #   repositories = [
-          #     "glanceapp/glance"
-          #     "go-gitea/gitea"
-          #     "immich-app/immich"
-          #     "syncthing/syncthing"
-          #     "9001/copyparty"
-          #     "caddyserver/caddy"
-          #   ];
-          # }
           {
             type = "custom-api";
             title = "xkcd";

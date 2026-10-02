@@ -10,11 +10,6 @@
   ];
   config = lib.mkIf config.nyx.low-power.enable {
     boot = {
-      kernelParams = [
-#      "pcie_aspm.policy=powersupersave"
-#      "amd_pstate=passive"
-#      "mitigations=auto"
-      ];
 
       extraModprobeConfig = ''
       # AMD iGPU tuning
@@ -31,7 +26,6 @@
     services.pipewire.jack.enable = false;
     powerManagement.enable = true;
     powerManagement.cpuFreqGovernor = "schedutil";
-    # powerManagement.cpuFreqGovernor = "powersave";
     services.power-profiles-daemon.enable = false;
 
     services.auto-cpufreq = {
@@ -43,7 +37,6 @@
           turbo = "never";
         };
         charger = {
-#          governor = "powersave";
           turbo = "auto";
         };
       };
@@ -72,8 +65,6 @@
         SATA_LINKPWR_ON_BAT = "min_power";
         SOUND_POWER_SAVE_ON_AC = "1";
         SOUND_POWER_SAVE_ON_BAT = "1";
-#        PLATFORM_PROFILE_ON_AC = "performance";
-#        PLATFORM_PROFILE_ON_BAT = "balanced";
         PLATFORM_PROFILE_ON_AC = "balanced";
         PLATFORM_PROFILE_ON_BAT = "low-power";
       };
@@ -104,7 +95,6 @@
     programs.kdeconnect.enable = lib.mkForce false;
 
     virtualisation = {
-      # docker.enable = lib.mkForce false;
       libvirtd.enable = lib.mkForce false;
     };
   };

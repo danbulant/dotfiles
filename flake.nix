@@ -8,10 +8,6 @@
       url = "github:yigexuanmu/waydroid-nvidia-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    paseo = {
-      url = "github:getpaseo/paseo";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     bun2nix = {
       url = "github:nix-community/bun2nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,19 +16,6 @@
       url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.bun2nix.follows = "bun2nix";
-    };
-    crane.url = "github:ipetkov/crane";
-    #spacedrive-src = {
-    #  url = "github:spacedriveapp/spacedrive";
-    #  flake = false;
-    #};
-    #spacebot-src = {
-    #  url = "github:spacedriveapp/spacebot";
-    #  flake = false;
-    #};
-    dmm = {
-      url = "github:deadlock-mod-manager/deadlock-mod-manager/v1.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     hypr-kdeconnect-fix.url = "github:danbulant/hypr-kdeconnect-fix";
     codexbar = {
@@ -47,50 +30,29 @@
       url = "git+https://github.com/AvengeMedia/dank-greeter.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    rusic.url = "github:temidaradev/rusic";
     danksearch = {
       url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    zed.url = "github:zed-industries/zed";
     delta = {
       url = "github:zed-industries/delta-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    #nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     reenv = {
       url = "github:levigross/NixRevAI";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
-    # hyprland.url = "github:hyprwm/Hyprland/v0.48.1";
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      # inputs.hyprland.follows = "hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    dolphin-overlay = {
-      url = "github:rumboon/dolphin-overlay";
-      # inputs.nixpkgs.follows = "nixpkgs";
-    };
     home-manager = {
-      #url = "github:nix-community/home-manager/release-25.05";
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    nix-gaming.url = "github:fufexan/nix-gaming";
 
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
@@ -98,13 +60,8 @@
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 
     colmena.url = "github:zhaofengli/colmena";
-    affinity-nix.url = "github:mrshmllow/affinity-nix";
-
-    copyparty.url = "github:9001/copyparty";
-
     nix-monitor = {
       url = "github:antonjah/nix-monitor";
-      # inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -116,37 +73,11 @@
       home-manager,
       nix-index-database,
       hypr-kdeconnect-fix,
-      paseo,
       reenv,
       bun2nix,
-      crane,
-      #spacedrive-src,
-      #spacebot-src,
       ...
     }@attrs:
     let
-      #spacedriveOverlay = final: _: {
-      #  spacedrive-master =
-      #    let
-      #      sources = import ./pkgs/spacedrive/nix/sources.nix {
-      #        inherit (final) lib;
-      #        root = spacedrive-src;
-      #      };
-      #      packages = import ./pkgs/spacedrive/nix {
-      #        pkgs = final;
-      #        craneLib = crane.mkLib final;
-      #        upstreamRoot = spacedrive-src;
-      #        spacebotRoot = spacebot-src;
-      #        inherit (sources)
-      #          frontendSrc
-      #          daemonRustSrc
-      #          desktopRustSrc
-      #          cliRustSrc
-      #          ;
-      #      };
-      #    in
-      #    packages.spacedrive;
-      #};
       photoprismOverlay = final: prev: {
         photoprism = final.callPackage ./pkgs/photoprism/package.nix {
           photoprism = prev.photoprism;
@@ -225,7 +156,6 @@
         specialArgs = attrs;
         modules = [
           hypr-kdeconnect-fix.nixosModules.default
-          paseo.nixosModules.paseo
           determinate.nixosModules.default
           home-manager.nixosModules.home-manager
           ./modules/adctf.nix
@@ -239,7 +169,6 @@
             nixpkgs.overlays = [
               bun2nix.overlays.default
               desktopCompatibilityOverlay
-              #spacedriveOverlay
               photoprismOverlay
             ];
             networking.hostName = "fern";
@@ -258,7 +187,6 @@
         modules = [
           {
             nixpkgs.overlays = [
-              # dolphin-overlay.overlays.default
               # Add sysbox overlay
               (final: prev: {
                 sysbox = final.callPackage ./pkgs/sysbox/package.nix { };
@@ -274,7 +202,6 @@
               })
               bun2nix.overlays.default
               desktopCompatibilityOverlay
-              #spacedriveOverlay
             ];
           }
           determinate.nixosModules.default
@@ -289,25 +216,12 @@
             imports = [ ./servers/aura/hardware-configuration.nix ];
           }
 
-          #          nix-monitor.nixosModules.default
-          #        {
-          #          programs.nix-monitor = {
-          #            enable = true;
-
-          # Required: customize for your setup
-          #            rebuildCommand = [
-          #              "bash" "-c"
-          #              "cd /home/dan/projects/dotfiles; nh os switch . 2>&1"
-          #            ];
-          #          };
-          #        }
           ./servers/ui-mode/configuration.nix
           ./servers/aura/configuration.nix
           # Import sysbox module
           ./modules/sysbox.nix
           nix-index-database.nixosModules.nix-index
           { programs.nix-index-database.comma.enable = true; }
-          #./powersave.nix
         ];
       };
 

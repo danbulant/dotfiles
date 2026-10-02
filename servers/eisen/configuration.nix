@@ -43,7 +43,6 @@ let
 in
 {
   deployment = {
-    # buildOnTarget = true;
     targetHost = "eisen";
   };
   nixpkgs.config.permittedInsecurePackages = [
@@ -171,17 +170,11 @@ in
       enable = true;
       extraEnvironment = {
         PORT = toString ports.keep;
-        # DISABLE_SIGNUPS = "true";
         DISABLE_NEW_RELEASE_CHECK = "true";
       };
       environmentFile = "/etc/secrets/karakeep.env";
     };
 
-    # llama-swap-exporter = {
-    #   enable = true;
-    #   url = "http://100.120.15.10:${toString ports.llama-swap}/api/metrics";
-    #   port = internalPorts.prometheus-llama-swap;
-    # };
 
     forgejo = {
       enable = true;
@@ -193,10 +186,6 @@ in
         };
         service.DISABLE_REGISTRATION = true;
       };
-      # actions = {
-      #   ENABLED = true;
-      #   DEFAULT_ACTIONS_URL = "github";
-      # };
       lfs.enable = true;
       dump.enable = true;
       dump.age = "5d";
@@ -222,7 +211,6 @@ in
       config = {
         ROCKET_ADDRESS = "::1";
         ROCKET_PORT = 8222;
-        # SIGNUPS_ALLOWED = false;
       };
     };
 
@@ -326,20 +314,6 @@ in
       ];
     };
 
-    # ntfy-sh = {
-    #   enable = true;
-    #   settings = {
-    #     listen-http = ":${toString ports.ntfy}";
-    #     base-url = "http://ntfy.eisen";
-    #   };
-    # };
-
-    # grafana-to-ntfy = {
-    #   enable = true;
-    #   settings = {
-    #     ntfyUrl = "http://ntfy.eisen/grafana";
-    #   };
-    # };
 
     glance = {
       enable = true;
@@ -539,14 +513,9 @@ in
     TimeoutStartSec = "12h";
   };
 
-  # The Karakeep module still emits this option, but Meilisearch 1.51 removed it.
-  # systemd.services.meilisearch.serviceConfig.ExecStartPre = lib.mkAfter [
-  #   "${lib.getExe pkgs.gnused} -i '/^experimental_dumpless_upgrade =/d' \${RUNTIME_DIRECTORY}/config.toml"
-  # ];
 
   # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
   networking.firewall.allowedTCPPorts = [ 7881 ];
-  # systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 
   virtualisation = {
     docker = {
@@ -568,13 +537,8 @@ in
             "${toString ports.qb}:${toString ports.qb}"
             "${toString ports.jackett}:${toString ports.jackett}"
           ];
-          # VPN_SERVICE_PROVIDER=protonvpn
-          # VPN_TYPE=wireguard
-          # WIREGUARD_PRIVATE_KEY=wOEI9rqqbDwnN8/Bpp22sVz48T71vJ4fYmFWujulwUU
-          # SERVER_COUNTRIES=Denmark
           environment = {
             VPN_PORT_FORWARDING = "on";
-            # TOR_ONLY = "on";
             PORT_FORWARD_ONLY = "on";
             FIREWALL_OUTBOUND_SUBNETS = "192.168.1.0/24,100.64.0.0/10";
             FIREWALL_INPUT_PORTS = "41641,22,80,443,53";
@@ -586,7 +550,6 @@ in
               /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://127.0.0.1:${toString ports.qb}/api/v2/app/setPreferences'
             '';
           };
-          # extraOptions = [ "--network=host" ];
         };
         qbittorrent = {
           image = "lscr.io/linuxserver/qbittorrent";
@@ -619,7 +582,6 @@ in
             EXPORTER_PORT = toString internalPorts.prometheus-qb;
           };
           extraOptions = [ "--network=host" ];
-          # ports = [ "8000:${toString internalPorts.prometheus-qb}" ];
         };
 
         sable = {
@@ -631,7 +593,6 @@ in
       };
     };
   };
-  # hardware.nvidia-container-toolkit.enable = true;
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
@@ -645,7 +606,6 @@ in
     # b: Reboot the system.
     kernel.sysctl."kernel.sysrq" = 1;
 
-    # zfs.enabled = false;
     swraid.enable = false;
 
     initrd.systemd.enable = true;
@@ -653,10 +613,6 @@ in
     loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
-      # timeout = 0;
-      # grub.enable = true;
-      # grub.device = "/dev/disk/by-id/ata-Apacer_AS350_512GB_2021012802000028";
-      # grub.efiSupport = true;
     };
   };
 
@@ -726,7 +682,6 @@ in
   ];
 
   nixpkgs.config.allowUnfree = true;
-  # nixpkgs.config.cudaSupport = true;
 
   nix.settings = {
     substituters = [
