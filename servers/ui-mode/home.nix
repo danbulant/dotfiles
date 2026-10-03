@@ -6,6 +6,7 @@
   dms,
   zen-browser,
   pkgs,
+  config,
   danksearch,
   nix-monitor,
   codexbar,
@@ -212,6 +213,8 @@ in
       kdePackages.ark
       kdePackages.qtdeclarative
       kdePackages.dolphin
+      kdePackages.gwenview
+      kdePackages.okular
       cachix
       playerctl
       libcanberra-gtk3 # sound events
@@ -433,20 +436,218 @@ in
   xdg = {
     mimeApps = {
       enable = true;
+      # Register code/config formats too: Zed only advertises text/plain.
+      associations.added = config.xdg.mimeApps.defaultApplications;
 
-      defaultApplications = {
-        "x-scheme-handler/http" = "zen-beta.desktop";
-        "x-scheme-handler/https" = "zen-beta.desktop";
-        "x-scheme-handler/chrome" = "zen-beta.desktop";
-        "text/html" = "zen-beta.desktop";
-        "application/x-extension-htm" = "zen-beta.desktop";
-        "application/x-extension-html" = "zen-beta.desktop";
-        "application/x-extension-shtml" = "zen-beta.desktop";
-        "application/xhtml+xml" = "zen-beta.desktop";
-        "application/x-extension-xhtml" = "zen-beta.desktop";
-        "application/x-extension-xht" = "zen-beta.desktop";
-        "x-scheme-handler/discord" = "vesktop.desktop";
-      };
+      defaultApplications =
+        let
+          defaultsFor = desktop: types: pkgs.lib.genAttrs types (_: [ desktop ]);
+        in
+        defaultsFor "zen-beta.desktop" [
+          "x-scheme-handler/http"
+          "x-scheme-handler/https"
+          "x-scheme-handler/chrome"
+          "text/html"
+          "application/xhtml+xml"
+          "application/x-extension-htm"
+          "application/x-extension-html"
+          "application/x-extension-shtml"
+          "application/x-extension-xhtml"
+          "application/x-extension-xht"
+        ]
+        // defaultsFor "dev.zed.Zed.desktop" [
+          "text/plain"
+          "application/x-zerosize"
+          "text/markdown"
+          "text/x-nix"
+          "text/x-python"
+          "text/x-shellscript"
+          "application/x-shellscript"
+          "text/x-c"
+          "text/x-csrc"
+          "text/x-chdr"
+          "text/x-c++src"
+          "text/x-c++hdr"
+          "text/x-java"
+          "text/x-rust"
+          "text/rust"
+          "text/x-go"
+          "text/javascript"
+          "application/javascript"
+          "application/x-javascript"
+          "application/typescript"
+          "application/json"
+          "application/ld+json"
+          "application/toml"
+          "text/x-toml"
+          "application/yaml"
+          "application/x-yaml"
+          "text/yaml"
+          "text/x-yaml"
+          "application/xml"
+          "text/xml"
+          "text/css"
+          "text/x-scss"
+          "text/x-sass"
+          "text/x-makefile"
+          "text/x-cmake"
+          "text/x-log"
+          "text/x-tex"
+          "text/x-typst"
+          "text/vnd.typst"
+          "text/csv"
+          "text/tab-separated-values"
+          "application/sql"
+          "application/x-php"
+          "application/x-ruby"
+          "application/x-perl"
+          "x-scheme-handler/zed"
+        ]
+        // defaultsFor "org.kde.gwenview.desktop" [
+          "image/avif"
+          "image/gif"
+          "image/heif"
+          "image/jpeg"
+          "image/jxl"
+          "image/png"
+          "image/bmp"
+          "image/x-eps"
+          "image/x-icns"
+          "image/x-ico"
+          "image/vnd.microsoft.icon"
+          "image/x-portable-bitmap"
+          "image/x-portable-graymap"
+          "image/x-portable-pixmap"
+          "image/x-xbitmap"
+          "image/x-xpixmap"
+          "image/tiff"
+          "image/x-psd"
+          "image/x-webp"
+          "image/webp"
+          "image/x-tga"
+          "image/x-xcf"
+          "image/openraster"
+          "image/svg+xml"
+          "image/svg+xml-compressed"
+          "application/x-krita"
+        ]
+        // defaultsFor "okularApplication_pdf.desktop" [
+          "application/pdf"
+          "application/x-gzpdf"
+          "application/x-bzpdf"
+        ]
+        // defaultsFor "okularApplication_epub.desktop" [ "application/epub+zip" ]
+        // defaultsFor "okularApplication_ghostview.desktop" [
+          "application/postscript"
+          "application/x-gzpostscript"
+          "application/x-bzpostscript"
+        ]
+        // defaultsFor "okularApplication_dvi.desktop" [
+          "application/x-dvi"
+          "application/x-gzdvi"
+          "application/x-bzdvi"
+        ]
+        // defaultsFor "okularApplication_djvu.desktop" [
+          "image/vnd.djvu"
+          "image/vnd.djvu+multipage"
+        ]
+        // defaultsFor "okularApplication_xps.desktop" [
+          "application/oxps"
+          "application/vnd.ms-xpsdocument"
+        ]
+        // defaultsFor "okularApplication_comicbook.desktop" [
+          "application/x-cbr"
+          "application/x-cbz"
+          "application/x-cbt"
+          "application/x-cb7"
+          "application/vnd.comicbook+zip"
+          "application/vnd.comicbook-rar"
+        ]
+        // defaultsFor "okularApplication_mobi.desktop" [ "application/x-mobipocket-ebook" ]
+        // defaultsFor "okularApplication_fb.desktop" [ "application/x-fictionbook+xml" ]
+        // defaultsFor "mpv.desktop" [
+          "video/mp4"
+          "video/mpeg"
+          "video/mp2t"
+          "video/x-matroska"
+          "video/webm"
+          "video/quicktime"
+          "video/x-msvideo"
+          "video/vnd.avi"
+          "video/x-ms-wmv"
+          "video/x-flv"
+          "video/x-m4v"
+          "video/ogg"
+          "video/3gpp"
+          "video/3gpp2"
+          "audio/mpeg"
+          "audio/mp4"
+          "audio/aac"
+          "audio/flac"
+          "audio/ogg"
+          "audio/opus"
+          "audio/x-opus+ogg"
+          "audio/x-vorbis+ogg"
+          "audio/x-wav"
+          "audio/vnd.wave"
+          "audio/x-aiff"
+          "audio/x-matroska"
+          "audio/webm"
+          "audio/x-ms-wma"
+          "audio/x-ape"
+          "audio/x-wavpack"
+          "audio/x-mpegurl"
+          "audio/mpegurl"
+          "audio/x-scpls"
+          "application/ogg"
+          "application/x-mpegurl"
+          "application/vnd.apple.mpegurl"
+          "application/x-cue"
+        ]
+        // defaultsFor "org.kde.ark.desktop" [
+          "application/zip"
+          "application/vnd.rar"
+          "application/x-rar"
+          "application/x-rar-compressed"
+          "application/x-7z-compressed"
+          "application/x-tar"
+          "application/x-compressed-tar"
+          "application/x-bzip-compressed-tar"
+          "application/x-bzip2-compressed-tar"
+          "application/x-xz-compressed-tar"
+          "application/x-lzma-compressed-tar"
+          "application/x-zstd-compressed-tar"
+          "application/gzip"
+          "application/x-bzip"
+          "application/x-bzip2"
+          "application/x-xz"
+          "application/x-lzma"
+          "application/zstd"
+          "application/x-lz4"
+          "application/x-lzip"
+          "application/x-cpio"
+          "application/x-archive"
+          "application/x-java-archive"
+          "application/vnd.ms-cab-compressed"
+        ]
+        // defaultsFor "org.qbittorrent.qBittorrent.desktop" [
+          "application/x-bittorrent"
+          "x-scheme-handler/magnet"
+        ]
+        // defaultsFor "org.wireshark.Wireshark.desktop" [
+          "application/vnd.tcpdump.pcap"
+          "application/x-pcapng"
+        ]
+        // defaultsFor "com.github.xournalpp.xournalpp.desktop" [
+          "application/x-xoj"
+          "application/x-xojpp"
+          "application/x-xopp"
+          "application/x-xopt"
+        ]
+        // {
+          "inode/directory" = [ "org.kde.dolphin.desktop" ];
+          "x-scheme-handler/discord" = [ "vesktop.desktop" ];
+        };
     };
   };
 

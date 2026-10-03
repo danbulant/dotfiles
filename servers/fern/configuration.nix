@@ -131,7 +131,7 @@ in
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
 
   services.adctf = {
-    enable = true;
+    enable = false;
     containerStacks.enable = true;
     proxy = {
       baseDomain = "fern.badapple.cz";
