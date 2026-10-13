@@ -248,7 +248,7 @@ in
       enable = true;
       settings = {
         # Preserve rpi1's instance preferences while using Eisen's storage paths.
-        APP_NAME = "BGit";
+        DEFAULT.APP_NAME = "BGit";
         server = {
           DOMAIN = "git.badapple.cz";
           ROOT_URL = "https://git.badapple.cz";
@@ -455,7 +455,7 @@ in
               reverse_proxy http://localhost:${toString internalPorts.hindsight-api}
             '';
           };
-          "${matrixHost}:80" = {
+          "${matrixHost}" = {
             extraConfig = ''
               @matrixClientWellKnown path /.well-known/matrix/client
               handle @matrixClientWellKnown {
@@ -488,17 +488,17 @@ in
               }
             '';
           };
-          "admin.${matrixHost}:80" = {
+          "admin.${matrixHost}" = {
             extraConfig = ''
               reverse_proxy http://localhost:${toString internalPorts.tuwunel-admin}
             '';
           };
-          "sable.badapple.cz:80" = {
+          "sable.badapple.cz" = {
             extraConfig = ''
               reverse_proxy http://localhost:${toString ports.sable}
             '';
           };
-          "doc.danbulant.cloud:80" = {
+          "doc.danbulant.cloud" = {
             extraConfig = ''
               reverse_proxy http://localhost:${toString ports.hedgedoc} {
                 # TLS terminates at the upstream Cloudflare/Traefik proxies;
@@ -507,7 +507,13 @@ in
               }
             '';
           };
-          "pw.danbulant.cloud:80" = {
+          "photos.badapple.cz" = {
+            extraConfig = ''reverse_proxy http://fern'';
+          };
+          "git.badapple.cz" = {
+            extraConfig = ''reverse_proxy http://localhost:${toString ports.forgejo}'';
+          };
+          "pw.danbulant.cloud" = {
             extraConfig = ''
               reverse_proxy http://localhost:${toString ports.vaultwarden}
             '';
@@ -845,7 +851,7 @@ in
 
 
   # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
-  networking.firewall.allowedTCPPorts = [ 7881 ];
+  networking.firewall.allowedTCPPorts = [ 7881 80 443 ];
 
   virtualisation = {
     docker = {
