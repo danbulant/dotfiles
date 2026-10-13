@@ -76,6 +76,8 @@ in
 
     packages = with pkgs; [
       usbtree
+      jetbrains.idea
+      pulseview
       art
       darktable
       delta.packages.${system}.delta
