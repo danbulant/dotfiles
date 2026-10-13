@@ -23,17 +23,16 @@ I'm using NixOS. For the full package list, see
 [`home.nix`](./servers/ui-mode/home.nix).
 
 - hyprland - wayland compositor and window manager (also adds blur and rounded corners). Really barebones, see below for shortcuts (read the config file for up to date shortcuts)
-- ~~fish - shell (friendly, interactive, doesn't implement POSIX, I recommend reading it's docs first)~~
-- nushell - shell (very different)
-- fastfetch - everyone needs a fetch program
-- onefetch - fetch for git repos (fish is configured to show repo details when you cd into a repo)
-- kitty - terminal emulator (GPU accelerated, supports ligatures, unicode, etc)
-- Dank Material Shell - desktop shell, status bar, launcher, and notifications
-- hyprlock - Fancy lock screen
-- ~~spicetify - custom spotify theme~~
 - Zed - code editor
 - Zen - browser
-- Vesktop - Discord client (the standalone Discord package is not installed)
+- nushell - shell (data oriented shell)
+- fish - shell (friendly, interactive, doesn't implement POSIX, I recommend reading it's docs first)
+- kitty - terminal emulator (GPU accelerated, supports ligatures, unicode, etc)
+- fastfetch - everyone needs a fetch program
+- onefetch - fetch for git repos (fish is configured to show repo details when you cd into a repo)
+- Dank Material Shell - desktop shell, status bar, launcher, and notifications
+- hyprlock - Fancy lock screen
+- Vesktop - Discord client
 - dolphin - file browser
 - blueman - bluetooth app indicator
 - swaybg - for showing wallpaper

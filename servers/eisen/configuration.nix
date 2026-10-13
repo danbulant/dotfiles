@@ -26,6 +26,9 @@ let
     hedgedoc = 7900;
     vaultwarden = 8222; # default vw port
   };
+
+  tailscaleAddress = "100.99.54.121";
+  privateHttpPort = 80;
   internalPorts = {
     prometheus-node = 9000;
     prometheus-qb = 9200;
@@ -36,10 +39,46 @@ let
     prometheus = 9090;
     livekit-jwt = 8080;
     tuwunel-admin = 8009;
+    hindsight-api = 8888;
+    hindsight-ui = 9999;
   };
   matrixServerName = "badapple.cz";
   matrixHost = "matrix.badapple.cz";
   livekitKeyFile = "/var/lib/livekit/keys";
+  resticRepository = "sftp:restic-eisen@100.120.15.10:/eisen";
+  # This is deliberately public: it avoids restic's rejection of an empty
+  # password without creating a missing secret-file activation prerequisite.
+  # Transport security comes from the pinned SSH host key and reused machine
+  # identity.
+  resticPasswordCommand = pkgs.writeShellScript "restic-eisen-password" ''
+    printf '%s\n' 'restic-eisen-public'
+  '';
+  resticEnvironmentFile = pkgs.writeText "restic-eisen-environment" ''
+    RESTIC_PASSWORD_COMMAND=${resticPasswordCommand}
+  '';
+  resticExtraOptions = [
+    "sftp.command='${lib.getExe pkgs.openssh} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts -o Port=2223 -i /etc/ssh/ssh_host_ed25519_key -s restic-eisen@100.120.15.10 sftp'"
+  ];
+  resticPruneOpts = [
+    "--keep-hourly=24"
+    "--keep-daily=14"
+    "--keep-weekly=8"
+    "--keep-monthly=12"
+    "--keep-yearly=5"
+    "--group-by=tags"
+  ];
+  resticDefaults = {
+    repository = resticRepository;
+    environmentFile = toString resticEnvironmentFile;
+    initialize = true;
+    extraOptions = resticExtraOptions;
+    pruneOpts = resticPruneOpts;
+  };
+  resticServiceConfig = {
+    Restart = "on-failure";
+    RestartSec = "30m";
+    TimeoutStartSec = "12h";
+  };
 in
 {
   deployment = {
@@ -50,12 +89,41 @@ in
   ];
   programs.nix-index-database.comma.enable = true;
 
+  # Pin Fern's ordinary sshd host key because the backup client uses port 2223
+  # on Fern's Tailscale address (port 22 is intercepted by Tailscale SSH).
+  programs.ssh.knownHosts."fern-restic" = {
+    hostNames = [ "[100.120.15.10]:2223" ];
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2UDk/HQF7+2spmQ0b/BFmw8tHAFwku4iUkooPuQXfm";
+  };
+
   imports = [
     nix-index-database.nixosModules.nix-index
     ./hardware-configuration.nix
     ../../modules/llama-swap-exporter.nix
     ../../modules/tuwunel-admin.nix
+    ../../modules/coolify-vm.nix
   ];
+
+  services.coolify-vm = {
+    enable = true;
+    memoryMiB = 3072;
+    vcpus = 2;
+    cpuQuotaPercent = 150;
+    dashboardDomain = "coolify.eisen.danbulant.cloud";
+    dashboardListenAddress = tailscaleAddress;
+    dashboardPort = privateHttpPort;
+    # Exact hosts and wildcard patterns; only these routes go to the VM.
+    domains = [ "*.apps.eisen.danbulant.cloud" ];
+    # Match the existing Cloudflare/Traefik -> HTTP Caddy ingress.
+    tlsAtUpstream = true;
+  };
+
+  # The private Caddy sites bind the Tailscale address instead of a wildcard;
+  # order Caddy after the daemon before attempting the listener.
+  systemd.services.caddy = {
+    wants = [ "tailscaled.service" ];
+    after = [ "tailscaled.service" ];
+  };
 
   nix = {
     daemonCPUSchedPolicy = "idle";
@@ -179,12 +247,21 @@ in
     forgejo = {
       enable = true;
       settings = {
+        # Preserve rpi1's instance preferences while using Eisen's storage paths.
+        APP_NAME = "BGit";
         server = {
           DOMAIN = "git.badapple.cz";
           ROOT_URL = "https://git.badapple.cz";
           HTTP_PORT = ports.forgejo;
+          OFFLINE_MODE = true;
         };
         service.DISABLE_REGISTRATION = true;
+        security.PASSWORD_HASH_ALGO = "pbkdf2_hi";
+        federation.ENABLED = true;
+        session = {
+          PROVIDER = "file";
+          PROVIDER_CONFIG = "/var/lib/forgejo/data/sessions";
+        };
       };
       lfs.enable = true;
       dump.enable = true;
@@ -328,6 +405,12 @@ in
 
     caddy = {
       enable = true;
+      # Explicitly include the tailnet socket for ordinary sites too. Caddy
+      # otherwise gives the more-specific private bind only the private routes.
+      # Private virtualHosts override this default with only tailscaleAddress.
+      globalConfig = ''
+        default_bind 0.0.0.0 [::] ${tailscaleAddress}
+      '';
 
       extraConfig = ''
         (auth) {
@@ -360,6 +443,18 @@ in
           }) (builtins.attrNames ports)
         )
         // {
+          "http://hindsight.eisen.danbulant.cloud:${toString privateHttpPort}" = {
+            extraConfig = ''
+              bind ${tailscaleAddress}
+              reverse_proxy http://localhost:${toString internalPorts.hindsight-ui}
+            '';
+          };
+          "http://hindsight-api.eisen.danbulant.cloud:${toString privateHttpPort}" = {
+            extraConfig = ''
+              bind ${tailscaleAddress}
+              reverse_proxy http://localhost:${toString internalPorts.hindsight-api}
+            '';
+          };
           "${matrixHost}:80" = {
             extraConfig = ''
               @matrixClientWellKnown path /.well-known/matrix/client
@@ -457,61 +552,296 @@ in
     after = [ "livekit-keys.service" ];
   };
 
-  services.restic.backups.matrix = {
-    repository = "sftp:restic-eisen@fern:/media/large/restic/eisen";
-    passwordFile = "/etc/secrets/restic-password";
-    initialize = true;
-    paths = [
-      "/var/lib/tuwunel/database-backups"
-      "/var/lib/tuwunel/media"
-      "/var/lib/livekit/keys"
-      "/etc/secrets/matrix-registration-token"
-    ];
-    extraOptions = [
-      "sftp.command='${lib.getExe pkgs.tailscale} ssh restic-eisen@fern -s sftp'"
-    ];
-    extraBackupArgs = [ "--tag=matrix" ];
-    pruneOpts = [
-      "--keep-hourly=24"
-      "--keep-daily=14"
-      "--keep-weekly=8"
-      "--keep-monthly=12"
-    ];
-    timerConfig = {
-      OnCalendar = "*-*-* 09,12,15,18,21:00:00";
-      Persistent = true;
-      RandomizedDelaySec = "20m";
+  # The dump must not race mirror updates or pushes. Forgejo is unavailable
+  # during its daily dump, and is restarted even if the dump fails.
+  systemd.timers.forgejo-dump.enable = false;
+  systemd.services.forgejo-dump.serviceConfig = {
+    ExecStartPre = "+${lib.getExe' pkgs.systemd "systemctl"} stop forgejo.service";
+    ExecStopPost = "+${lib.getExe' pkgs.systemd "systemctl"} start forgejo.service";
+  };
+  # Restic jobs intentionally back up generated/logical database exports, not
+  # live SQLite/PostgreSQL files. Retention is applied separately to each tag.
+  services.restic.backups =
+    {
+      forgejo = resticDefaults // {
+        # forgejo-dump.service creates a consistent archive before this runs.
+        paths = [ "/var/lib/forgejo/dump" ];
+        extraBackupArgs = [ "--tag=forgejo" ];
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          # Reuse today's completed dump if Fern is asleep or a transfer fails;
+          # network retries must not repeatedly take Forgejo offline.
+          stamp=/var/lib/forgejo/dump/.restic-dump-date
+          today="$(${pkgs.coreutils}/bin/date +%F)"
+          if [[ ! -r "$stamp" ]] || [[ "$(${pkgs.coreutils}/bin/cat "$stamp")" != "$today" ]]; then
+            ${lib.getExe' pkgs.systemd "systemctl"} start forgejo-dump.service
+            printf '%s\n' "$today" > "$stamp"
+          fi
+        '';
+        timerConfig = {
+          OnCalendar = "*-*-* 09,12,15,18,21:00:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+      };
+
+      matrix = resticDefaults // {
+        initialize = true;
+        paths = [
+          "/var/lib/tuwunel/database-backups"
+          "/var/lib/tuwunel/media"
+          "/var/lib/livekit/keys"
+          "/etc/secrets/matrix-registration-token"
+        ];
+        extraBackupArgs = [ "--tag=matrix" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 09,12,15,18,21:00:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+
+          backup_meta=/var/lib/tuwunel/database-backups/meta
+          before="$(${pkgs.findutils}/bin/find "$backup_meta" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | ${pkgs.coreutils}/bin/sort || true)"
+
+          ${lib.getExe' pkgs.systemd "systemctl"} kill --kill-whom=main --signal=SIGUSR2 tuwunel.service
+
+          # RocksDB writes the metadata file only after an online backup is complete.
+          for ((attempt = 0; attempt < 120; attempt++)); do
+            after="$(${pkgs.findutils}/bin/find "$backup_meta" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | ${pkgs.coreutils}/bin/sort || true)"
+            if [[ -n "$after" && "$after" != "$before" ]]; then
+              exit 0
+            fi
+            ${pkgs.coreutils}/bin/sleep 5
+          done
+
+          echo "Timed out waiting for Tuwunel's online database backup" >&2
+          exit 1
+        '';
+      };
+
+      hedgedoc = resticDefaults // {
+        # HedgeDoc currently uses SQLite. .dump is a transactional logical
+        # export; uploads are immutable files and are copied separately.
+        dynamicFilesFrom = ''
+          printf '%s\n' /run/restic-backups-hedgedoc/hedgedoc.sql /var/lib/hedgedoc/uploads
+        '';
+        extraBackupArgs = [ "--tag=hedgedoc" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 05:30:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-hedgedoc
+          ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/hedgedoc/db.sqlite .dump \
+            > /run/restic-backups-hedgedoc/hedgedoc.sql
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -f /run/restic-backups-hedgedoc/hedgedoc.sql
+        '';
+      };
+
+      vaultwarden = resticDefaults // {
+        # Keep the database logical and include user attachments. The
+        # attachments directory is optional on this installation.
+        dynamicFilesFrom = ''
+          printf '%s\n' \
+            /run/restic-backups-vaultwarden/vaultwarden.sql \
+            /var/lib/vaultwarden/rsa_key.pem
+          if [ -d /var/lib/vaultwarden/attachments ]; then
+            printf '%s\n' /var/lib/vaultwarden/attachments
+          fi
+        '';
+        extraBackupArgs = [ "--tag=vaultwarden" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 06:00:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-vaultwarden
+          ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/vaultwarden/db.sqlite3 .dump \
+            > /run/restic-backups-vaultwarden/vaultwarden.sql
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -f /run/restic-backups-vaultwarden/vaultwarden.sql
+        '';
+      };
+
+      karakeep = resticDefaults // {
+        dynamicFilesFrom = ''
+          printf '%s\n' \
+            /run/restic-backups-karakeep \
+            /var/lib/karakeep/assets \
+            /var/lib/karakeep/settings.env
+        '';
+        extraBackupArgs = [ "--tag=karakeep" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 06:30:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-karakeep
+          ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/karakeep/db.db .dump \
+            > /run/restic-backups-karakeep/db.sql
+          ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/karakeep/queue.db .dump \
+            > /run/restic-backups-karakeep/queue.sql
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-karakeep
+        '';
+      };
+
+      uptime-kuma = resticDefaults // {
+        dynamicFilesFrom = ''
+          printf '%s\n' \
+            /run/restic-backups-uptime-kuma \
+            /var/lib/private/uptime-kuma/upload \
+            /var/lib/private/uptime-kuma/screenshots \
+            /var/lib/private/uptime-kuma/db-config.json
+        '';
+        extraBackupArgs = [ "--tag=uptime-kuma" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 07:00:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-uptime-kuma
+          ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/private/uptime-kuma/kuma.db .dump \
+            > /run/restic-backups-uptime-kuma/kuma.sql
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-uptime-kuma
+        '';
+      };
+
+      grafana = resticDefaults // {
+        dynamicFilesFrom = ''
+          printf '%s\n' \
+            /run/restic-backups-grafana \
+            /etc/secrets/gf_secret_key
+        '';
+        extraBackupArgs = [ "--tag=grafana" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 07:30:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-grafana
+          ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/grafana/data/grafana.db .dump \
+            > /run/restic-backups-grafana/grafana.sql
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-grafana
+        '';
+      };
+
+      # Sonarr, Radarr and Prowlarr store their indexes in SQLite. Keep the
+      # small XML settings (including API keys), but never copy live databases.
+      media-indexers = resticDefaults // {
+        dynamicFilesFrom = ''
+          printf '%s\n' /run/restic-backups-media-indexers
+          for path in \
+            /var/lib/sonarr/.config/NzbDrone/config.xml \
+            /var/lib/radarr/.config/Radarr/config.xml \
+            /var/lib/private/prowlarr/config.xml; do
+            if [ -e "$path" ]; then
+              printf '%s\n' "$path"
+            fi
+          done
+        '';
+        extraBackupArgs = [ "--tag=media-indexers" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 08:00:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-media-indexers
+          for spec in \
+            "/var/lib/sonarr/.config/NzbDrone/sonarr.db:sonarr.sql" \
+            "/var/lib/sonarr/.config/NzbDrone/logs.db:sonarr-logs.sql" \
+            "/var/lib/radarr/.config/Radarr/radarr.db:radarr.sql" \
+            "/var/lib/radarr/.config/Radarr/logs.db:radarr-logs.sql" \
+            "/var/lib/private/prowlarr/prowlarr.db:prowlarr.sql" \
+            "/var/lib/private/prowlarr/logs.db:prowlarr-logs.sql"; do
+            source="''${spec%%:*}"
+            destination="''${spec##*:}"
+            if [ -f "$source" ]; then
+              ${lib.getExe pkgs.sqlite} -readonly -bail "$source" .dump \
+                > "/run/restic-backups-media-indexers/$destination"
+            fi
+          done
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-media-indexers
+        '';
+      };
+
+      hindsight = resticDefaults // {
+        # Hindsight ships an embedded PostgreSQL server in its container.
+        # Dump it through pg_dump rather than copying the Docker volume.
+        dynamicFilesFrom = ''
+          printf '%s\n' /run/restic-backups-hindsight/hindsight.sql
+        '';
+        extraBackupArgs = [ "--tag=hindsight" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 08:30:00";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+        backupPrepareCommand = ''
+          #!${pkgs.runtimeShell}
+          set -eu
+          umask 077
+          ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-hindsight
+          ${lib.getExe pkgs.docker} exec -e PGPASSWORD=hindsight hindsight \
+            /home/hindsight/.pg0/installation/18.1.0/bin/pg_dump \
+            -h 127.0.0.1 -p 5432 -U hindsight -d hindsight \
+            > /run/restic-backups-hindsight/hindsight.sql
+        '';
+        backupCleanupCommand = ''
+          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-hindsight
+        '';
+      };
     };
-    backupPrepareCommand = ''
-      #!${pkgs.runtimeShell}
-      set -eu
 
-      backup_meta=/var/lib/tuwunel/database-backups/meta
-      before="$(${pkgs.findutils}/bin/find "$backup_meta" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | ${pkgs.coreutils}/bin/sort || true)"
-
-      ${lib.getExe' pkgs.systemd "systemctl"} kill --kill-whom=main --signal=SIGUSR2 tuwunel.service
-
-      # RocksDB writes the metadata file only after an online backup is complete.
-      for ((attempt = 0; attempt < 120; attempt++)); do
-        after="$(${pkgs.findutils}/bin/find "$backup_meta" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | ${pkgs.coreutils}/bin/sort || true)"
-        if [[ -n "$after" && "$after" != "$before" ]]; then
-          exit 0
-        fi
-        ${pkgs.coreutils}/bin/sleep 5
-      done
-
-      echo "Timed out waiting for Tuwunel's online database backup" >&2
-      exit 1
-    '';
-  };
-
-  # A sleeping Fern is normal. Keep retrying without overlapping timer runs,
-  # and promptly abandon dead SSH connections if it sleeps during a backup.
-  systemd.services.restic-backups-matrix.serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = "30m";
-    TimeoutStartSec = "12h";
-  };
+  # A sleeping Fern is normal. Retry failed jobs without overlapping timer
+  # runs, and abandon dead SSH connections after twelve hours.
+  systemd.services.restic-backups-forgejo.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-matrix.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-hedgedoc.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-vaultwarden.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-karakeep.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-uptime-kuma.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-grafana.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-media-indexers.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-hindsight.serviceConfig = resticServiceConfig;
 
 
   # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
@@ -526,6 +856,33 @@ in
     oci-containers = {
       backend = "docker";
       containers = {
+        hindsight = {
+          image = "ghcr.io/vectorize-io/hindsight:0.10.2";
+          autoStart = true;
+          # Docker stays loopback-only; Caddy publishes these only on Tailscale.
+          # No authentication is configured, so do not add a public listener.
+          ports = [
+            "127.0.0.1:${toString internalPorts.hindsight-api}:8888"
+            "127.0.0.1:${toString internalPorts.hindsight-ui}:9999"
+          ];
+          environment = {
+            # Chunk retention and recall only; reflect and consolidation need an LLM.
+            HINDSIGHT_API_LLM_PROVIDER = "none";
+            HINDSIGHT_API_EMBEDDINGS_PROVIDER = "local";
+            HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL = "BAAI/bge-small-en-v1.5";
+            HINDSIGHT_API_EMBEDDINGS_LOCAL_FORCE_CPU = "true";
+            HINDSIGHT_API_RERANKER_PROVIDER = "local";
+            HINDSIGHT_API_RERANKER_LOCAL_FORCE_CPU = "true";
+            HINDSIGHT_API_WORKER_ID = "eisen-hindsight";
+          };
+          # The all-in-one image runs embedded PostgreSQL as UID 1000.
+          # Named volumes preserve its ownership and data across container replacement.
+          volumes = [
+            "hindsight-data:/home/hindsight/.pg0"
+          ];
+          extraOptions = [ "--shm-size=1g" ];
+        };
+
         gluetun = {
           image = "qmcgaw/gluetun";
           capabilities = {
@@ -596,6 +953,7 @@ in
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
+    kernelModules = [ "kvm-intel" ];
     # Shortcuts for fixing things
     # alt+sysrq (prtsc) + key
     # h: Print help to the system log.
@@ -646,7 +1004,8 @@ in
       intel-vaapi-driver
       intel-ocl
       libva-vdpau-driver
-      intel-compute-runtime-legacy1
+      # This Gen8-capable release predates GCC 16's incomplete-SFINAE checks.
+      (intel-compute-runtime-legacy1.override { stdenv = gcc15Stdenv; })
     ];
   };
 

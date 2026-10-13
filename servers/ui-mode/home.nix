@@ -75,6 +75,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      usbtree
       art
       darktable
       delta.packages.${system}.delta
@@ -344,6 +345,18 @@ in
       serif = [ "Noto Serif" ];
     };
   };
+  # Merge only the LoC bar layout; keep OMP's other runtime settings writable.
+  home.activation.ompLocStatusLine = {
+    before = [ ];
+    after = [ "writeBoundary" "ompConfig" ];
+    data = ''
+      run ${config.programs.omp.package}/bin/omp config set statusLine.preset custom
+      run ${config.programs.omp.package}/bin/omp config set statusLine.leftSegments '["vim","model","mode","path","git","status","pr"]'
+      run ${config.programs.omp.package}/bin/omp config set statusLine.rightSegments '["session_name","token_total","cost","context_pct"]'
+      run ${config.programs.omp.package}/bin/omp config set statusLine.showHookStatus false
+    '';
+  };
+
   programs = {
     omp.enable = true;
     omp.package = omp.packages.${system}.default.overrideAttrs (old: {

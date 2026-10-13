@@ -106,6 +106,49 @@ let
         ];
       })
   );
+
+  clefPython = (pkgs.python3.override {
+    packageOverrides = final: prev: {
+      cuda-bindings = prev.cuda-bindings.override { cudaPackages = pkgs.cudaPackages_13_3; };
+      triton-bin = prev.triton-bin.overrideAttrs (old: {
+        # Fix nixpkgs' binary patch: libcuda_dirs must return directories, not a string.
+        postFixup = (old.postFixup or "") + ''
+          substituteInPlace "$out/${pkgs.python3.sitePackages}/triton/backends/nvidia/driver.py" \
+            --replace-fail \
+              "return '${pkgs.addDriverRunpath.driverLink}/lib/libcuda.so'" \
+              "return ['${pkgs.addDriverRunpath.driverLink}/lib']"
+        '';
+      });
+      torch-bin = (prev.torch-bin.override { cudaPackages = pkgs.cudaPackages_13_3; }).overrideAttrs (old: {
+        passthru = (old.passthru or { }) // {
+          cudaSupport = true;
+          rocmSupport = false;
+          cudaPackages = pkgs.cudaPackages_13_3;
+        };
+      });
+      torch = final.torch-bin;
+      torchvision = prev.torchvision-bin.override { cudaPackages = pkgs.cudaPackages_13_3; };
+    };
+  }).withPackages (ps: with ps; [
+    torch
+    torchvision
+    transformers
+    accelerate
+    bitsandbytes
+    safetensors
+    pillow
+  ]);
+  clefServer = pkgs.writeShellScript "clef-flash-server" ''
+    # Triton compiles its CUDA driver helper during the first inference.
+    export CC=${lib.getExe' pkgs.stdenv.cc "cc"}
+    export HF_HUB_OFFLINE=1
+    export HF_HUB_DISABLE_TELEMETRY=1
+    exec ${clefPython}/bin/python ${../../pkgs/clef/server.py} \
+      --model-dir /home/dan/models/Cloudflare/clef-flash "$@"
+  '';
+  # Restic always encrypts; this intentionally public password needs no secret
+  # provisioning and matches Eisen's local repository.
+  eisenResticPassword = pkgs.writeText "eisen-restic-public-password" "restic-eisen-public\n";
 in
 {
   imports = [
@@ -126,9 +169,48 @@ in
   systemd.user.services.sunshine.serviceConfig.ExecStart =
     lib.mkForce ''"/run/wrappers/bin/sunshine" "capture=wlr"'';
 
+  # The backup client uses ordinary SSH on a Tailscale-only port 2223.
+  # Tailscale SSH intercepts port 22 and cannot consume sshd's ForceCommand.
+  services.openssh.extraConfig = ''
+    Match User restic-eisen
+      ChrootDirectory /var/lib/restic-receiver
+      ForceCommand internal-sftp -d /eisen
+      DisableForwarding yes
+      PermitTTY no
+      AuthenticationMethods publickey
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PubkeyAuthentication yes
+  '';
+  services.openssh.openFirewall = false;
+  services.openssh.ports = [ 22 2223 ];
+  services.openssh.listenAddresses = [
+    {
+      addr = "0.0.0.0";
+      port = 22;
+    }
+    {
+      addr = "::";
+      port = 22;
+    }
+    {
+      addr = "100.120.15.10";
+      port = 2223;
+    }
+  ];
+  systemd.services.sshd = {
+    wants = [ "network-online.target" "tailscaled.service" ];
+    after = [ "network-online.target" "tailscaled.service" ];
+  };
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 2223 ];
   # ssh -R (remote port forward) to this server should listen publicly
   services.openssh.settings.GatewayPorts = "yes";
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
+
+  # `tailscale ssh` remains available for administrators; restic deliberately
+  # uses the ordinary port above so this account is constrained by sshd.
+
 
   services.adctf = {
     enable = false;
@@ -158,13 +240,32 @@ in
   users.users.restic-eisen = {
     isSystemUser = true;
     group = "restic-eisen";
-    home = "/";
+    home = "/media/large/restic/eisen";
+    shell = "${pkgs.shadow}/bin/nologin";
+    # Reuse Eisen's existing machine SSH host key as this account's client
+    # identity; the ForceCommand above prevents shell access.
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPuCpbQyWhXv+lDpLnf4tB+AfAsAbCaEtHflnX1QLnlG root@eisen"
+    ];
   };
 
   systemd.tmpfiles.rules = [
     "d /media/large/restic 0755 root root -"
     "d /media/large/restic/eisen 0700 restic-eisen restic-eisen -"
+    "d /var/lib/restic-receiver 0755 root root -"
   ];
+  # /media/large is owned by dan, so it cannot be an SSH chroot ancestor.
+  # Expose only the repository beneath a separate root-owned chroot, on demand.
+  fileSystems."/var/lib/restic-receiver/eisen" = {
+    device = "/media/large/restic/eisen";
+    fsType = "none";
+    options = [
+      "bind"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.requires-mounts-for=/media/large"
+    ];
+  };
   boot = {
     # Steam client bug #13186: xpad conflicts with Steam Controller emulation
     # and crashes Steam while a game is starting.
@@ -231,6 +332,8 @@ in
       imgbrd-grabber
       protonplus
 
+      eden
+
       # Reverse engineering tooling
       bintools
       binwalk
@@ -296,6 +399,13 @@ in
       };
       globalTTL = 3600;
       models = {
+        "clef-flash" = {
+          cmd = "${clefServer} --port \${PORT}";
+          checkEndpoint = "/health";
+          ttl = 300;
+          # A decision model, not a chat/completions model.
+          unlisted = true;
+        };
         "qwen3.6-35B-A3B" = {
           cmd = "\${llama} -m /home/dan/.lmstudio/models/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf";
         };
@@ -384,6 +494,57 @@ in
       OnCalendar = "*-*-* 00/4:00:00";
       Persistent = true;
       RandomizedDelaySec = "15m";
+    };
+  };
+
+  # Copy snapshots, not the live repository files: restic coordinates locks
+  # with Eisen's writers and keeps the offsite repository independently usable.
+  systemd.services.eisen-restic-storagebox = {
+    description = "Copy Eisen restic snapshots from Fern to Hetzner";
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+    unitConfig.ConditionPathExists = "/media/large/restic/eisen/config";
+    environment = {
+      RESTIC_REPOSITORY = "sftp:u669849@u669849.your-storagebox.de:restic/eisen";
+      RESTIC_PASSWORD_FILE = eisenResticPassword;
+    };
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root"; # Read the restricted receiver and existing Storage Box key.
+      Nice = 10;
+      IOSchedulingClass = "idle";
+      ProtectSystem = "strict";
+      ProtectHome = "read-only";
+      ReadWritePaths = [ "/media/large/restic/eisen" ]; # Source repository locks.
+      PrivateTmp = true;
+      CacheDirectory = "restic-eisen-storagebox";
+      Restart = "on-failure";
+      RestartSec = "30m";
+      TimeoutStartSec = "12h";
+    };
+    script = ''
+      set -eu
+      export RESTIC_CACHE_DIR="$CACHE_DIRECTORY"
+      restic() {
+        ${lib.getExe pkgs.restic} \
+          -o "sftp.command=${lib.getExe pkgs.openssh} -p 23 -i /home/dan/.ssh/id_ed25519 -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -s u669849@u669849.your-storagebox.de sftp" \
+          "$@"
+      }
+      restic cat config >/dev/null || restic init
+      restic copy --from-repo /media/large/restic/eisen \
+        --from-password-file ${eisenResticPassword}
+      restic forget --prune --group-by tags \
+        --keep-hourly 24 --keep-daily 14 --keep-weekly 8 \
+        --keep-monthly 12 --keep-yearly 5
+    '';
+  };
+  systemd.timers.eisen-restic-storagebox = {
+    description = "Copy Eisen backups to Hetzner every four hours";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 00/4:00:00";
+      Persistent = true;
+      RandomizedDelaySec = "20m";
     };
   };
 

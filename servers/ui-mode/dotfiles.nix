@@ -45,5 +45,6 @@
 
   home.file = {
     ".oh-my-posh.nu".source = ../../.oh-my-posh.nu;
+    ".omp/agent/extensions/loc.ts".source = ../../.config/omp/extensions/loc.ts;
   };
 }
