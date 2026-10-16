@@ -849,6 +849,22 @@ in
   systemd.services.restic-backups-media-indexers.serviceConfig = resticServiceConfig;
   systemd.services.restic-backups-hindsight.serviceConfig = resticServiceConfig;
 
+  systemd.services.docker-hindsight = {
+    serviceConfig = {
+      LoadCredential = "openrouter-key:/etc/secrets/hindsight-or";
+      RuntimeDirectory = "hindsight";
+      RuntimeDirectoryMode = "0700";
+    };
+    # The source is a raw key, not an environment file. Convert it only at
+    # startup, outside the Nix store, and never include its value in tracing.
+    preStart = lib.mkBefore ''
+      set +x
+      umask 077
+      printf 'HINDSIGHT_API_LLM_API_KEY=%s\n' "$(< "$CREDENTIALS_DIRECTORY/openrouter-key")" \
+        > /run/hindsight/environment
+    '';
+  };
+
 
   # LiveKit's TCP ICE fallback is separate from its HTTP/WebSocket port.
   networking.firewall.allowedTCPPorts = [ 7881 80 443 ];
@@ -871,9 +887,21 @@ in
             "127.0.0.1:${toString internalPorts.hindsight-api}:8888"
             "127.0.0.1:${toString internalPorts.hindsight-ui}:9999"
           ];
+          environmentFiles = [ "/run/hindsight/environment" ];
           environment = {
-            # Chunk retention and recall only; reflect and consolidation need an LLM.
-            HINDSIGHT_API_LLM_PROVIDER = "none";
+            HINDSIGHT_API_LLM_PROVIDER = "openrouter";
+            HINDSIGHT_API_LLM_MODEL = "openai/gpt-6-luna";
+            HINDSIGHT_API_RETAIN_EXTRACTION_MODE = "concise";
+            HINDSIGHT_API_ENABLE_OBSERVATIONS = "true";
+            HINDSIGHT_API_ENABLE_AUTO_CONSOLIDATION = "true";
+            # Bound background traffic and reflect work; spending is capped
+            # separately on the dedicated OpenRouter key.
+            HINDSIGHT_API_LLM_MAX_CONCURRENT = "4";
+            HINDSIGHT_API_RETAIN_LLM_MAX_CONCURRENT = "2";
+            HINDSIGHT_API_CONSOLIDATION_LLM_MAX_CONCURRENT = "1";
+            HINDSIGHT_API_LLM_MAX_RETRIES = "2";
+            HINDSIGHT_API_REFLECT_MAX_ITERATIONS = "6";
+            HINDSIGHT_API_REFLECT_MAX_CONTEXT_TOKENS = "24000";
             HINDSIGHT_API_EMBEDDINGS_PROVIDER = "local";
             HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL = "BAAI/bge-small-en-v1.5";
             HINDSIGHT_API_EMBEDDINGS_LOCAL_FORCE_CPU = "true";

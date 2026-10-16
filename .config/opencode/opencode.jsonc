@@ -17,6 +17,10 @@
         "FIRECRAWL_API_KEY": "",
       },
     },
+    "blender-mcp": {
+      "type": "lcoal",
+      "command": ["uvx", "mcp-for-blender"]
+    }
   },
   "agent": {
     "explore": {
