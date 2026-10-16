@@ -190,7 +190,8 @@ in
       port = 22;
     }
     {
-      addr = "::";
+      # NixOS appends :port verbatim, so IPv6 addresses need brackets.
+      addr = "[::]";
       port = 22;
     }
     {
