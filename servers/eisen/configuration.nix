@@ -268,6 +268,19 @@ in
       dump.age = "5d";
     };
 
+    forgejo-runner.instances.eisen = {
+      enable = true;
+      settings = {
+        runner.labels = [ "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:act-24.04" ];
+        server.connections.default = {
+          url = "https://git.badapple.cz";
+          # Offline registration token prefix: ffa19dc0216ce2d1.
+          uuid = "66666131-3964-6330-3231-366365326431";
+        };
+      };
+      secrets.server.connections.default.token_url = "/etc/secrets/forgejo-runner-token";
+    };
+
     dnsmasq = {
       enable = true;
     };
@@ -1048,6 +1061,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    forgejo
     bun
     jellyfin-ffmpeg
     intel-gpu-tools

@@ -444,6 +444,20 @@ in
       '';
     };
   };
+  services.forgejo-runner.instances.fern = {
+    enable = true;
+    settings = {
+      runner.labels = [ "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:act-24.04" ];
+      server.connections.default = {
+        url = "https://git.badapple.cz";
+        # Offline registration token prefix: d647656e3d16534c.
+        uuid = "64363437-3635-3665-3364-313635333463";
+      };
+    };
+    secrets.server.connections.default.token_url = "/etc/secrets/forgejo-runner-token";
+  };
+  systemd.services.forgejo-runner-fern.requires = [ "docker.service" ];
+
   services.photoprism = {
     enable = true;
     originalsPath = "/media/large/photos";
