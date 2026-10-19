@@ -1,0 +1,12 @@
+{
+  "id": "aiUsage",
+  "name": "AI Usage",
+  "description": "OMP quotas, saved resets, monetary usage and linear pacing; CodexBar fallback",
+  "version": "1.0.0",
+  "author": "dan",
+  "icon": "monitoring",
+  "type": "widget",
+  "component": "./AiUsageWidget.qml",
+  "settings": "./AiUsageSettings.qml",
+  "permissions": ["process", "settings_read", "settings_write"]
+}

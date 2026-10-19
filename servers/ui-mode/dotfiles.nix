@@ -8,6 +8,11 @@
       source = ../../.config/carapace;
       recursive = true;
     };
+    "DankMaterialShell/plugins/aiUsage" = {
+      source = ../../.config/DankMaterialShell/plugins/aiUsage;
+      recursive = true;
+      force = true;
+    };
     "fish" = {
       source = ../../.config/fish;
       recursive = true;
