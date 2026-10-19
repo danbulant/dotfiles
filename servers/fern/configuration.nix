@@ -153,7 +153,28 @@ in
 {
   imports = [
     waydroid-nvidia-nix.nixosModules.waydroid-nvidia
+    ../../modules/systemd-backup-metrics.nix
   ];
+
+  services.backupMetrics = {
+    enable = true;
+    host = "fern";
+    jobs."eisen-restic-storagebox".service = "eisen-restic-storagebox";
+  };
+
+  services.prometheus.exporters.node = {
+    enable = true;
+    port = 9000;
+    # Bind privately: the shared desktop module disables Fern's firewall.
+    listenAddress = "100.120.15.10";
+    extraFlags = [ "--collector.textfile.directory=/var/lib/node_exporter/textfile_collector" ];
+  };
+  systemd.services.prometheus-node-exporter = {
+    wants = [ "network-online.target" "tailscaled.service" ];
+    after = [ "network-online.target" "tailscaled.service" ];
+    # Tailscaled can report ready before its address is assigned.
+    serviceConfig.RestartSec = "10s";
+  };
 
   services.hardware.openrgb.enable = true;
 
@@ -201,10 +222,22 @@ in
   ];
   systemd.services.sshd = {
     wants = [ "network-online.target" "tailscaled.service" ];
-    after = [ "network-online.target" "tailscaled.service" ];
+    requires = [ "restic-receiver-permissions.service" ];
+    after = [ "network-online.target" "tailscaled.service" "restic-receiver-permissions.service" ];
+    preStart = ''
+      for ((attempt = 0; attempt < 60; attempt++)); do
+        if ${pkgs.iproute2}/bin/ip -4 -o address show dev tailscale0 \
+          | ${pkgs.gnugrep}/bin/grep -Fq ' 100.120.15.10/'; then
+          exit 0
+        fi
+        ${pkgs.coreutils}/bin/sleep 1
+      done
+      echo "Timed out waiting for Fern's Tailscale backup listener" >&2
+      exit 1
+    '';
   };
   networking.firewall.allowedTCPPorts = [ 22 ];
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 2223 ];
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 2223 9000 ];
   # ssh -R (remote port forward) to this server should listen publicly
   services.openssh.settings.GatewayPorts = "yes";
   services.tailscale.extraUpFlags = lib.mkAfter [ "--ssh" ];
@@ -255,6 +288,24 @@ in
     "d /media/large/restic/eisen 0700 restic-eisen restic-eisen -"
     "d /var/lib/restic-receiver 0755 root root -"
   ];
+  systemd.services.restic-receiver-permissions = {
+    description = "Prepare the Fern restic receiver mount";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "var-lib-restic\\x2dreceiver-eisen.mount" "sshd.service" ];
+    unitConfig.RequiresMountsFor = [ "/media/large" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "prepare-restic-receiver" ''
+        set -eu
+        ${pkgs.coreutils}/bin/mkdir -p /media/large/restic/eisen
+        ${pkgs.coreutils}/bin/chown root:root /media/large/restic
+        ${pkgs.coreutils}/bin/chmod 0755 /media/large/restic
+        ${pkgs.coreutils}/bin/chown restic-eisen:restic-eisen /media/large/restic/eisen
+        ${pkgs.coreutils}/bin/chmod 0700 /media/large/restic/eisen
+      '';
+    };
+  };
   # /media/large is owned by dan, so it cannot be an SSH chroot ancestor.
   # Expose only the repository beneath a separate root-owned chroot, on demand.
   fileSystems."/var/lib/restic-receiver/eisen" = {
@@ -541,11 +592,22 @@ in
       set -eu
       export RESTIC_CACHE_DIR="$CACHE_DIRECTORY"
       restic() {
-        ${lib.getExe pkgs.restic} \
+        ${lib.getExe pkgs.restic} --retry-lock=30m \
           -o "sftp.command=${lib.getExe pkgs.openssh} -p 23 -i /home/dan/.ssh/id_ed25519 -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -s u669849@u669849.your-storagebox.de sftp" \
           "$@"
       }
-      restic cat config >/dev/null || restic init
+      config_error="$(${pkgs.coreutils}/bin/mktemp)"
+      trap '${pkgs.coreutils}/bin/rm -f "$config_error"' EXIT
+      if ! restic cat config >/dev/null 2>"$config_error"; then
+        if ${pkgs.gnugrep}/bin/grep -Eiq \
+          '(no such file|does not exist|not found).*(config|repository)|(config|repository).*(no such file|does not exist|not found)' \
+          "$config_error"; then
+          restic init
+        else
+          ${pkgs.coreutils}/bin/cat "$config_error" >&2
+          exit 1
+        fi
+      fi
       restic copy --from-repo /media/large/restic/eisen \
         --from-password-file ${eisenResticPassword}
       restic forget --prune --group-by tags \

@@ -1,0 +1,980 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Backup-chain health for Eisen's local restic jobs and Fern's Eisen-to-Hetzner transfer. This dashboard consumes only the backup_job_* textfile contract metrics. Missing series are explicitly unknown and never treated as healthy.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "content": "**Freshness:** age of the last successful run; limits are 16h for Forgejo and Matrix (including the scheduled 21:00–09:00 gap), 8h for Fern → Hetzner, and 36h for daily jobs. Check the latest-result table too: a recent success does not hide a later failure. Unknown is not healthy; Fern may sleep.\n\n**Forgejo:** live incremental SQLite + Git mirrors + file capture. No backup outage; database, repositories and attachments are not an atomic application-wide snapshot. Retention on each destination: 24 hourly / 14 daily / 8 weekly / 12 monthly / 5 yearly buckets per app; this is not a disk-size cap.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.0.0",
+      "type": "text",
+      "title": "Backup-chain contract and freshness"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 57600
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"forgejo\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / forgejo · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Forgejo backup. Green is less than 16h; red is 16h or older. This accommodates the scheduled 21:00–09:00 overnight gap. Missing backup_job_last_success_timestamp_seconds is UNKNOWN — no telemetry, not healthy."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 57600
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"matrix\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / matrix · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Matrix backup. Green is less than 16h; red is 16h or older. This accommodates the scheduled 21:00–09:00 overnight gap. Missing telemetry is UNKNOWN — no data is not a healthy result."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"hedgedoc\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / hedgedoc · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful HedgeDoc backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. No metric is UNKNOWN, not healthy."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"vaultwarden\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / vaultwarden · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Vaultwarden backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. Missing data stays UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 9
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"karakeep\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / karakeep · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Karakeep backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. Missing data stays UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 9
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"uptime-kuma\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / uptime-kuma · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Uptime Kuma backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. Missing data stays UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 9
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"grafana\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / grafana · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Grafana backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. Missing data stays UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 9
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"media-indexers\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / media-indexers · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful media-indexers backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. Missing data stays UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 172800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 14
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"hindsight\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Eisen / hindsight · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Hindsight backup. Green is less than 36h; yellow is 36h–48h; red is 48h or older. Missing data stays UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "mappings": [{"type": "special", "options": {"match": "null+nan", "result": {"text": "UNKNOWN — no successful run", "color": "gray"}}}],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 28800
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 14
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\",backup=\"eisen-restic-storagebox\"}",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Fern → Hetzner / storagebox · success age",
+      "type": "stat",
+      "description": "Age of the latest completed successful Fern transfer of Eisen's restic storage to Hetzner Storage Box. Green is less than 8h; red is 8h or older. Fern sleeping between scheduled transfers is normal; missing or stale telemetry is not healthy."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN — no telemetry"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Time" },
+            "properties": [
+              { "id": "displayName", "value": "Queried at (not backup time)" }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "id": 12,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "backup_job_success{host=~\"${host:regex}\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Latest completed result by job (1=success, 0=failure)",
+      "type": "table",
+      "description": "The persisted result of each job's most recent completed run, not a backup event. Queried at is the query evaluation time and normally shows now; it is NOT the backup completion time. See Last successful backup by job for actual success timestamps. A failed run remains 0 until a later success. An absent row is UNKNOWN — no telemetry, never healthy."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "id": 13,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "backup_job_running{host=~\"${host:regex}\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Jobs running now (1=running)",
+      "type": "table",
+      "description": "Current activity from backup_job_running. A Fern value of 0 is expected while Fern sleeps between transfer windows. Missing rows are UNKNOWN, not idle and not healthy."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "time() - backup_job_last_attempt_timestamp_seconds{host=~\"${host:regex}\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Last attempt age by job",
+      "type": "table",
+      "description": "Age since each job last started or attempted, independent of whether that attempt succeeded. This is diagnostic context only; freshness is based on last success. Missing last-attempt telemetry is UNKNOWN."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cewzter06us5cf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "UNKNOWN — no telemetry",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "backup_job_success{host=~\"${host:regex}\"}",
+          "legendFormat": "{{host}} / {{backup}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Completed result history (0=failure, 1=success)",
+      "type": "timeseries",
+      "description": "Seven-day history of the persisted last-completed result gauge. It can remain flat between scheduled runs because this metric represents the latest result, not an event counter. Missing series are absent/UNKNOWN and never rendered healthy."
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "cewzter06us5cf" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsIso",
+          "noValue": "UNKNOWN — no successful run"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Time" },
+            "properties": [
+              { "id": "custom.hidden", "value": true }
+            ]
+          },
+          {
+            "matcher": { "id": "byRegexp", "options": "^Value(?: #A)?$" },
+            "properties": [
+              { "id": "displayName", "value": "Last successful backup" }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 35 },
+      "id": 16,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "show": false },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "backup_job_last_success_timestamp_seconds{host=~\"${host:regex}\"} * 1000",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Last successful backup by job",
+      "type": "table",
+      "description": "Actual last-success timestamps from the backup jobs, converted from Unix seconds to milliseconds for Grafana date formatting. Query evaluation time is hidden to avoid confusing it with backup completion. An old success does not hide a more recent failed attempt; check the latest-result table too."
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "backup",
+    "restic",
+    "eisen",
+    "fern",
+    "hetzner"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "definition": "eisen,fern",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Host",
+        "multi": true,
+        "name": "host",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "eisen",
+            "value": "eisen"
+          },
+          {
+            "selected": false,
+            "text": "fern",
+            "value": "fern"
+          }
+        ],
+        "query": "eisen,fern",
+        "refresh": 1,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Backup chain · Eisen → Fern → Hetzner",
+  "uid": "eisen-backups",
+  "version": 1,
+  "weekStart": ""
+}

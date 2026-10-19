@@ -56,10 +56,12 @@ let
   resticEnvironmentFile = pkgs.writeText "restic-eisen-environment" ''
     RESTIC_PASSWORD_COMMAND=${resticPasswordCommand}
   '';
+  resticSftpCommand = "${lib.getExe pkgs.openssh} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts -o Port=2223 -i /etc/ssh/ssh_host_ed25519_key -s restic-eisen@100.120.15.10 sftp";
   resticExtraOptions = [
-    "sftp.command='${lib.getExe pkgs.openssh} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts -o Port=2223 -i /etc/ssh/ssh_host_ed25519_key -s restic-eisen@100.120.15.10 sftp'"
+    "sftp.command='${resticSftpCommand}'"
   ];
   resticPruneOpts = [
+    "--retry-lock=30m"
     "--keep-hourly=24"
     "--keep-daily=14"
     "--keep-weekly=8"
@@ -70,7 +72,7 @@ let
   resticDefaults = {
     repository = resticRepository;
     environmentFile = toString resticEnvironmentFile;
-    initialize = true;
+    initialize = false;
     extraOptions = resticExtraOptions;
     pruneOpts = resticPruneOpts;
   };
@@ -79,6 +81,41 @@ let
     RestartSec = "30m";
     TimeoutStartSec = "12h";
   };
+  resticBackupNames = [
+    "forgejo"
+    "matrix"
+    "hedgedoc"
+    "vaultwarden"
+    "karakeep"
+    "uptime-kuma"
+    "grafana"
+    "media-indexers"
+    "hindsight"
+  ];
+  resticBackupServices = map (name: "restic-backups-${name}.service") resticBackupNames;
+  resticRepositoryInit = pkgs.writeShellScript "restic-eisen-repository-init" ''
+    set -eu
+    error="$(${pkgs.coreutils}/bin/mktemp)"
+    trap '${pkgs.coreutils}/bin/rm -f "$error"' EXIT
+
+    restic() {
+      ${lib.getExe pkgs.restic} --no-cache --option ${lib.escapeShellArg "sftp.command=${resticSftpCommand}"} "$@"
+    }
+
+    if restic cat config >/dev/null 2>"$error"; then
+      exit 0
+    fi
+
+    if ${pkgs.gnugrep}/bin/grep -Eiq \
+      '(no such file|does not exist|not found).*(config|repository)|(config|repository).*(no such file|does not exist|not found)' \
+      "$error"; then
+      restic init
+      exit 0
+    fi
+
+    ${pkgs.coreutils}/bin/cat "$error" >&2
+    exit 1
+  '';
 in
 {
   deployment = {
@@ -100,9 +137,26 @@ in
     nix-index-database.nixosModules.nix-index
     ./hardware-configuration.nix
     ../../modules/llama-swap-exporter.nix
+    ../../modules/systemd-backup-metrics.nix
     ../../modules/tuwunel-admin.nix
     ../../modules/coolify-vm.nix
   ];
+
+  services.backupMetrics = {
+    enable = true;
+    host = "eisen";
+    jobs = {
+      forgejo.service = "restic-backups-forgejo";
+      matrix.service = "restic-backups-matrix";
+      hedgedoc.service = "restic-backups-hedgedoc";
+      vaultwarden.service = "restic-backups-vaultwarden";
+      karakeep.service = "restic-backups-karakeep";
+      uptime-kuma.service = "restic-backups-uptime-kuma";
+      grafana.service = "restic-backups-grafana";
+      media-indexers.service = "restic-backups-media-indexers";
+      hindsight.service = "restic-backups-hindsight";
+    };
+  };
 
   services.coolify-vm = {
     enable = true;
@@ -264,8 +318,10 @@ in
         };
       };
       lfs.enable = true;
-      dump.enable = true;
-      dump.age = "5d";
+      # Forgejo's ZIP dump rewrites large archives, forcing restic to read
+      # them again instead of reusing unchanged files. The backup job below
+      # stages a database export, Git mirrors, and persistent files.
+      dump.enable = false;
     };
 
     forgejo-runner.instances.eisen = {
@@ -319,6 +375,17 @@ in
           secret_key = "$__file{/etc/secrets/gf_secret_key}";
         };
       };
+      provision = {
+        enable = true;
+        dashboards.settings.providers = [
+          {
+            name = "backups";
+            options.path = pkgs.writeTextDir "backup-chain-dashboard.json" (
+              builtins.readFile ./backup-chain-dashboard.json
+            );
+          }
+        ];
+      };
     };
     prometheus = {
       enable = true;
@@ -344,6 +411,7 @@ in
         node = {
           enable = true;
           port = internalPorts.prometheus-node;
+          extraFlags = [ "--collector.textfile.directory=/var/lib/node_exporter/textfile_collector" ];
         };
       };
 
@@ -353,6 +421,14 @@ in
           static_configs = [
             {
               targets = [ "localhost:${toString internalPorts.prometheus-node}" ];
+            }
+          ];
+        }
+        {
+          job_name = "node-fern";
+          static_configs = [
+            {
+              targets = [ "100.120.15.10:9000" ];
             }
           ];
         }
@@ -571,32 +647,140 @@ in
     after = [ "livekit-keys.service" ];
   };
 
-  # The dump must not race mirror updates or pushes. Forgejo is unavailable
-  # during its daily dump, and is restarted even if the dump fails.
+  # Keep any previously generated Forgejo dump timer disabled.
   systemd.timers.forgejo-dump.enable = false;
-  systemd.services.forgejo-dump.serviceConfig = {
-    ExecStartPre = "+${lib.getExe' pkgs.systemd "systemctl"} stop forgejo.service";
-    ExecStopPost = "+${lib.getExe' pkgs.systemd "systemctl"} start forgejo.service";
-  };
-  # Restic jobs intentionally back up generated/logical database exports, not
-  # live SQLite/PostgreSQL files. Retention is applied separately to each tag.
+
+  # Stop creating large, repeatedly rewritten Forgejo ZIP dumps.
+  # Existing archives remain untouched for historical restore use.
+  # This is a live, incremental backup. SQLite gets an online-consistent
+  # snapshot and repositories use Git transport; files are not one global
+  # point-in-time image, so a concurrent push/upload can cross the snapshots.
+  # Restic jobs back up the staged tree and retain each tag independently.
   services.restic.backups =
     {
       forgejo = resticDefaults // {
-        # forgejo-dump.service creates a consistent archive before this runs.
-        paths = [ "/var/lib/forgejo/dump" ];
-        extraBackupArgs = [ "--tag=forgejo" ];
+        # The stage persists between runs so Git mirrors and restic deduplicate
+        # unchanged repository objects.
+        paths = [ "/var/lib/forgejo-backup" ];
+        extraBackupArgs = [
+          "--tag=forgejo"
+          "--retry-lock=30m"
+        ];
         backupPrepareCommand = ''
           #!${pkgs.runtimeShell}
           set -eu
-          # Reuse today's completed dump if Fern is asleep or a transfer fails;
-          # network retries must not repeatedly take Forgejo offline.
-          stamp=/var/lib/forgejo/dump/.restic-dump-date
-          today="$(${pkgs.coreutils}/bin/date +%F)"
-          if [[ ! -r "$stamp" ]] || [[ "$(${pkgs.coreutils}/bin/cat "$stamp")" != "$today" ]]; then
-            ${lib.getExe' pkgs.systemd "systemctl"} start forgejo-dump.service
-            printf '%s\n' "$today" > "$stamp"
-          fi
+          umask 077
+
+          git=${lib.getExe pkgs.git}
+          rsync=${lib.getExe pkgs.rsync}
+          sqlite=${lib.getExe pkgs.sqlite}
+          source=/var/lib/forgejo
+          staging=/var/lib/forgejo-backup
+          db_tmp="$staging/data/forgejo.db.tmp"
+          repo_list=/run/restic-backups-forgejo/repositories
+
+          # Keep credentials private. The staging directory is owned by this
+          # job and is never used as a source for the live Forgejo service.
+          ${pkgs.coreutils}/bin/install -d -o root -g root -m 0700 "$staging"
+          ${pkgs.coreutils}/bin/install -d -m 0700 \
+            "$staging/data" "$staging/custom" "$staging/repositories"
+          cleanup() {
+            ${pkgs.coreutils}/bin/rm -f "$db_tmp"
+          }
+          trap cleanup EXIT
+          trap 'exit 143' HUP INT TERM
+          ${pkgs.coreutils}/bin/rm -f "$db_tmp"
+
+          # SQLite's online backup API produces a consistent live snapshot;
+          # rename it only after the backup completes.
+          "$sqlite" -readonly "$source/data/forgejo.db" ".backup $db_tmp"
+          ${pkgs.coreutils}/bin/chmod 0600 "$db_tmp"
+          ${pkgs.coreutils}/bin/mv -f "$db_tmp" "$staging/data/forgejo.db"
+
+          # Forgejo's bare repositories are mirrored through Git's transport,
+          # not copied with hardlinks or a live recursive filesystem copy.
+          ${pkgs.findutils}/bin/find "$source/repositories" \
+            -type d -name '*.git' -prune -print0 > "$repo_list"
+          while IFS= read -r -d "" repo; do
+            relative="''${repo#"$source/repositories/"}"
+            destination="$staging/repositories/$relative"
+            ${pkgs.coreutils}/bin/install -d -m 0700 "''${destination%/*}"
+            # Forgejo can leave hook-only directories without a Git
+            # repository. Preserve their files instead of trying to clone.
+            if [ ! -e "$repo/HEAD" ] && [ ! -d "$repo/objects" ]; then
+              "$rsync" --archive --no-owner --no-group --delete "$repo/" "$destination/"
+              continue
+            fi
+            if [ -d "$destination/objects" ]; then
+              "$git" -C "$destination" \
+                -c core.hooksPath=/dev/null \
+                -c "safe.directory=$repo" \
+                -c protocol.file.allow=always \
+                -c gc.autoDetach=false \
+                fetch --no-auto-maintenance --prune origin
+            else
+              clone_tmp="$destination.tmp"
+              ${pkgs.coreutils}/bin/rm -rf "$clone_tmp"
+              "$git" \
+                -c core.hooksPath=/dev/null \
+                -c "safe.directory=$repo" \
+                -c protocol.file.allow=always \
+                clone --mirror --no-local "$repo" "$clone_tmp"
+              ${pkgs.coreutils}/bin/rm -rf "$destination"
+              ${pkgs.coreutils}/bin/mv -f "$clone_tmp" "$destination"
+            fi
+            "$git" -C "$destination" \
+              -c core.hooksPath=/dev/null \
+              -c "safe.directory=$repo" \
+              -c gc.autoDetach=false \
+              gc --auto
+            if [ -f "$repo/HEAD" ]; then
+              "$rsync" --archive "$repo/HEAD" "$destination/HEAD"
+            fi
+            # Preserve repository-local hooks and other non-object files.
+            # Keep the source config separately: replacing the mirror config
+            # would destroy its fetch settings.
+            # On restore, copy these saved configs onto the restored mirrors.
+            "$rsync" --archive --no-owner --no-group --delete \
+              --exclude='/objects/' --exclude='/refs/' --exclude='/logs/' \
+              --exclude='/HEAD' --exclude='/packed-refs' --exclude='/config' \
+              --exclude='/FETCH_HEAD' --exclude='/ORIG_HEAD' \
+              "$repo/" "$destination/"
+            config_dir="$staging/repository-configs/$relative"
+            ${pkgs.coreutils}/bin/install -d -m 0700 "$config_dir"
+            if [ -f "$repo/config" ]; then
+              "$rsync" --archive "$repo/config" "$config_dir/config"
+            else
+              ${pkgs.coreutils}/bin/rm -f "$config_dir/config"
+            fi
+          done < "$repo_list"
+
+          # Remove only mirrors and interrupted clone directories owned by the
+          # staging job when their source repository no longer exists.
+          ${pkgs.findutils}/bin/find "$staging/repositories" \
+            -type d -name '*.git' -prune -print0 > "$repo_list"
+          while IFS= read -r -d "" mirror; do
+            relative="''${mirror#"$staging/repositories/"}"
+            if [ ! -d "$source/repositories/$relative" ]; then
+              ${pkgs.coreutils}/bin/rm -rf "$mirror"
+              ${pkgs.coreutils}/bin/rm -rf "$staging/repository-configs/$relative"
+            fi
+          done < "$repo_list"
+          ${pkgs.findutils}/bin/find "$staging/repositories" \
+            -type d -name '*.git.tmp' -prune \
+            -exec ${pkgs.coreutils}/bin/rm -rf -- {} +
+
+          # Keep persistent storage, queues, and action data. Issue/repository
+          # indexers and temporary files are regenerable and are omitted.
+          ${pkgs.coreutils}/bin/rm -rf \
+            "$staging/data/indexers" "$staging/data/tmp"
+          "$rsync" --archive --delete \
+            --exclude='forgejo.db*' \
+            --exclude='indexers/' \
+            --exclude='tmp/' \
+            "$source/data/" "$staging/data/"
+          "$rsync" --archive --delete \
+            "$source/custom/" "$staging/custom/"
         '';
         timerConfig = {
           OnCalendar = "*-*-* 09,12,15,18,21:00:00";
@@ -606,14 +790,13 @@ in
       };
 
       matrix = resticDefaults // {
-        initialize = true;
         paths = [
           "/var/lib/tuwunel/database-backups"
           "/var/lib/tuwunel/media"
           "/var/lib/livekit/keys"
           "/etc/secrets/matrix-registration-token"
         ];
-        extraBackupArgs = [ "--tag=matrix" ];
+        extraBackupArgs = [ "--tag=matrix" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 09,12,15,18,21:00:00";
           Persistent = true;
@@ -648,7 +831,7 @@ in
         dynamicFilesFrom = ''
           printf '%s\n' /run/restic-backups-hedgedoc/hedgedoc.sql /var/lib/hedgedoc/uploads
         '';
-        extraBackupArgs = [ "--tag=hedgedoc" ];
+        extraBackupArgs = [ "--tag=hedgedoc" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 05:30:00";
           Persistent = true;
@@ -678,7 +861,7 @@ in
             printf '%s\n' /var/lib/vaultwarden/attachments
           fi
         '';
-        extraBackupArgs = [ "--tag=vaultwarden" ];
+        extraBackupArgs = [ "--tag=vaultwarden" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 06:00:00";
           Persistent = true;
@@ -704,7 +887,7 @@ in
             /var/lib/karakeep/assets \
             /var/lib/karakeep/settings.env
         '';
-        extraBackupArgs = [ "--tag=karakeep" ];
+        extraBackupArgs = [ "--tag=karakeep" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 06:30:00";
           Persistent = true;
@@ -720,9 +903,6 @@ in
           ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/karakeep/queue.db .dump \
             > /run/restic-backups-karakeep/queue.sql
         '';
-        backupCleanupCommand = ''
-          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-karakeep
-        '';
       };
 
       uptime-kuma = resticDefaults // {
@@ -733,7 +913,7 @@ in
             /var/lib/private/uptime-kuma/screenshots \
             /var/lib/private/uptime-kuma/db-config.json
         '';
-        extraBackupArgs = [ "--tag=uptime-kuma" ];
+        extraBackupArgs = [ "--tag=uptime-kuma" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 07:00:00";
           Persistent = true;
@@ -747,9 +927,6 @@ in
           ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/private/uptime-kuma/kuma.db .dump \
             > /run/restic-backups-uptime-kuma/kuma.sql
         '';
-        backupCleanupCommand = ''
-          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-uptime-kuma
-        '';
       };
 
       grafana = resticDefaults // {
@@ -758,7 +935,7 @@ in
             /run/restic-backups-grafana \
             /etc/secrets/gf_secret_key
         '';
-        extraBackupArgs = [ "--tag=grafana" ];
+        extraBackupArgs = [ "--tag=grafana" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 07:30:00";
           Persistent = true;
@@ -771,9 +948,6 @@ in
           ${pkgs.coreutils}/bin/install -d -m 0700 /run/restic-backups-grafana
           ${lib.getExe pkgs.sqlite} -readonly -bail /var/lib/grafana/data/grafana.db .dump \
             > /run/restic-backups-grafana/grafana.sql
-        '';
-        backupCleanupCommand = ''
-          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-grafana
         '';
       };
 
@@ -791,7 +965,7 @@ in
             fi
           done
         '';
-        extraBackupArgs = [ "--tag=media-indexers" ];
+        extraBackupArgs = [ "--tag=media-indexers" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 08:00:00";
           Persistent = true;
@@ -817,9 +991,6 @@ in
             fi
           done
         '';
-        backupCleanupCommand = ''
-          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-media-indexers
-        '';
       };
 
       hindsight = resticDefaults // {
@@ -828,7 +999,7 @@ in
         dynamicFilesFrom = ''
           printf '%s\n' /run/restic-backups-hindsight/hindsight.sql
         '';
-        extraBackupArgs = [ "--tag=hindsight" ];
+        extraBackupArgs = [ "--tag=hindsight" "--retry-lock=30m" ];
         timerConfig = {
           OnCalendar = "*-*-* 08:30:00";
           Persistent = true;
@@ -844,11 +1015,22 @@ in
             -h 127.0.0.1 -p 5432 -U hindsight -d hindsight \
             > /run/restic-backups-hindsight/hindsight.sql
         '';
-        backupCleanupCommand = ''
-          ${pkgs.coreutils}/bin/rm -rf /run/restic-backups-hindsight
-        '';
       };
     };
+  systemd.services.restic-repository-init = {
+    description = "Initialize the shared Eisen restic repository";
+    wantedBy = [ "multi-user.target" ];
+    before = resticBackupServices;
+    environment.RESTIC_REPOSITORY = resticRepository;
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      EnvironmentFile = toString resticEnvironmentFile;
+      ExecStart = resticRepositoryInit;
+    };
+  };
+
+
 
   # A sleeping Fern is normal. Retry failed jobs without overlapping timer
   # runs, and abandon dead SSH connections after twelve hours.
@@ -861,6 +1043,24 @@ in
   systemd.services.restic-backups-grafana.serviceConfig = resticServiceConfig;
   systemd.services.restic-backups-media-indexers.serviceConfig = resticServiceConfig;
   systemd.services.restic-backups-hindsight.serviceConfig = resticServiceConfig;
+  systemd.services.restic-backups-forgejo.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-forgejo.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-matrix.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-matrix.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-hedgedoc.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-hedgedoc.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-vaultwarden.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-vaultwarden.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-karakeep.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-karakeep.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-uptime-kuma.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-uptime-kuma.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-grafana.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-grafana.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-media-indexers.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-media-indexers.after = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-hindsight.requires = [ "restic-repository-init.service" ];
+  systemd.services.restic-backups-hindsight.after = [ "restic-repository-init.service" ];
 
   systemd.services.docker-hindsight = {
     serviceConfig = {
