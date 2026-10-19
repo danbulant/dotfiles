@@ -75,6 +75,9 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      arduino-cli
+      clang-tools
+      prusa-slicer
       usbtree
       jetbrains.idea
       pulseview

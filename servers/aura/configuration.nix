@@ -17,5 +17,7 @@
     LIBVA_DRIVER_NAME = "iHD";
   };
   services.thermald.enable = true;
-
+users.users.dan.extraGroups = [
+  "dialout"
+];
 }
