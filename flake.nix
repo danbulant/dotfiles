@@ -43,6 +43,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     reenv = {
       url = "github:levigross/NixRevAI";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -86,26 +90,55 @@
           photoprism = prev.photoprism;
         };
       };
+      # Preserve NVIDIA ELF header order; sorting corrupts cicc at dynamic-loader startup.
+      singlePassCudaRunpath = pkgs: old: {
+        appendRunpaths = (old.appendRunpaths or [ ]) ++ [ "${pkgs.addDriverRunpath.driverLink}/lib" ];
+        patchelfFlags = (old.patchelfFlags or [ ]) ++ [ "--no-sort" ];
+        # Only autoPatchelf honors patchelfFlags; fold driver lookup into that pass.
+        dontPatchELF = true;
+        dontUseAutoAddDriverRunpath = true;
+      };
+
       desktopCompatibilityOverlay = _: prev: {
-        codex =
-          let
-            version = "0.153.4";
-            src = prev.fetchFromGitHub {
-              owner = "openai";
-              repo = "codex";
-              tag = "rust-v${version}";
-              hash = "sha256-lHiDj5SodaM3mh8goMm6esfejeAT+Y3JJWrRnyj6sJo=";
+        # Apply during scope construction so CUDA's nested pkgs inherit the fix too.
+        _cuda = prev._cuda.extend (_: cudaPrev: {
+          extensions = cudaPrev.extensions ++ [
+            (_: cudaPrev:
+              prev.lib.optionalAttrs (cudaPrev.cudaMajorMinorVersion == "13.3") {
+                libnvvm = cudaPrev.libnvvm.overrideAttrs (singlePassCudaRunpath prev);
+                cuda_nvcc = cudaPrev.cuda_nvcc.overrideAttrs (singlePassCudaRunpath prev);
+                libcufile = cudaPrev.libcufile.overrideAttrs (singlePassCudaRunpath prev);
+              }
+              // prev.lib.optionalAttrs (cudaPrev.cudaMajorMinorVersion == "13.4") {
+                cuda_gdb = cudaPrev.cuda_gdb.overrideAttrs (singlePassCudaRunpath prev);
+                cuda_sanitizer_api = cudaPrev.cuda_sanitizer_api.overrideAttrs (singlePassCudaRunpath prev);
+              })
+          ];
+        });
+
+        # Structured wrapper arguments must be separate tokens, not one shell string.
+        aw-qt = prev.aw-qt.overrideAttrs (_: {
+          makeWrapperArgs = [ "--suffix" "PATH" ":" (prev.lib.makeBinPath [ prev.xdg-utils ]) ];
+        });
+
+        # Godot 4.7 also requires HarfBuzz's optional vector library.
+        godot_4 = prev.godot_4.override {
+          harfbuzz = prev.harfbuzz.override { withVector = true; };
+        };
+
+        # sphinxHook reads a scalar; structured attrs otherwise expose only "html".
+        khal = prev.khal.overrideAttrs (_: {
+          sphinxBuilders = "html man";
+        });
+
+        # ActivityWatch's aw-core requires Peewee 3, not the default Peewee 4.
+        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+          (finalPython: prevPython: {
+            aw-core = prevPython.aw-core.override {
+              peewee = finalPython.peewee_3;
             };
-            sourceRoot = "${src.name}/codex-rs";
-          in
-          prev.codex.overrideAttrs (_: {
-            inherit version src sourceRoot;
-            cargoHash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
-            cargoDeps = prev.rustPlatform.fetchCargoVendor {
-              inherit src sourceRoot;
-              hash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
-            };
-          });
+          })
+        ];
 
         # DwarFS 0.14.0 bundles Folly and fbthrift snapshots that relied on
         # transitive C string declarations and fmt's pre-12 core header.
@@ -152,6 +185,14 @@
           nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/tuwunel-admin/package.nix
             { };
         default = tuwunel-admin;
+      };
+
+      devShells.x86_64-linux.secrets = nixpkgs.legacyPackages.x86_64-linux.mkShellNoCC {
+        packages = with nixpkgs.legacyPackages.x86_64-linux; [
+          sops
+          age
+          ssh-to-age
+        ];
       };
 
       nixosConfigurations.fern = nixpkgs.lib.nixosSystem {

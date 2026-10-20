@@ -399,7 +399,10 @@
 
     # OBS Studio virtual camera
     extraModulePackages = with config.boot.kernelPackages; [
-      v4l2loopback
+      (v4l2loopback.overrideAttrs (old: {
+        # NixOS runs depmod after merging modules; per-package indexes collide.
+        makeFlags = old.makeFlags ++ [ "DEPMOD=true" ];
+      }))
       #lenovo-legion-module
     ];
     extraModprobeConfig = ''

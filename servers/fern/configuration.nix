@@ -70,46 +70,30 @@ let
       rocmSupport = false;
       metalSupport = false;
       blasSupport = true;
+      cpuArchDynamicDispatch = false;
     }).overrideAttrs
-      (_: rec {
-        version = "10434";
-        src = pkgs.fetchFromGitHub {
-          owner = "ggml-org";
-          repo = "llama.cpp";
-          tag = "b${version}";
-          hash = "sha256-Sz0kW1q91YzdrKbZUqMbFJ0DLZrzARSGheUrtCKcoQo=";
-        };
-        npmRoot = "tools/ui";
-        npmDepsHash = "sha256-2Q7XhaLAArmviOLdQsNbYTfdyDE5pW9lR26cRHEVl9k=";
+      (old: {
+        # Keep nixpkgs' source, patches, UI dependencies and build metadata together.
         preConfigure = ''
           export NIX_ENFORCE_NO_NATIVE=0
-          prependToVar cmakeFlags "-DLLAMA_BUILD_COMMIT:STRING=7e4c0a96"
-          pushd ${npmRoot}
-          LLAMA_BUILD_NUMBER=${version} npm run build
-          popd
-        '';
-        cmakeFlags = with pkgs.lib; [
-          # -march=native is non-deterministic; override with platform-specific flags if needed
+        '' + old.preConfigure;
+        cmakeFlags = old.cmakeFlags ++ (with lib; [
           (cmakeBool "GGML_NATIVE" true)
-          (cmakeBool "LLAMA_BUILD_EXAMPLES" false)
-          (cmakeBool "LLAMA_BUILD_SERVER" true)
-          (cmakeBool "LLAMA_BUILD_TESTS" false)
-          (cmakeBool "LLAMA_OPENSSL" true)
-          (cmakeBool "BUILD_SHARED_LIBS" true)
           (cmakeBool "GGML_LTO" true)
-          (cmakeBool "GGML_CUDA" true)
           (cmakeBool "GGML_CUDA_GRAPHS" true)
-          (cmakeBool "GGML_CUDA_F16" true)
           (cmakeBool "GGML_CUDA_FA_ALL_QUANTS" true)
-          (cmakeFeature "LLAMA_BUILD_NUMBER" version)
           (cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "120")
-        ];
+        ]);
       })
   );
 
   clefPython = (pkgs.python3.override {
     packageOverrides = final: prev: {
-      cuda-bindings = prev.cuda-bindings.override { cudaPackages = pkgs.cudaPackages_13_3; };
+      cuda-bindings = prev.cuda-bindings.override {
+        cudaPackages = pkgs.cudaPackages_13_3;
+        # NVIDIA 13.3 requires Cython >=3.2,<3.3.
+        cython = final.cython_3_2;
+      };
       triton-bin = prev.triton-bin.overrideAttrs (old: {
         # Fix nixpkgs' binary patch: libcuda_dirs must return directories, not a string.
         postFixup = (old.postFixup or "") + ''
@@ -153,6 +137,7 @@ in
 {
   imports = [
     waydroid-nvidia-nix.nixosModules.waydroid-nvidia
+    ../../modules/sops.nix
     ../../modules/systemd-backup-metrics.nix
   ];
 
@@ -366,7 +351,6 @@ in
     (with pkgs; [
       photoprism
       wl-clipboard
-      mtkclient
       blender
       (android-studio.withSdk (
         androidenv.composeAndroidPackages {

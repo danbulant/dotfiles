@@ -14,6 +14,12 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  # Match nix shell's cached dependency set, not the host-wide CUDA variants.
+  obsStudio = (import pkgs.path {
+    inherit system;
+    config.allowUnfree = true;
+  }).obs-studio;
+
   dmsShell = dms.packages.${system}.dms-shell.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + ''
       if [[ -f quickshell/Services/PopoutService.qml ]]; then
@@ -248,10 +254,10 @@ in
       ansible
       aria2
       qbittorrent
-      audacity
       bettercap
       duperemove
       ffmpeg
+      obsStudio
       ripgrep
       iotop
       nethogs

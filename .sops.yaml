@@ -1,0 +1,18 @@
+# Host recipients use the SSH public keys pinned in Nix. The editor recipient
+# uses Dan's SSH public key on Fern, allowing edits to either host's file.
+# Keep an independent offline recovery recipient before relying on this for DR.
+keys:
+  - &eisen age184cs53vjqn6538y7u5stj9pnnggn8990vyj3pza7cn7l48wmrqrs2hu6e7
+  - &fern age1rjf59vhd6lq2agxe7lxnwrkacra4kc6ccwp83kmaz24r4pldf3tqdq35ay
+  - &dan_fern age1ceu2a5v7v7yrchmfflg9a0yn6c6ydlmh8wwd6gj3qw2993munvuqgjp80f
+creation_rules:
+  - path_regex: ^secrets/eisen\.yaml$
+    key_groups:
+      - age:
+          - *eisen
+          - *dan_fern
+  - path_regex: ^secrets/fern\.yaml$
+    key_groups:
+      - age:
+          - *fern
+          - *dan_fern

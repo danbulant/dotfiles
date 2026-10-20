@@ -135,6 +135,7 @@ in
 
   imports = [
     nix-index-database.nixosModules.nix-index
+    ../../modules/sops.nix
     ./hardware-configuration.nix
     ../../modules/llama-swap-exporter.nix
     ../../modules/systemd-backup-metrics.nix
@@ -1104,6 +1105,8 @@ in
           environment = {
             HINDSIGHT_API_LLM_PROVIDER = "openrouter";
             HINDSIGHT_API_LLM_MODEL = "openai/gpt-6-luna";
+            # Normalize facts, observations, and reflect output, even for multilingual input.
+            HINDSIGHT_API_LLM_OUTPUT_LANGUAGE = "English";
             HINDSIGHT_API_RETAIN_EXTRACTION_MODE = "concise";
             HINDSIGHT_API_ENABLE_OBSERVATIONS = "true";
             HINDSIGHT_API_ENABLE_AUTO_CONSOLIDATION = "true";
