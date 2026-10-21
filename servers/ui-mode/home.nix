@@ -14,6 +14,12 @@
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
+  ohMyTmux = pkgs.fetchFromGitHub {
+    owner = "gpakosz";
+    repo = ".tmux";
+    rev = "58a3dcc0d718ec0fa1c0d5a2fddd640a1ad7a5b7";
+    hash = "sha256-YDzbZVFhrAMBhOI8HVDxR3rEPkrEwG57IUbnZicmfn4=";
+  };
   # Match nix shell's cached dependency set, not the host-wide CUDA variants.
   obsStudio = (import pkgs.path {
     inherit system;
@@ -195,6 +201,8 @@ in
       nerd-fonts.fira-code
       iosevka
       kitty
+      tmux
+      perl
       rofi
       vesktopWrapped
       spotify
@@ -337,6 +345,28 @@ in
     colorScheme = "dark";
   };
   programs.man.enable = false;
+  home.file.".tmux.conf".source = "${ohMyTmux}/.tmux.conf";
+  home.file.".tmux.conf.local".text = builtins.readFile "${ohMyTmux}/.tmux.conf.local" + ''
+    set -g default-shell "${pkgs.nushell}/bin/nu"
+    set -g default-command ""
+    set -g default-terminal "tmux-256color" #!important
+    set -as terminal-features ",xterm-kitty:RGB"
+    # OMP wraps Kitty graphics in tmux's DCS passthrough envelope.
+    set -g allow-passthrough on #!important
+
+    set -g set-titles on #!important
+    tmux_conf_theme_terminal_title='#{pane_title}'
+
+    set -g mouse on
+
+    # Kitty forwards these sequences instead of handling its own tabs.
+    set -s user-keys[0] "\e[900~"
+    set -s user-keys[1] "\e[901~"
+    set -s user-keys[2] "\e[902~"
+    bind -n User0 new-window -c "#{pane_current_path}"
+    bind -n User1 previous-window
+    bind -n User2 next-window
+  '';
   services.lorri.enable = true;
   programs.dank-material-shell = {
     enable = true;
