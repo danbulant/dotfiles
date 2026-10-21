@@ -167,10 +167,10 @@ in
     dashboardDomain = "coolify.eisen.danbulant.cloud";
     dashboardListenAddress = tailscaleAddress;
     dashboardPort = privateHttpPort;
-    # Exact hosts and wildcard patterns; only these routes go to the VM.
-    domains = [ "*.apps.eisen.danbulant.cloud" ];
-    # Match the existing Cloudflare/Traefik -> HTTP Caddy ingress.
-    tlsAtUpstream = true;
+    githubWebhookDomain = "coolify-hooks.apps.danbulant.cloud";
+    # Eisen terminates public TLS; the VM receives HTTP only.
+    domains = [ "*.apps.eisen.danbulant.cloud" "*.apps.danbulant.cloud" "bv.badapple.cz" "www.bv.badapple.cz" ];
+    tlsAtUpstream = false;
   };
 
   # The private Caddy sites bind the Tailscale address instead of a wildcard;
