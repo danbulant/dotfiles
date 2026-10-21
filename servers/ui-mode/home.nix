@@ -349,13 +349,46 @@ in
   home.file.".tmux.conf.local".text = builtins.readFile "${ohMyTmux}/.tmux.conf.local" + ''
     set -g default-shell "${pkgs.nushell}/bin/nu"
     set -g default-command ""
+    tmux_conf_new_window_retain_current_path=true
     set -g default-terminal "tmux-256color" #!important
-    set -as terminal-features ",xterm-kitty:RGB"
+    set -as terminal-features ",xterm-kitty:RGB,xterm-kitty:extkeys"
     # OMP wraps Kitty graphics in tmux's DCS passthrough envelope.
     set -g allow-passthrough on #!important
+    set -g extended-keys on
+    set -g extended-keys-format csi-u
+#    set -as terminal-features 'xterm-kitty:extkeys'
 
     set -g set-titles on #!important
     tmux_conf_theme_terminal_title='#{pane_title}'
+
+    # Match Kitty's current Dank palette and rounded powerline tabs.
+    tmux_conf_theme_status_fg='#bec8c9'
+    tmux_conf_theme_status_bg='#0e1415'
+    tmux_conf_theme_left_separator_main='\uE0B4'
+    tmux_conf_theme_right_separator_main='\uE0B6'
+    tmux_conf_theme_window_status_fg='#bec8c9'
+    tmux_conf_theme_window_status_bg='#0e1415'
+    tmux_conf_theme_window_status_current_fg='#003739'
+    tmux_conf_theme_window_status_current_bg='#80d4d8'
+    tmux_conf_theme_window_status_format='#I #{?window_bell_flag,!,}#{?window_activity_flag,*,}#W'
+    tmux_conf_theme_window_status_current_format="$tmux_conf_theme_window_status_format"
+    tmux_conf_theme_window_status_activity_fg='default'
+    tmux_conf_theme_window_status_activity_bg='default'
+    tmux_conf_theme_window_status_activity_attr='none'
+    tmux_conf_theme_window_status_bell_fg='default'
+    tmux_conf_theme_window_status_bell_bg='default'
+    tmux_conf_theme_window_status_bell_attr='none'
+    tmux_conf_theme_window_status_last_fg='default'
+    tmux_conf_theme_window_status_last_bg='default'
+    tmux_conf_theme_window_status_last_attr='none'
+    set -g monitor-activity on
+    set -g bell-action other
+
+    tmux_conf_theme_status_left=""
+    tmux_conf_theme_status_right=" #{username}#{root} | #{hostname} "
+    tmux_conf_theme_status_right_fg='#dde4e3,#003739'
+    tmux_conf_theme_status_right_bg='#3b4344,#b1cccd'
+    tmux_conf_theme_status_right_attr='none,bold'
 
     set -g mouse on
 

@@ -814,6 +814,9 @@ source npm.nu
 use sockets.nu
 use jc.nu
 
+# Alert tmux when sudo (including nh's sudo calls) needs a password.
+$env.SUDO_PROMPT = $"(char bel)[sudo] password for %p: "
+
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
 $env.RUSTC_WRAPPER = (which sccache)
 source ../carapace/init.nu
