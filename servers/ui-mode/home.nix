@@ -371,6 +371,12 @@ in
     tmux_conf_theme_window_status_bg='#0e1415'
     tmux_conf_theme_window_status_current_fg='#003739'
     tmux_conf_theme_window_status_current_bg='#80d4d8'
+    tmux_conf_theme_message_fg='#003739'
+    tmux_conf_theme_message_bg='#80d4d8'
+    tmux_conf_theme_message_command_fg='#80d4d8'
+    tmux_conf_theme_message_command_bg='#0e1415'
+    tmux_conf_theme_mode_fg='#003739'
+    tmux_conf_theme_mode_bg='#80d4d8'
     tmux_conf_theme_window_status_format='#I #{?window_bell_flag,!,}#{?window_activity_flag,*,}#W'
     tmux_conf_theme_window_status_current_format="$tmux_conf_theme_window_status_format"
     tmux_conf_theme_window_status_activity_fg='default'
@@ -382,6 +388,8 @@ in
     tmux_conf_theme_window_status_last_fg='default'
     tmux_conf_theme_window_status_last_bg='default'
     tmux_conf_theme_window_status_last_attr='none'
+    # Keep the first tab flush left; retain the rounded separators elsewhere.
+    set -g window-status-current-format "#[fg=#0e1415,bg=#80d4d8,none]#{?window_start_flag, ,}#[fg=#003739,bg=#80d4d8,bold] #I #{?window_bell_flag,!,}#{?window_activity_flag,*,}#W #[fg=#80d4d8,bg=#0e1415]" #!important
     set -g monitor-activity on
     set -g bell-action other
 
@@ -392,6 +400,11 @@ in
     tmux_conf_theme_status_right_attr='none,bold'
 
     set -g mouse on
+    # Forward wheel input to mouse-aware TUIs (including over SSH); otherwise scroll history.
+    bind -n WheelUpPane if -F -t = '#{||:#{pane_in_mode},#{mouse_any_flag}}' 'send-keys -M' 'copy-mode -e' #!important
+    # Scrolling over the status bar must not switch windows.
+    unbind -n WheelUpStatus #!important
+    unbind -n WheelDownStatus #!important
 
     # Kitty forwards these sequences instead of handling its own tabs.
     set -s user-keys[0] "\e[900~"

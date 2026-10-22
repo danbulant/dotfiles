@@ -146,7 +146,7 @@ bind("SUPER + ALT + P", hl.dsp.exec_cmd("pkill rofi || ~/.config/rofi/bin/powerm
 bind("XF86AudioRecord", hl.dsp.exec_cmd("voxtype record-toggle"))
 bind("SUPER + O", hl.dsp.exec_cmd("voxtype record start"))
 bind("SUPER + O", hl.dsp.exec_cmd("voxtype record stop"), { release = true })
-bind("SUPER + T", hl.dsp.exec_cmd("kitty"))
+bind("SUPER + T", hl.dsp.exec_cmd("kitty nu"))
 bind("SUPER + K", hl.dsp.exec_cmd("kitty"))
 bind("SUPER + B", hl.dsp.exec_cmd("zen-beta"))
 bind("SUPER + CTRL + Q", hl.dsp.exit())
