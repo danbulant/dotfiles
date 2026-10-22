@@ -361,6 +361,8 @@ in
 
     set -g set-titles on #!important
     tmux_conf_theme_terminal_title='#{pane_title}'
+    # Use application-supplied titles (shell directory or OMP thread) for tabs.
+    set -g automatic-rename-format "#{pane_title}" #!important
 
     # Match Kitty's current Dank palette and rounded powerline tabs.
     tmux_conf_theme_status_fg='#bec8c9'
