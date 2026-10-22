@@ -97,6 +97,7 @@ in
       darktable
       delta.packages.${system}.delta
       kicad
+      freerouting
       protontricks
       waypipe
       cinny
