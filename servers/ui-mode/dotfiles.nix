@@ -13,6 +13,11 @@
       recursive = true;
       force = true;
     };
+    "DankMaterialShell/plugins/musicLyrics" = {
+      source = ../../.config/DankMaterialShell/plugins/musicLyrics;
+      recursive = true;
+      force = true;
+    };
     "fish" = {
       source = ../../.config/fish;
       recursive = true;

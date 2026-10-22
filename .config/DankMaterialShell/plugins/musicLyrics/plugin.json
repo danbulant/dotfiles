@@ -1,0 +1,12 @@
+{
+  "id": "musicLyrics",
+  "name": "Music Lyrics",
+  "description": "Local fork with full-width bar lyrics, wrapping popout lyrics, and DMS seekbar compatibility",
+  "version": "1.4.1",
+  "author": "gasiyu",
+  "icon": "lyrics",
+  "type": "widget",
+  "component": "./MusicLyrics.qml",
+  "settings": "./MusicLyricsSettings.qml",
+  "permissions": ["settings_read", "settings_write", "process", "network"]
+}
