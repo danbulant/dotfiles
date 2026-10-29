@@ -10,6 +10,7 @@
 <ul class="dynamic-columns list-gap-8">
 {{ range .JSON.Array "publicGroupList" }}
 {{ range .Array "monitorList" }}
+{{ if ne (.String "name") ($.Options.StringOr "excluded-monitor" "") }}
 {{ $id := .String "id" }}
 {{ $hbArray := $hb.JSON.Array (print "heartbeatList." $id) }}
 <div class="flex items-center gap-12">
@@ -48,6 +49,7 @@
     </div>
     {{ end }}
 </div>
+{{ end }}
 {{ end }}
 {{ end }}
 </ul>

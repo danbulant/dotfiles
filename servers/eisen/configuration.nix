@@ -28,6 +28,65 @@ let
   };
 
   tailscaleAddress = "100.99.54.121";
+  tailscaleStatusServer = pkgs.writeText "glance-tailscale-status.py" ''
+    import http.client
+    import json
+    import socket
+    from contextlib import closing
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    SOCKET_PATH = "/run/tailscale/tailscaled.sock"
+
+    class LocalAPIConnection(http.client.HTTPConnection):
+        def connect(self):
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.sock.settimeout(self.timeout)
+            self.sock.connect(SOCKET_PATH)
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path != "/api/tailscale/status":
+                self.send_error(404)
+                return
+
+            try:
+                with closing(LocalAPIConnection("local-tailscaled.sock", timeout=3)) as connection:
+                    connection.request("GET", "/localapi/v0/status")
+                    response = connection.getresponse()
+                    if response.status != 200:
+                        raise RuntimeError("Tailscale LocalAPI returned HTTP " + str(response.status))
+                    status = json.loads(response.read())
+                if status.get("BackendState") != "Running":
+                    raise RuntimeError("Tailscale is not running")
+                peers = [status.get("Self", {})] + list(status.get("Peer", {}).values())
+                devices = [
+                    {
+                        "name": peer.get("HostName", ""),
+                        "os": peer.get("OS", ""),
+                        "addresses": peer.get("TailscaleIPs", []),
+                        "online": peer.get("Online", False),
+                    }
+                    for peer in peers
+                ]
+                payload = {"devices": devices}
+                response_status = 200
+            except Exception as error:
+                payload = {"devices": [], "error": "Unable to read Tailscale status: " + str(error)}
+                response_status = 503
+
+            body = json.dumps(payload).encode()
+            self.send_response(response_status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, format, *args):
+            pass
+
+    HTTPServer(("127.0.0.1", 8765), Handler).serve_forever()
+  '';
   privateHttpPort = 80;
   internalPorts = {
     prometheus-node = 9000;
@@ -618,6 +677,28 @@ in
     };
   };
   systemd.services.lk-jwt-service.environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = matrixServerName;
+  systemd.services.glance-tailscale-status = {
+    description = "Expose read-only local Tailscale status to Glance";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "tailscaled.service" ];
+    wants = [ "tailscaled.service" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.python3}/bin/python3 ${tailscaleStatusServer}";
+      Restart = "on-failure";
+      RestartSec = "5s";
+      User = "glance";
+      Group = "glance";
+      NoNewPrivileges = true;
+      PrivateDevices = true;
+      PrivateTmp = true;
+      ProtectHome = true;
+      ProtectSystem = "strict";
+      RestrictAddressFamilies = [
+        "AF_UNIX"
+        "AF_INET"
+      ];
+    };
+  };
 
   systemd.services.livekit-keys = {
     description = "Generate the shared LiveKit API key";

@@ -63,17 +63,15 @@ in
               };
             };
             cache = "10m";
+            options.excluded-monitor = "Nextcloud";
             template = builtins.readFile ./glance/uptime-kuma;
           }
           {
             type = "custom-api";
             title = "Tailscale";
             title-url = "https://login.tailscale.com/admin/machines";
-            url = "https://api.tailscale.com/api/v2/tailnet/-/devices";
-            headers = {
-              Authorization = "Bearer \${TAILSCALE_API_KEY}";
-            };
-            cache = "10m";
+            url = "http://127.0.0.1:8765/api/tailscale/status";
+            cache = "1m";
             template = builtins.readFile ./glance/tailscale;
           }
         ];
@@ -121,13 +119,9 @@ in
               }
               {
                 title = "Vaultwarden";
-                url = "https://vaultwarden.danbulant.cloud";
+                url = "https://pw.danbulant.cloud";
+                check-url = "https://pw.danbulant.cloud/alive";
                 icon = "si:vaultwarden";
-              }
-              {
-                title = "Nextcloud";
-                url = "https://direct.danbulant.cloud";
-                icon = "si:nextcloud";
               }
               {
                 title = "Grafana";
@@ -142,7 +136,7 @@ in
             ];
           }
           (jellyfinConfig {
-            title = "Movies";
+            title = "Next Up";
             mode = "nextup";
           })
           {

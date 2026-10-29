@@ -35,7 +35,7 @@
     {{/* Fetch user ID */}}
     {{ $userID := "" }}
     {{ $usersCall := newRequest (print $baseURL "/Users")
-        | withParameter "api_key" $apiKey
+        | withHeader "Authorization" (printf "MediaBrowser Token=\"%s\"" $apiKey)
         | withHeader "Accept" "application/json"
         | getResponse }}
 
@@ -45,61 +45,78 @@
         {{ break }}
     {{ end }}
     {{ end }}
-    {{ if eq $userID "" }}
+    {{ if ne $usersCall.Response.StatusCode 200 }}
+    {{ template "errorMsg" (printf "Jellyfin /Users returned %s." $usersCall.Response.Status) }}
+    {{ else if eq $userID "" }}
     {{ template "errorMsg" (printf "User '%s' not found." $userName) }}
     {{ else }}
 
     {{ $items := "" }}
+    {{ $requestError := "" }}
 
     {{ if eq $mode "latest" }}
 
         {{/* Fetch library ID */}}
         {{ $libraryID := "" }}
         {{ $userViewsCall := newRequest (print $baseURL "/UserViews")
-            | withParameter "api_key" $apiKey
             | withParameter "userId" $userID
+            | withHeader "Authorization" (printf "MediaBrowser Token=\"%s\"" $apiKey)
             | withHeader "Accept" "application/json"
             | getResponse }}
 
-        {{ range $i, $item := $userViewsCall.JSON.Array "Items" }}
-        {{ if eq ($item.String "Name") $libraryName }}
-            {{ $libraryID = $item.String "Id" }}
-            {{ break }}
-        {{ end }}
-        {{ end }}
-
-        {{ if eq $libraryID "" }}
-        {{ template "errorMsg" (printf "Library '%s' not found." $libraryName) }}
+        {{ if ne $userViewsCall.Response.StatusCode 200 }}
+            {{ $requestError = printf "Jellyfin /UserViews returned %s." $userViewsCall.Response.Status }}
         {{ else }}
+            {{ range $i, $item := $userViewsCall.JSON.Array "Items" }}
+            {{ if eq ($item.String "Name") $libraryName }}
+                {{ $libraryID = $item.String "Id" }}
+                {{ break }}
+            {{ end }}
+            {{ end }}
+
+            {{ if eq $libraryID "" }}
+                {{ $requestError = printf "Library '%s' not found." $libraryName }}
+            {{ end }}
+        {{ end }}
         {{/* Fetch latest items */}}
-        {{ $latestCall := newRequest (print $baseURL "/Users/" $userID "/Items/Latest")
-            | withParameter "api_key" $apiKey
-            | withParameter "Limit" $itemCount
-            | withParameter "ParentId" $libraryID
-            | withParameter "IncludeItemTypes" $mediaTypes
-            | withParameter "GroupItems" "true"
-            | withHeader "Accept" "application/json"
-            | getResponse }}
-        {{ $items = $latestCall.JSON.Array "" }}
+        {{ if eq $requestError "" }}
+            {{ $latestCall := newRequest (print $baseURL "/Users/" $userID "/Items/Latest")
+                | withParameter "Limit" $itemCount
+                | withParameter "ParentId" $libraryID
+                | withParameter "IncludeItemTypes" $mediaTypes
+                | withParameter "GroupItems" "true"
+                | withHeader "Authorization" (printf "MediaBrowser Token=\"%s\"" $apiKey)
+                | withHeader "Accept" "application/json"
+                | getResponse }}
+            {{ if ne $latestCall.Response.StatusCode 200 }}
+                {{ $requestError = printf "Jellyfin latest-items request returned %s." $latestCall.Response.Status }}
+            {{ else }}
+                {{ $items = $latestCall.JSON.Array "" }}
+            {{ end }}
         {{ end }}
 
     {{ else if eq $mode "nextup" }}
 
         {{/* Fetch next up items */}}
         {{ $nextUpCall := newRequest (print $baseURL "/Shows/NextUp")
-        | withParameter "api_key" $apiKey
-        | withParameter "UserId" $userID
-        | withParameter "Limit" $itemCount
-        | withParameter "EnableResumable" "true"
-        | withHeader "Accept" "application/json"
-        | getResponse }}
-        {{ $items = $nextUpCall.JSON.Array "Items" }}
-
+            | withParameter "UserId" $userID
+            | withParameter "Limit" $itemCount
+            | withParameter "EnableResumable" "true"
+            | withHeader "Authorization" (printf "MediaBrowser Token=\"%s\"" $apiKey)
+            | withHeader "Accept" "application/json"
+            | getResponse }}
+        {{ if ne $nextUpCall.Response.StatusCode 200 }}
+            {{ $requestError = printf "Jellyfin /Shows/NextUp returned %s." $nextUpCall.Response.Status }}
+        {{ else }}
+            {{ $items = $nextUpCall.JSON.Array "Items" }}
+        {{ end }}
     {{ else }}
-        {{ template "errorMsg" "Unknown mode, expected 'latest' or 'nextup'" }}
+        {{ $requestError = "Unknown mode, expected 'latest' or 'nextup'" }}
     {{ end }}
 
-    {{ if eq (len $items) 0 }}
+    {{ if ne $requestError "" }}
+        {{ template "errorMsg" $requestError }}
+    {{ else if eq (len $items) 0 }}
         <p>No items found, start streaming something!</p>
     {{ else }}
 
@@ -145,13 +162,7 @@
             {{ end }}
 
             {{ $linkURL := print $baseURL "/web/#/details?id=" $itemID }}
-            {{ $thumbURL := "" }}
-            {{ if not (eq $playPercentage "") }}
-                {{/* $thumbURL = concat $baseURL "/Items/" $itemID "/Images/Primary?api_key=" $apiKey "&percentPlayed=" $playPercentage */}}
-                {{ $thumbURL = concat $baseURL "/Items/" $itemID "/Images/Primary?api_key=" $apiKey }}
-            {{ else }}
-                {{ $thumbURL = concat $baseURL "/Items/" $itemID "/Images/Primary?api_key=" $apiKey }}
-            {{ end }}
+            {{ $thumbURL := concat $baseURL "/Items/" $itemID "/Images/Primary" }}
 
             <a class="card widget-content-frame" href="{{ $linkURL | safeURL }}">
                 {{ if $showThumbnail }}
