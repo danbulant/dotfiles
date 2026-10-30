@@ -199,6 +199,9 @@
       nixosModules.adctf = import ./modules/adctf.nix;
 
       packages.x86_64-linux = rec {
+        ugs-platform =
+          nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/ugs-platform/package.nix
+            { };
         tuwunel-admin =
           nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/tuwunel-admin/package.nix
             { };

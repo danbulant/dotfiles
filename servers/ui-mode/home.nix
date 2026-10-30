@@ -83,7 +83,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
-      ugs
+      (callPackage ../../pkgs/ugs-platform/package.nix { })
       arduino-cli
       clang-tools
       prusa-slicer
