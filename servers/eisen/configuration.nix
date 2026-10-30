@@ -263,7 +263,13 @@ in
 
     geoclue2.enable = true;
     localtimed.enable = true;
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+      };
+    };
     tailscale = {
       enable = true;
       useRoutingFeatures = "both";
@@ -360,6 +366,7 @@ in
 
     forgejo = {
       enable = true;
+      user = "git";
       settings = {
         # Preserve rpi1's instance preferences while using Eisen's storage paths.
         DEFAULT.APP_NAME = "BGit";
@@ -676,6 +683,15 @@ in
       group = "caddy";
     };
   };
+  # Preserve Forgejo's existing file ownership while exposing SSH as git.
+  users.users.git = {
+    uid = 978;
+    isSystemUser = true;
+    group = "forgejo";
+    home = "/var/lib/forgejo";
+    useDefaultShell = true;
+  };
+
   systemd.services.lk-jwt-service.environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = matrixServerName;
   systemd.services.glance-tailscale-status = {
     description = "Expose read-only local Tailscale status to Glance";
@@ -1296,8 +1312,6 @@ in
     kernel.sysctl."kernel.sysrq" = 1;
 
     swraid.enable = false;
-
-    initrd.systemd.enable = true;
 
     loader = {
       systemd-boot.enable = true;
