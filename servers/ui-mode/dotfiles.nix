@@ -8,13 +8,13 @@
       source = ../../.config/carapace;
       recursive = true;
     };
-    "DankMaterialShell/plugins/aiUsage" = {
-      source = ../../.config/DankMaterialShell/plugins/aiUsage;
+    "dms/plugins/aiUsage" = {
+      source = ../../.config/dms/plugins/aiUsage;
       recursive = true;
       force = true;
     };
-    "DankMaterialShell/plugins/musicLyrics" = {
-      source = ../../.config/DankMaterialShell/plugins/musicLyrics;
+    "dms/plugins/musicLyrics" = {
+      source = ../../.config/dms/plugins/musicLyrics;
       recursive = true;
       force = true;
     };

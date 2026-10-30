@@ -1,7 +1,7 @@
 {
   "id": "musicLyrics",
   "name": "Music Lyrics",
-  "description": "Local fork with full-width bar lyrics, wrapping popout lyrics, and DMS seekbar compatibility",
+  "description": "Local fork with full-width bar lyrics, wrapping popout lyrics, and Dux seekbar compatibility",
   "version": "1.4.1",
   "author": "gasiyu",
   "icon": "lyrics",

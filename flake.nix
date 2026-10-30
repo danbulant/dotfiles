@@ -22,16 +22,24 @@
       url = "github:0xferrous/CodexBar-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
+    dux-shell = {
+      url = "github:duxlabs-dev/dux-shell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    dank-greeter = {
-      url = "git+https://github.com/AvengeMedia/dank-greeter.git";
+    dux-greeter = {
+      url = "github:duxlabs-dev/dux-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    danksearch = {
-      url = "github:AvengeMedia/danksearch";
+    dux-search = {
+      url = "github:duxlabs-dev/dux-search";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dux-files = {
+      url = "github:duxlabs-dev/dux-files";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dux-calendar = {
+      url = "github:duxlabs-dev/dux-calendar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     delta = {
@@ -94,6 +102,14 @@
       singlePassCudaRunpath = pkgs: old: {
         appendRunpaths = (old.appendRunpaths or [ ]) ++ [ "${pkgs.addDriverRunpath.driverLink}/lib" ];
         patchelfFlags = (old.patchelfFlags or [ ]) ++ [ "--no-sort" ];
+        # NVCC copies patched NVVM binaries; patchelf 0.15.2 corrupts them on re-patching.
+        nativeBuildInputs = map (
+          input:
+          if pkgs.lib.isDerivation input && pkgs.lib.getName input == "patchelf" then
+            pkgs.buildPackages.patchelf
+          else
+            input
+        ) (old.nativeBuildInputs or [ ]);
         # Only autoPatchelf honors patchelfFlags; fold driver lookup into that pass.
         dontPatchELF = true;
         dontUseAutoAddDriverRunpath = true;

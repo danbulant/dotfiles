@@ -115,7 +115,7 @@ hl.on("hyprland.start", function()
     for _, command in ipairs(commands) do hl.exec_cmd(command) end
 end)
 
--- Layer effects for DMS and the older quickshell namespaces still in use.
+-- Layer effects for Dux and the older quickshell namespaces still in use.
 local blurredNamespaces = {
     "^quickshell:bar$", "^quickshell:popup$", "^quickshell:notificationPopup$",
     "^quickshell:overview$", "^quickshell:sidebarLeft$", "^quickshell:sidebarRight$",
@@ -127,7 +127,7 @@ for _, namespace in ipairs({ "^quickshell:overview$", "^quickshell:sidebarLeft$"
     hl.layer_rule({ match = { namespace = namespace }, blur_popups = true })
 end
 hl.layer_rule({
-    name = "blur-dms",
+    name = "blur-dux",
     match = { namespace = "^dms:(color-picker|clipboard|spotlight|settings)$" },
     blur = true,
     ignore_alpha = 0,

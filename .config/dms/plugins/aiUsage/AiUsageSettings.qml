@@ -59,7 +59,7 @@ PluginSettings {
     }
     StyledText {
         width: parent.width
-        text: "The bar shows an icon and usage percentage. Popout ranges show all reported windows, relative reset times and saved resets with their nearest expiry. Cache age is shown as a relative time per account. Expected usage is a linear pacing guide, not a provider forecast. Monthly windows without a duration use the previous calendar-month anniversary of their reset time. Missing monetary data is not estimated from quota percentages.\n\nThis plugin is deployed by the dotfiles Home Manager module. Enable AI Usage in DMS Plugins and add it in the bar’s widget settings on each machine. Authentication stays local; OMP uses its own credentials, CodexBar its own."
+        text: "The bar shows an icon and usage percentage. Popout ranges show all reported windows, relative reset times and saved resets with their nearest expiry. Cache age is shown as a relative time per account. Expected usage is a linear pacing guide, not a provider forecast. Monthly windows without a duration use the previous calendar-month anniversary of their reset time. Missing monetary data is not estimated from quota percentages.\n\nThis plugin is deployed by the dotfiles Home Manager module. Enable AI Usage in Dux Plugins and add it in the bar’s widget settings on each machine. Authentication stays local; OMP uses its own credentials, CodexBar its own."
         wrapMode: Text.WordWrap
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText

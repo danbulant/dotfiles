@@ -87,31 +87,15 @@ let
       })
   );
 
-  clefPython = (pkgs.python3.override {
-    packageOverrides = final: prev: {
-      cuda-bindings = prev.cuda-bindings.override {
-        cudaPackages = pkgs.cudaPackages_13_3;
-        # NVIDIA 13.3 requires Cython >=3.2,<3.3.
-        cython = final.cython_3_2;
-      };
-      triton-bin = prev.triton-bin.overrideAttrs (old: {
-        # Fix nixpkgs' binary patch: libcuda_dirs must return directories, not a string.
-        postFixup = (old.postFixup or "") + ''
-          substituteInPlace "$out/${pkgs.python3.sitePackages}/triton/backends/nvidia/driver.py" \
-            --replace-fail \
-              "return '${pkgs.addDriverRunpath.driverLink}/lib/libcuda.so'" \
-              "return ['${pkgs.addDriverRunpath.driverLink}/lib']"
-        '';
-      });
-      torch-bin = (prev.torch-bin.override { cudaPackages = pkgs.cudaPackages_13_3; }).overrideAttrs (old: {
-        passthru = (old.passthru or { }) // {
-          cudaSupport = true;
-          rocmSupport = false;
-          cudaPackages = pkgs.cudaPackages_13_3;
-        };
-      });
+  # Keep the runtime stack on stock CUDA packages so NCCL/NVSHMEM reuse the CUDA cache.
+  clefPkgs = import pkgs.path {
+    inherit system;
+    config.allowUnfree = true;
+  };
+  clefPython = (clefPkgs.python3.override {
+    packageOverrides = final: _: {
       torch = final.torch-bin;
-      torchvision = prev.torchvision-bin.override { cudaPackages = pkgs.cudaPackages_13_3; };
+      torchvision = final.torchvision-bin;
     };
   }).withPackages (ps: with ps; [
     torch

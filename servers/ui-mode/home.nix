@@ -3,11 +3,13 @@
   omp,
   delta,
   colmena,
-  dms,
+  dux-shell,
   zen-browser,
   pkgs,
   config,
-  danksearch,
+  dux-search,
+  dux-files,
+  dux-calendar,
   nix-monitor,
   codexbar,
   ...
@@ -25,14 +27,6 @@ let
     inherit system;
     config.allowUnfree = true;
   }).obs-studio;
-
-  dmsShell = dms.packages.${system}.dms-shell.overrideAttrs (oldAttrs: {
-    postPatch = (oldAttrs.postPatch or "") + ''
-      if [[ -f quickshell/Services/PopoutService.qml ]]; then
-        patch -p1 < ${../../pkgs/dms-settings-reopen.patch}
-      fi
-    '';
-  });
 
   activitywatchPackages =
     pkgs.qt6Packages.callPackage "${pkgs.path}/pkgs/applications/office/activitywatch"
@@ -79,8 +73,10 @@ in
     ./dotfiles.nix
     omp.homeManagerModules.default
     zen-browser.homeModules.beta
-    dms.homeModules.dank-material-shell
-    danksearch.homeModules.default
+    dux-shell.homeModules.default
+    dux-search.homeModules.default
+    dux-files.homeModules.default
+    dux-calendar.homeModules.default
     nix-monitor.homeManagerModules.default
   ];
   home = {
@@ -417,9 +413,22 @@ in
     bind -n User2 next-window
   '';
   services.lorri.enable = true;
+  # Dux 2.0 retains the upstream dank-material-shell option and dms CLI/config paths.
+  # Use the flakes' stock package sets to reuse caches instead of host-wide CUDA variants.
   programs.dank-material-shell = {
     enable = true;
-    package = dmsShell;
+    package = dux-shell.packages.${system}.default;
+    systemd.enable = true;
+  };
+  programs.dsearch.enable = true;
+  programs.dux-files = {
+    enable = true;
+    package = dux-files.packages.${system}.default;
+    systemd.enable = true;
+  };
+  programs.dank-calendar = {
+    enable = true;
+    package = dux-calendar.packages.${system}.default;
     systemd.enable = true;
   };
   fonts.fontconfig = {
@@ -449,21 +458,7 @@ in
 
   programs = {
     omp.enable = true;
-    omp.package = omp.packages.${system}.default.overrideAttrs (old: {
-      # The Nix build copies the Cargo addon directly, bypassing the upstream
-      # build script that stamps its release version before embedding.
-      buildPhase =
-        assert pkgs.lib.assertMsg (pkgs.lib.hasInfix ''echo "Compiling OMP"'' old.buildPhase) "OMP build phase changed; update the native addon stamp";
-        builtins.replaceStrings
-          [ ''echo "Compiling OMP"'' ]
-          [
-            ''
-              bun scripts/stamp-native-version.ts "packages/natives/native/pi_natives.linux-x64-baseline.node"
-              echo "Compiling OMP"
-            ''
-          ]
-          old.buildPhase;
-    });
+    omp.package = omp.packages.${system}.default;
     nix-monitor.enable = true;
     nix-monitor.rebuildCommand = [
       "bash"

@@ -7,12 +7,12 @@
   pkgs,
   options,
   lib,
-  dank-greeter,
+  dux-greeter,
   ...
 }:
 {
   imports = [
-    dank-greeter.nixosModules.default
+    dux-greeter.nixosModules.default
   ];
   hardware.nvidia.dynamicBoost.enable = lib.mkForce false;
   services.sunshine = {
@@ -247,7 +247,6 @@
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
-      xdg-desktop-portal-hyprland
       xdg-desktop-portal-gtk
     ];
     config = {
@@ -287,9 +286,9 @@
     compositor.name = "hyprland";
     configHome = "/home/dan";
   };
-  # DMS otherwise falls back to whichever session desktop file finishes loading
+  # Dux Greeter otherwise falls back to whichever session desktop file finishes loading
   # first. Seed its per-boot memory so the UWSM-managed session is deterministic.
-  systemd.tmpfiles.settings."20-dms-greeter-default-session" = {
+  systemd.tmpfiles.settings."20-dux-greeter-default-session" = {
     "/var/lib/dms-greeter/.local".d = {
       user = "greeter";
       group = "greeter";
@@ -394,8 +393,6 @@
       "rd.udev.log_level=3"
       "udev.log_priority=3"
     ];
-
-    initrd.systemd.enable = true;
 
     # OBS Studio virtual camera
     extraModulePackages = with config.boot.kernelPackages; [
