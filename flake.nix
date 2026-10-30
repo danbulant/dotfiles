@@ -51,6 +51,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # pcb2gcode was removed from unstable along with its GTK2-based gerbv dependency.
+    nixpkgs-pcb.url = "https://channels.nixos.org/nixos-25.11/nixexprs.tar.xz";
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";

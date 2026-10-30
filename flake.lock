@@ -892,6 +892,19 @@
         "type": "github"
       }
     },
+    "nixpkgs-pcb": {
+      "locked": {
+        "lastModified": 1782847189,
+        "narHash": "sha256-IWpaImuKa1YVOmnuPyyzbG6/Q6ZgKaOsP4sXmfTbkdQ=",
+        "rev": "b6018f87da91d19d0ab4cf979885689b469cdd41",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixos/25.11/nixos-25.11.12484.b6018f87da91/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://channels.nixos.org/nixos-25.11/nixexprs.tar.xz"
+      }
+    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -1148,6 +1161,7 @@
         "nix-monitor": "nix-monitor",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_6",
+        "nixpkgs-pcb": "nixpkgs-pcb",
         "omp": "omp",
         "reenv": "reenv",
         "sops-nix": "sops-nix",

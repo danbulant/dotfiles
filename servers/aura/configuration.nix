@@ -1,6 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, nixpkgs-pcb, ... }:
 
 {
+  environment.systemPackages = [
+    nixpkgs-pcb.legacyPackages.${pkgs.stdenv.hostPlatform.system}.pcb2gcode
+    (pkgs.callPackage ../../pkgs/flatcam/package.nix { })
+  ];
+
   programs.steam.enable = true;
   services.openssh.settings.MaxSessions = 64;
 
