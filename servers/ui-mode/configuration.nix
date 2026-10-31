@@ -242,8 +242,9 @@
 
   programs.hyprland = {
     enable = true;
+    # Publish the managed login session that activates Dux's graphical-session target.
+    withUWSM = true;
   };
-  programs.uwsm.enable = true;
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
