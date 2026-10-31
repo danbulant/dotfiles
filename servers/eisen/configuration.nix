@@ -1218,8 +1218,9 @@ in
             HINDSIGHT_API_EMBEDDINGS_PROVIDER = "local";
             HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL = "BAAI/bge-small-en-v1.5";
             HINDSIGHT_API_EMBEDDINGS_LOCAL_FORCE_CPU = "true";
-            HINDSIGHT_API_RERANKER_PROVIDER = "local";
-            HINDSIGHT_API_RERANKER_LOCAL_FORCE_CPU = "true";
+            # Reuse the LLM credential; remote ranking avoids Eisen's CPU bottleneck.
+            HINDSIGHT_API_RERANKER_PROVIDER = "openrouter";
+            HINDSIGHT_API_RERANKER_OPENROUTER_MODEL = "cohere/rerank-v3.5";
             HINDSIGHT_API_WORKER_ID = "eisen-hindsight";
           };
           # The all-in-one image runs embedded PostgreSQL as UID 1000.
