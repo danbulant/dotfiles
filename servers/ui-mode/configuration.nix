@@ -150,6 +150,13 @@
     variant = "";
   };
 
+  # Keep console Alt+arrows from switching VTs; Ctrl+Alt+Fn remains available.
+  console.keyMap = pkgs.writeText "us-no-alt-vt.map" ''
+    include "${pkgs.kbd}/share/keymaps/i386/qwerty/us.map.gz"
+    alt keycode 105 = Left
+    alt keycode 106 = Right
+  '';
+
   services.printing.enable = true;
   hardware.sane.enable = true;
   hardware.acpilight.enable = true;
@@ -284,7 +291,7 @@
   };
   programs.dms-greeter = {
     enable = true;
-    compositor.name = "hyprland";
+    compositor.name = "niri";
     configHome = "/home/dan";
   };
   # Dux Greeter otherwise falls back to whichever session desktop file finishes loading
