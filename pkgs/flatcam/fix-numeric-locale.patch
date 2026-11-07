@@ -1,0 +1,27 @@
+Keep native numeric parsing locale-independent after Qt initializes the process
+locale. Czech and other comma-decimal locales otherwise make protobuf reject
+OR-Tools' serialized floating-point defaults (for example clause_cleanup_ratio).
+Only LC_NUMERIC is reset; language, time and monetary preferences are preserved.
+
+This follows https://doc.qt.io/qt-6/qcoreapplication.html#locale-settings
+
+--- a/flatcam.py
++++ b/flatcam.py
+@@ -1,6 +1,7 @@
+ #!/usr/bin/python3
+ import sys
+ import os
++import locale
+ import traceback
+ from datetime import datetime
+ 
+@@ -151,6 +152,9 @@
+     sys.excepthook = excepthook
+ 
+     app = QtWidgets.QApplication(sys.argv)
++    # Qt adopts the system locale; protobuf and CNC numeric formats require dots.
++    # Reset before starting worker threads rather than changing locale during jobs.
++    locale.setlocale(locale.LC_NUMERIC, 'C')
+ 
+     # apply style
+     settings = QSettings("Open Source", "FlatCAM_EVO")

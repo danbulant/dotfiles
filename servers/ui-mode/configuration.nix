@@ -80,7 +80,7 @@
     ];
     dispatcherScripts = [
       {
-        # Keep DHCP DNS out of resolved without rewriting runtime profiles.
+        # Ordinary uplinks must not bypass dnscrypt or claim VPN DNS domains.
         # VPN and Tailscale links retain their own DNS and routing domains.
         source = pkgs.writeShellScript "dnscrypt-uplinks" ''
           set -euo pipefail

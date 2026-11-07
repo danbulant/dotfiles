@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "anyconnect-webauth": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789383635,
+        "narHash": "sha256-nMiEM33MEAliIN8AEWUNFeDpK0zvDfe48GVIyejp2kk=",
+        "owner": "z10n-dev",
+        "repo": "nixos-anyconnect-webauth",
+        "rev": "818ebbc610757c4df1c7d41c62ea0c5f529a7ced",
+        "type": "github"
+      },
+      "original": {
+        "owner": "z10n-dev",
+        "repo": "nixos-anyconnect-webauth",
+        "type": "github"
+      }
+    },
     "bdwgc": {
       "flake": false,
       "locked": {
@@ -1144,6 +1164,7 @@
     },
     "root": {
       "inputs": {
+        "anyconnect-webauth": "anyconnect-webauth",
         "bun2nix": "bun2nix",
         "codexbar": "codexbar",
         "colmena": "colmena",

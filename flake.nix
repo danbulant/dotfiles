@@ -1,5 +1,9 @@
 {
   inputs = {
+    anyconnect-webauth = {
+      url = "github:z10n-dev/nixos-anyconnect-webauth";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     waydroid-script = {
       url = "github:casualsnek/waydroid_script";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -283,6 +287,7 @@
 
           ./servers/ui-mode/configuration.nix
           ./servers/aura/configuration.nix
+          attrs.anyconnect-webauth.nixosModules.default
           # Import sysbox module
           ./modules/sysbox.nix
           nix-index-database.nixosModules.nix-index

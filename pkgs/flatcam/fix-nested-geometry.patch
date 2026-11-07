@@ -1,0 +1,45 @@
+Flatten nested isolation passes and multipart geometry recursively.
+combined_normal appends the list returned by generate_envelope, so a
+one-level flattener asserts on valid isolation output. Preserve atomic
+geometry (including polygon holes), omit empties, and propagate the
+requested simplification tolerance to every leaf.
+
+--- a/camlib.py
++++ b/camlib.py
+@@ -8048,22 +8048,20 @@
+     """
+     flat_list: list[BaseGeometry] = []
+ 
+-    if isinstance(geometry, BaseMultipartGeometry):
+-        for geo in geometry.geoms:
+-            assert isinstance(geo, BaseGeometry)
+-            flat_list.append(geo)
+-    elif hasattr(geometry, "__iter__"):
+-        for geo in geometry:
+-            assert isinstance(geo, BaseGeometry)
+-            flat_list.append(geo)
+-    elif isinstance(geometry, BaseGeometry):
+-        if not geometry.is_empty:
+-            if simplify_tolerance > 0.0:
+-                flat_list.append(geometry.simplify(simplify_tolerance))
+-            else:
+-                flat_list.append(geometry)
+-    else:
+-        raise NotImplementedError(f"No implementation for flattening {type(geometry)}")
++    def collect(item):
++        if isinstance(item, BaseMultipartGeometry):
++            for part in item.geoms:
++                collect(part)
++        elif isinstance(item, BaseGeometry):
++            if not item.is_empty:
++                flat_list.append(item.simplify(simplify_tolerance) if simplify_tolerance > 0.0 else item)
++        elif isinstance(item, Iterable) and not isinstance(item, (str, bytes)):
++            for part in item:
++                collect(part)
++        else:
++            raise NotImplementedError(f"No implementation for flattening {type(item)}")
++
++    collect(geometry)
+     return flat_list
+ 
+ 

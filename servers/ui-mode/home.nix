@@ -83,6 +83,7 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      gradle
       (callPackage ../../pkgs/ugs-platform/package.nix { })
       arduino-cli
       clang-tools

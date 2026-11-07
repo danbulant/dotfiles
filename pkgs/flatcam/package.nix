@@ -34,6 +34,15 @@ stdenvNoCC.mkDerivation {
     rev = "b6e87dbf1e20819f136ac5ecaa4ebebfb69e89c2";
     hash = "sha256-RaQYw3EVUEWVRGL7Pwhe5cSSU6WoBosiS0CeVim1Wfs=";
   };
+  # The pinned refactor retained a second startup pass, duplicating signals and scripts.
+  # Keep signal wiring in _setup_signal_connections and execute --shellfile only once.
+  patches = [
+    ./fix-duplicate-startup.patch
+    # GUI isolation returns nested pass lists; flatten them without losing polygon holes.
+    ./fix-nested-geometry.patch
+    # Reset only numeric parsing after Qt adopts the user's locale, before workers start.
+    ./fix-numeric-locale.patch
+  ];
   postPatch = ''
     substituteInPlace appPlugins/ToolImage.py \
       --replace-fail 'from pyppeteer.chromium_downloader import check_chromium' \
@@ -43,6 +52,12 @@ stdenvNoCC.mkDerivation {
   buildInputs = [ qt6.qtbase qt6.qtwayland ];
   dontBuild = true;
   dontWrapQtApps = true;
+  doCheck = true;
+  checkPhase = ''
+    runHook preCheck
+    PYTHONPATH="$PWD" ${python}/bin/python ${./test-geometry.py}
+    runHook postCheck
+  '';
   desktopItems = [ (makeDesktopItem {
     name = "flatcam";
     desktopName = "FlatCAM Evo";
