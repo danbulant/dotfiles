@@ -10,8 +10,9 @@
 
 let
   system = pkgs.stdenv.hostPlatform.system;
-  waydroidNvidia = (waydroid-nvidia-nix.packages.${system}.waydroid-nvidia-full).overrideAttrs (_: {
-    postFixup = ''
+  waydroidNvidia = (waydroid-nvidia-nix.packages.${system}.waydroid-nvidia-full).overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+    postFixup = (old.postFixup or "") + ''
       wrapProgram $out/bin/waydroid \
         --prefix PATH : ${
           lib.makeBinPath [

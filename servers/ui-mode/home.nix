@@ -162,7 +162,6 @@ in
       translate-shell
       hyprpicker
       hypridle
-      hyprland-qtutils
       hyprwayland-scanner
       hyprcursor
       material-symbols
@@ -460,7 +459,16 @@ in
 
   programs = {
     omp.enable = true;
-    omp.package = omp.packages.${system}.default;
+    omp.package = omp.packages.${system}.default.override (args: {
+      craneLib = args.craneLib // {
+        # Vendored jaq crates inherit lints; Crane strips them from the dummy workspace.
+        cleanCargoToml = params:
+          pkgs.lib.recursiveUpdate (args.craneLib.cleanCargoToml params) {
+            workspace.lints =
+              (builtins.fromTOML (builtins.readFile "${omp}/Cargo.toml")).workspace.lints;
+          };
+      };
+    });
     nix-monitor.enable = true;
     nix-monitor.rebuildCommand = [
       "bash"
