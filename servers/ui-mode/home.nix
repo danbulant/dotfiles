@@ -83,6 +83,11 @@ in
     stateVersion = "25.11";
 
     packages = with pkgs; [
+      (callPackage ../../pkgs/deadlock-mod-manager/package.nix { })
+      #nexusmods-app-unfree
+      # The app replaces PATH from the login shell before registering deep links.
+      desktop-file-utils
+      xdg-utils
       gradle
       (callPackage ../../pkgs/ugs-platform/package.nix { })
       arduino-cli
