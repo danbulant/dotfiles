@@ -46,25 +46,10 @@
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
-  services.dnsmasq = {
-    enable = true;
-    resolveLocalQueries = false;
-    settings = {
-      # resolved owns resolv.conf; never forward back to its stub.
-      no-resolv = true;
-      listen-address = "127.0.0.1";
-      bind-interfaces = true;
-      server = [
-        "/ts.net/100.100.100.100"
-        "127.0.0.1#5053"
-      ];
-    };
-  };
-
   services.resolved = {
     enable = true;
     settings.Resolve = {
-      DNS = [ "127.0.0.1" ];
+      DNS = [ "127.0.0.1:5053" ];
       # No global ~. domain: a VPN's ~. must override the normal upstream.
       Domains = [ ];
       FallbackDNS = [ ];
@@ -80,9 +65,9 @@
     ];
     dispatcherScripts = [
       {
-        # Ordinary uplinks must not bypass dnscrypt or claim VPN DNS domains.
-        # VPN and Tailscale links retain their own DNS and routing domains.
-        source = pkgs.writeShellScript "dnscrypt-uplinks" ''
+        # Keep NetworkManager's DHCP DNS, but use it only for GitLab.
+        # A specific route beats Tailscale/VPN ~.; other queries keep their routing.
+        source = pkgs.writeShellScript "gitlab-dhcp-dns" ''
           set -euo pipefail
           export LC_ALL=C
           case "$2" in
@@ -93,8 +78,7 @@
             while IFS=: read -r device type state; do
               case "$type:$state" in
                 ethernet:connected*|wifi:connected*)
-                  ${config.systemd.package}/bin/resolvectl dns "$device" ""
-                  ${config.systemd.package}/bin/resolvectl domain "$device" ""
+                  ${config.systemd.package}/bin/resolvectl domain "$device" "~gitlab.au.dk"
                   ${config.systemd.package}/bin/resolvectl default-route "$device" no
                   ;;
               esac
