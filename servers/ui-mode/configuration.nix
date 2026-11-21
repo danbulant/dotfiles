@@ -26,6 +26,8 @@
     pulseaudio
   ];
 
+  virtualisation.incus.enable = true;
+
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
     "cinny-unwrapped-4.2.3"
