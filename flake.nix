@@ -239,6 +239,12 @@
               bun2nix.overlays.default
               desktopCompatibilityOverlay
               photoprismOverlay
+              (_final: prev: {
+                # The original output has unreadable Btrfs extents on Fern.
+                google-fonts = prev.google-fonts.overrideAttrs (old: {
+                  pname = "${old.pname}-fern";
+                });
+              })
             ];
             networking.hostName = "fern";
             imports = [ ./servers/fern/hardware-configuration.nix ];
