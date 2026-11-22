@@ -1,6 +1,11 @@
-{ pkgs, nixpkgs-pcb, ... }:
+{ lib, pkgs, nixpkgs-pcb, ... }:
 
 {
+  nix.settings = {
+    substituters = lib.mkAfter [ "http://nix.fern.danbulant.cloud" ];
+    trusted-public-keys = [ "fern:yuWzr5L8X9lNJhdBV1ksA97bm9S/F79ekodKXZSarig=" ];
+  };
+
   # NetworkManager opens the browser for AU's SAML/MFA authentication.
   services.anyconnect-webauth = {
     enable = true;
