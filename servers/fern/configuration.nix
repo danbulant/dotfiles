@@ -121,7 +121,7 @@ let
 in
 {
   imports = [
-    waydroid-nvidia-nix.nixosModules.waydroid-nvidia
+    #waydroid-nvidia-nix.nixosModules.waydroid-nvidia
     ../../modules/sops.nix
     ../../modules/systemd-backup-metrics.nix
   ];
@@ -373,7 +373,7 @@ in
       wireshark-cli
       avalonia-ilspy
     ])
-    ++ [ waydroid-script.packages.${system}.default ]
+   # ++ [ waydroid-script.packages.${system}.default ]
     ++ (with reenv.packages.${system}; [
       bindiff
       ghidra-with-extensions
@@ -649,26 +649,26 @@ in
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.docker.daemon.settings.features.cdi = true;
 
-  services.waydroid-nvidia = {
-    enable = true;
-    package = waydroidNvidia;
-    refreshRate = 200;
-  };
+  #services.waydroid-nvidia = {
+  #  enable = true;
+  #  package = waydroidNvidia;
+  #  refreshRate = 200;
+  #};
 
-  virtualisation.waydroid = {
-    enable = true;
-    package = waydroidNvidia;
-  };
+  #virtualisation.waydroid = {
+  #  enable = true;
+  #  package = waydroidNvidia;
+  #};
 
   # Native-bridge installers reuse these global binfmt names. Container
   # restarts do not clear them, so switching libndk/libhoudini otherwise leaves
   # stale interpreters pointing at files removed from the Android overlay.
-  systemd.services.waydroid-container.preStart = ''
-    for handler in arm_exe arm_dyn arm64_exe arm64_dyn; do
-      handlerPath="/proc/sys/fs/binfmt_misc/$handler"
-      if [[ -e "$handlerPath" ]]; then
-        echo -1 > "$handlerPath"
-      fi
-    done
-  '';
+  #systemd.services.waydroid-container.preStart = ''
+  #  for handler in arm_exe arm_dyn arm64_exe arm64_dyn; do
+  #    handlerPath="/proc/sys/fs/binfmt_misc/$handler"
+  #    if [[ -e "$handlerPath" ]]; then
+  #      echo -1 > "$handlerPath"
+  #    fi
+  #  done
+  #'';
 }
