@@ -85,6 +85,8 @@ in
     packages = with pkgs; [
       (callPackage ../../pkgs/deadlock-mod-manager/package.nix { })
       tor-browser
+      t3code
+      claude-code
       #nexusmods-app-unfree
       # The app replaces PATH from the login shell before registering deep links.
       desktop-file-utils

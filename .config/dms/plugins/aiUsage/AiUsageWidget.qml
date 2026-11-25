@@ -10,6 +10,7 @@ PluginComponent {
     id: root
 
     property var payload: null
+    property string claudePayload: ""
     property string activeBackend: "omp"
     property string fallbackReason: ""
     property string errorMessage: ""
@@ -17,7 +18,15 @@ PluginComponent {
     property double now: Date.now()
     readonly property string backend: pluginData.backend || "auto"
     readonly property int refreshInterval: Math.max(60000, Number(pluginData.refreshInterval) || 120000)
-    readonly property var snapshot: payload ? Usage.normalize(payload.text, payload.backend, now) : ({providers: [], warnings: []})
+    readonly property var snapshot: {
+        var primary = payload ? Usage.normalize(payload.text, payload.backend, now) : {providers: [], warnings: []}
+        if (!claudePayload) return primary
+        var claude = Usage.normalize(claudePayload, "codexbar", now)
+        var providers = primary.providers.filter(function(provider) {
+            return provider.name !== "Claude Code" || provider.windows.length > 0
+        })
+        return {providers: providers.concat(claude.providers), warnings: primary.warnings.concat(claude.warnings)}
+    }
     readonly property var topUsage: Usage.chooseTop(snapshot.providers)
     readonly property string barText: topUsage ? Math.round(topUsage.percent) + "%" : loading ? "…" : errorMessage ? "ERR" : "N/A"
     readonly property string notices: [errorMessage, fallbackReason].concat(snapshot.warnings).filter(function(s) { return !!s }).join("\n")
@@ -34,7 +43,7 @@ PluginComponent {
         if (name === "omp") {
             command.push("--json", "--no-extensions")
         } else {
-            command.push("--format", "json", "--provider", "both", "--source", pluginData.sourceMode || "oauth")
+            command.push("--format", "json", "--provider", name === "claude" ? "claude" : "both", "--source", pluginData.sourceMode || "oauth")
         }
         usageProcess.command = command
         usageProcess.running = true
@@ -51,10 +60,22 @@ PluginComponent {
         var failure = ""
         try {
             // Exit 1/3 can contain usable providers. Judge the payload, not the status.
-            var result = Usage.normalize(text, activeBackend, Date.now())
+            var result = Usage.normalize(text, activeBackend === "claude" ? "codexbar" : activeBackend, Date.now())
             if (Usage.chooseTop(result.providers)) {
                 now = Date.now()
-                payload = {text: text, backend: activeBackend}
+                if (activeBackend === "claude") {
+                    claudePayload = text
+                } else {
+                    payload = {text: text, backend: activeBackend}
+                    if (backend === "auto" && activeBackend === "omp" && !result.providers.some(function(provider) {
+                        return provider.name === "Claude Code" && provider.windows.length > 0
+                    })) {
+                        errorMessage = ""
+                        Qt.callLater(function() { root.startBackend("claude") })
+                        return
+                    }
+                    claudePayload = ""
+                }
                 errorMessage = ""
                 loading = false
                 return
@@ -65,6 +86,11 @@ PluginComponent {
         }
         failure = activeBackend + " (exit " + code + "): " + failure
         if (stderrText.trim()) failure += "\n" + stderrText.trim().slice(0, 800)
+        if (activeBackend === "claude") {
+            fallbackReason = (claudePayload ? "Claude Code usage is stale.\n" : "") + failure
+            loading = false
+            return
+        }
         if (backend === "auto" && activeBackend === "omp") {
             fallbackReason = failure + "\nUsing CodexBar fallback."
             Qt.callLater(function() { root.startBackend("codexbar") })

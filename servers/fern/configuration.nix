@@ -596,6 +596,7 @@ in
 
   services.nix-serve = {
     enable = true;
+    package = pkgs.nix-serve-ng;
     secretKeyFile = "/var/secrets/cache-private-key.pem";
   };
 

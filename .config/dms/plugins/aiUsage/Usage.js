@@ -72,7 +72,7 @@ function friendlyName(provider) {
     var lower = value.toLowerCase();
     if (lower === "openai-codex" || lower === "codex") return lower === "codex" ? "Codex" : "OpenAI Codex";
     if (lower === "opencode-go") return "OpenCode Go";
-    if (lower === "claude") return "Claude";
+    if (lower === "claude" || lower === "anthropic" || lower === "claude-code") return "Claude Code";
     if (lower === "gemini") return "Gemini";
     return value;
 }

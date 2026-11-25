@@ -16,7 +16,7 @@ PluginSettings {
     }
     StyledText {
         width: parent.width
-        text: "Auto prefers omp usage --json and falls back to CodexBar only if OMP returns no usable limits. Partial provider failures never hide working accounts, including recoverable CLI exits 1 and 3. A failed refresh retains the last good values with a stale warning. The bar uses each account’s session limit, or weekly when session is absent, then shows the highest usage across accounts."
+        text: "Auto prefers omp usage --json and fetches Claude Code usage from CodexBar if OMP has no Claude Code limits. If OMP returns no usable limits, Auto falls back to CodexBar for Codex and Claude Code. A failed refresh retains the last good values with a stale warning. The bar uses each account’s session limit, or weekly when session is absent, then shows the highest usage across accounts."
         wrapMode: Text.WordWrap
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
